@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDS → Ideal Cup · SCA Brewing Control Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #0b0a08;
+  --surface: #161410;
+  --card:    #1d1b17;
+  --border:  #2a2620;
+  --gold:    #c9943a;
+  --gold-lt: #e8be78;
+  --green:   #4ade80;
+  --red:     #f87171;
+  --blue:    #60a5fa;
+  --amber:   #fbbf24;
+  --text:    #f0ead8;
+  --muted:   #7a7068;
+  --dim:     #4a4540;
+  --mono:    'JetBrains Mono', monospace;
+  --serif:   'Fraunces', serif;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--serif);
+  min-height: 100vh;
+  padding: 24px 16px 48px;
+}
+
+/* ─── Typography helpers ───────────────────────────────────────────── */
+.mono   { font-family: var(--mono); }
+.muted  { color: var(--muted); }
+.label  { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.eyebrow{ font-family: var(--mono); font-size: 9px; letter-spacing: .3em; text-transform: uppercase; }
+
+/* ─── Layout ───────────────────────────────────────────────────────── */
+.wrap   { max-width: 900px; margin: 0 auto; }
+.grid   { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; }
+.card   { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+.card + .card { margin-top: 0; }
+.col    { display: flex; flex-direction: column; gap: 14px; }
+
+/* ─── Sliders ──────────────────────────────────────────────────────── */
+.slider-wrap { margin-bottom: 18px; }
+.slider-wrap:last-child { margin-bottom: 0; }
+.slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 7px; }
+.slider-label  { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.slider-value  { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--gold-lt); }
+.slider-value span { font-size: 10px; color: var(--muted); }
+.slider-hint   { font-family: var(--mono); font-size: 9px; color: var(--dim); margin-top: 4px; line-height: 1.5; }
+
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px;
+  background: var(--border); border-radius: 2px;
+  outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  height: 4px; border-radius: 2px; background: var(--border);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--gold);
+  box-shadow: 0 0 8px rgba(201,148,58,.45);
+  margin-top: -6px; cursor: pointer;
+  transition: box-shadow .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 14px rgba(201,148,58,.65);
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--gold); border: none; cursor: pointer;
+}
+
+/* ─── Gauge bar ────────────────────────────────────────────────────── */
+.gauge { margin-bottom: 14px; }
+.gauge-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.gauge-name  { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.gauge-val   { font-family: var(--mono); font-size: 18px; font-weight: 700; transition: color .3s; }
+.gauge-val span { font-size: 10px; color: var(--dim); }
+.gauge-track { position: relative; height: 8px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border); }
+.gauge-ideal { position: absolute; top: 0; bottom: 0; background: rgba(74,222,128,.12); border-radius: 4px; }
+.gauge-fill  { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 4px; transition: width .35s ease, background .35s; }
+.gauge-mark  { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: rgba(74,222,128,.45); }
+.gauge-footer{ display: flex; justify-content: space-between; margin-top: 4px; }
+.gauge-lo, .gauge-hi { font-family: var(--mono); font-size: 9px; color: var(--dim); }
+.gauge-ideal-label { font-family: var(--mono); font-size: 9px; color: rgba(74,222,128,.5); }
+
+/* ─── Derived row ──────────────────────────────────────────────────── */
+.derived { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 4px; background: var(--surface); border: 1px solid var(--border); font-family: var(--mono); font-size: 11px; }
+
+/* ─── Formula box ──────────────────────────────────────────────────── */
+.formula { padding: 10px 14px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 2; margin-top: 10px; }
+.formula .result { color: var(--gold-lt); margin-top: 3px; }
+
+/* ─── Status boxes ─────────────────────────────────────────────────── */
+.status-ideal {
+  padding: 14px 16px; border-radius: 6px;
+  background: rgba(74,222,128,.07); border: 1px solid rgba(74,222,128,.3);
+}
+.status-ideal .check { font-size: 22px; margin-right: 8px; }
+.status-ideal h3 { display: inline; font-family: var(--serif); font-weight: 400; font-size: 20px; color: var(--green); }
+.status-ideal p  { color: rgba(74,222,128,.65); font-family: var(--mono); font-size: 11px; margin-top: 6px; }
+
+.status-off {
+  padding: 14px 16px; border-radius: 6px;
+  background: rgba(251,191,36,.05); border: 1px solid rgba(251,191,36,.25);
+}
+.status-off h3  { font-family: var(--serif); font-weight: 400; font-size: 17px; color: var(--amber); margin-bottom: 8px; }
+.status-label   { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: .1em; margin-bottom: 8px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag  { padding: 3px 9px; border-radius: 4px; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.22); color: var(--amber); font-size: 11px; font-family: var(--mono); }
+
+.status-empty { padding: 12px 16px; border-radius: 6px; background: var(--card); border: 1px solid var(--border); text-align: center; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+
+/* ─── Adjustment cards ─────────────────────────────────────────────── */
+.adj-card { padding: 12px 14px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 10px; }
+.adj-card:last-of-type { margin-bottom: 0; }
+.adj-label   { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: .08em; margin-bottom: 6px; }
+.adj-row     { display: flex; justify-content: space-between; align-items: center; }
+.adj-name    { font-family: var(--mono); font-size: 11px; color: var(--text); }
+.adj-value   { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+.adj-delta   { font-size: 10px; color: var(--muted); margin-left: 5px; }
+.adj-tip     { font-family: var(--mono); font-size: 9px; color: var(--dim); margin-top: 6px; }
+
+.ratio-row { padding: 8px 12px; border-radius: 4px; background: rgba(201,148,58,.06); border: 1px solid rgba(201,148,58,.18); font-family: var(--mono); font-size: 10px; }
+
+/* ─── Reference table ──────────────────────────────────────────────── */
+.ref-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 11px; }
+.ref-row:last-child { border-bottom: none; }
+.ref-val { font-weight: 600; }
+
+/* ─── SVG chart wrapper ────────────────────────────────────────────── */
+.chart-svg { width: 100%; height: auto; display: block; }
+.chart-legend { display: flex; gap: 14px; margin-top: 10px; font-family: var(--mono); font-size: 9px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 5px; }
+.legend-box { width: 10px; height: 10px; border-radius: 2px; background: rgba(74,222,128,.12); border: 1px dashed rgba(74,222,128,.4); display: inline-block; margin-right: 5px; }
+
+/* ─── Header ───────────────────────────────────────────────────────── */
+.header     { margin-bottom: 24px; }
+.header h1  { font-size: clamp(1.7rem, 5vw, 2.8rem); font-weight: 300; letter-spacing: -.025em; line-height: 1.05; margin-bottom: 6px; }
+.header em  { color: var(--gold); font-style: italic; }
+.header p   { color: var(--muted); font-size: 12px; font-family: var(--mono); max-width: 500px; line-height: 1.65; }
+
+/* ─── Footer ───────────────────────────────────────────────────────── */
+.footer { margin-top: 20px; text-align: center; font-family: var(--mono); font-size: 9px; color: var(--dim); }
+
+/* ─── Mobile tweaks ────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  body { padding: 16px 12px 40px; }
+  .gauge-val { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="eyebrow muted" style="margin-bottom:8px">SCA Brewing Control Chart · Calculator</div>
+    <h1>TDS → Ideal Cup <em>Model</em></h1>
+    <p>Input your refractometer reading and recipe. The model places your brew on the SCA chart and calculates exactly what to adjust.</p>
+  </header>
+
+  <!-- Main grid -->
+  <div class="grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="col">
+
+      <!-- TDS input -->
+      <div class="card">
+        <div class="label" style="color:var(--gold);margin-bottom:16px;font-weight:700">① Refractometer Reading</div>
+        <div class="slider-wrap">
+          <div class="slider-header">
+            <span class="slider-label">TDS</span>
+            <span class="slider-value" id="tdsDisplay">1.30<span>%</span></span>
+          </div>
+          <input type="range" id="tdsSlider" min="0.80" max="1.80" step="0.01" value="1.30">
+          <div class="slider-hint">Measure at 20 °C · multiply by VST correction factor if needed</div>
+        </div>
+        <!-- TDS gauge -->
+        <div class="gauge" id="tdsGauge"></div>
+      </div>
+
+      <!-- Recipe inputs -->
+      <div class="card">
+        <div class="label" style="margin-bottom:16px">② Recipe Parameters</div>
+        <div class="slider-wrap">
+          <div class="slider-header">
+            <span class="slider-label">Coffee Dose</span>
+            <span class="slider-value" id="doseDisplay">15.0<span>g</span></span>
+          </div>
+          <input type="range" id="doseSlider" min="10" max="30" step="0.5" value="15">
+        </div>
+        <div class="slider-wrap" style="margin-bottom:12px">
+          <div class="slider-header">
+            <span class="slider-label">Liquid Yield (brewed)</span>
+            <span class="slider-value" id="brewedDisplay">225<span>g</span></span>
+          </div>
+          <input type="range" id="brewedSlider" min="100" max="500" step="5" value="225">
+          <div class="slider-hint">Weigh the cup output — not water in. Typically 75–85% of water used.</div>
+        </div>
+        <div class="derived">
+          <span class="muted" style="font-family:var(--mono);font-size:11px">Brew ratio</span>
+          <span id="ratioDisplay" style="font-family:var(--mono);font-size:11px">1 : 15.0</span>
+        </div>
+      </div>
+
+      <!-- EY result -->
+      <div class="card">
+        <div class="label" style="margin-bottom:16px">③ Calculated Results</div>
+        <div class="gauge" id="eyGauge"></div>
+        <div class="formula" id="formulaBox">
+          <div>EY = (TDS% × Brewed) / Dose</div>
+          <div class="result" id="formulaResult"></div>
+        </div>
+      </div>
+
+      <!-- Diagnosis -->
+      <div id="diagBox" class="status-empty">Enter values above to see diagnosis</div>
+
+    </div><!-- /LEFT -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="col">
+
+      <!-- SCA Chart -->
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">SCA Brewing Control Chart</div>
+        <svg id="chartSvg" class="chart-svg" viewBox="0 0 440 280"></svg>
+        <div class="chart-legend">
+          <span><span class="legend-box"></span><span class="muted">SCA Ideal Zone</span></span>
+          <span><span class="legend-dot"></span><span class="muted">Your brew</span></span>
+        </div>
+      </div>
+
+      <!-- Adjustment calculator -->
+      <div class="card">
+        <div class="label" style="margin-bottom:14px">To hit TDS 1.30% (Ideal Center)</div>
+        <div id="adjBox">
+          <p class="muted" style="font-family:var(--mono);font-size:11px">Enter values above to calculate.</p>
+        </div>
+      </div>
+
+      <!-- SCA Reference -->
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">SCA Reference</div>
+        <div class="ref-row"><span class="muted">TDS ideal</span><span class="ref-val" style="color:var(--green)">1.15–1.45%</span></div>
+        <div class="ref-row"><span class="muted">Extraction Yield</span><span class="ref-val" style="color:var(--green)">18–22%</span></div>
+        <div class="ref-row"><span class="muted">Brew ratio (typical)</span><span class="ref-val">1:15–1:17</span></div>
+        <div class="ref-row"><span class="muted">Water temperature</span><span class="ref-val">92–96 °C</span></div>
+        <div class="ref-row"><span class="muted">Classic recipe</span><span class="ref-val">60 g / 1 L</span></div>
+      </div>
+
+    </div><!-- /RIGHT -->
+  </div><!-- /grid -->
+
+  <div class="footer">
+    EY (%) = (TDS% × Brewed Weight g) / Dose Weight g &nbsp;·&nbsp; Source: SCA Brewing Control Chart
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const CHART = { eyMin:14, eyMax:28, tdsMin:0.80, tdsMax:1.80 };
+const IDEAL  = { eyLo:18, eyHi:22, tdsLo:1.15, tdsHi:1.45 };
+const NS     = 'http://www.w3.org/2000/svg';
+
+// ── Maths ──────────────────────────────────────────────────────────────────
+function calcEY(tds, brewed, dose) {
+  if (!tds || !brewed || !dose) return null;
+  return (tds / 100) * brewed / dose * 100;
+}
+function toX(ey, W) { return ((ey - CHART.eyMin) / (CHART.eyMax - CHART.eyMin)) * W; }
+function toY(tds, H) { return H - ((tds - CHART.tdsMin) / (CHART.tdsMax - CHART.tdsMin)) * H; }
+
+function diagnose(ey, tds) {
+  if (!ey || !tds) return null;
+  const eyOk  = ey  >= IDEAL.eyLo  && ey  <= IDEAL.eyHi;
+  const tdsOk = tds >= IDEAL.tdsLo && tds <= IDEAL.tdsHi;
+  if (eyOk && tdsOk) return { type:'ideal' };
+  const eyLow  = ey  < IDEAL.eyLo,   eyHigh  = ey  > IDEAL.eyHi;
+  const tdsLow = tds < IDEAL.tdsLo,  tdsHigh = tds > IDEAL.tdsHi;
+  const parts  = [], fixes = [];
+  if (eyLow)   parts.push('Under-extracted');
+  if (eyHigh)  parts.push('Over-extracted');
+  if (tdsLow)  parts.push('Too weak');
+  if (tdsHigh) parts.push('Too strong');
+  if (eyLow)   fixes.push('Grind finer', '↑ Water temperature', '↑ Contact time');
+  if (eyHigh)  fixes.push('Grind coarser', '↓ Water temperature', 'Tail-cut earlier');
+  if (tdsLow)  fixes.push('Tighter ratio (1:14–1:15)', '↑ Dose');
+  if (tdsHigh) fixes.push('Looser ratio (1:16–1:17)', '↓ Dose');
+  return { type:'off', label:parts.join(' · '), fixes };
+}
+
+// ── SVG helpers ────────────────────────────────────────────────────────────
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+// ── Draw Chart ────────────────────────────────────────────────────────────
+function drawChart(ey, tds) {
+  const svg  = document.getElementById('chartSvg');
+  svg.innerHTML = '';
+
+  const W = 440, H = 280;
+  const PAD = { l:44, r:14, t:14, b:36 };
+  const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+
+  // Defs
+  const defs = el('defs', {}, svg);
+  const clip = el('clipPath', { id:'cc' }, defs);
+  el('rect', { x:PAD.l, y:PAD.t, width:cW, height:cH }, clip);
+
+  const rg = el('radialGradient', { id:'dg', cx:'50%', cy:'50%', r:'50%' }, defs);
+  const s1 = el('stop', { offset:'0%' }, rg);   s1.style.stopColor='#c9943a'; s1.style.stopOpacity='0.5';
+  const s2 = el('stop', { offset:'100%' }, rg); s2.style.stopColor='#c9943a'; s2.style.stopOpacity='0';
+
+  // Background
+  el('rect', { x:PAD.l, y:PAD.t, width:cW, height:cH, fill:'#161410', stroke:'#2a2620', 'stroke-width':1, rx:2 }, svg);
+
+  const g = el('g', { 'clip-path':'url(#cc)' }, svg);
+
+  // Grid lines
+  [14,16,18,20,22,24,26,28].forEach(v => {
+    el('line', { x1:PAD.l+toX(v,cW), y1:PAD.t, x2:PAD.l+toX(v,cW), y2:PAD.t+cH, stroke:'#2a2620', 'stroke-width':1 }, g);
+  });
+  [0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8].forEach(v => {
+    el('line', { x1:PAD.l, y1:PAD.t+toY(v,cH), x2:PAD.l+cW, y2:PAD.t+toY(v,cH), stroke:'#2a2620', 'stroke-width':1 }, g);
+  });
+
+  // Zone shading
+  el('rect', { x:PAD.l, y:PAD.t, width:toX(IDEAL.eyLo,cW), height:cH, fill:'rgba(248,113,113,0.05)' }, g);
+  el('rect', { x:PAD.l+toX(IDEAL.eyHi,cW), y:PAD.t, width:cW-toX(IDEAL.eyHi,cW), height:cH, fill:'rgba(248,113,113,0.05)' }, g);
+
+  // Ideal zone
+  const ix1 = toX(IDEAL.eyLo, cW), ix2 = toX(IDEAL.eyHi, cW);
+  const iy1 = toY(IDEAL.tdsHi, cH), iy2 = toY(IDEAL.tdsLo, cH);
+  el('rect', { x:PAD.l+ix1, y:PAD.t+iy1, width:ix2-ix1, height:iy2-iy1,
+               fill:'rgba(74,222,128,0.08)', stroke:'rgba(74,222,128,0.4)',
+               'stroke-width':1.5, 'stroke-dasharray':'4,3', rx:2 }, g);
+
+  const idealLabel = el('text', {
+    x: PAD.l + (ix1+ix2)/2, y: PAD.t + iy1 + 13,
+    'text-anchor':'middle', fill:'rgba(74,222,128,0.65)',
+    'font-family':'JetBrains Mono,monospace', 'font-size':8,
+    'letter-spacing':2, 'font-weight':700
+  }, g);
+  idealLabel.textContent = 'SCA IDEAL';
+
+  // Zone labels
+  const makeZL = (eyCenter, text) => {
+    const t = el('text', {
+      x: PAD.l + toX(eyCenter, cW), y: PAD.t + cH - 8,
+      'text-anchor':'middle', fill:'rgba(248,113,113,0.3)',
+      'font-family':'JetBrains Mono,monospace', 'font-size':7, 'letter-spacing':1
+    }, g);
+    t.textContent = text;
+  };
+  makeZL(16, 'UNDER'); makeZL(25, 'OVER');
+
+  // Dot
+  const inChart = ey !== null && ey >= CHART.eyMin && ey <= CHART.eyMax
+                              && tds >= CHART.tdsMin && tds <= CHART.tdsMax;
+  if (inChart) {
+    const dx = PAD.l + toX(ey, cW), dy = PAD.t + toY(tds, cH);
+    // Crosshairs
+    el('line', { x1:PAD.l, y1:dy, x2:dx-11, y2:dy, stroke:'#c9943a', 'stroke-width':0.8, 'stroke-opacity':0.35, 'stroke-dasharray':'3,3' }, g);
+    el('line', { x1:dx+11, y1:dy, x2:PAD.l+cW, y2:dy, stroke:'#c9943a', 'stroke-width':0.8, 'stroke-opacity':0.35, 'stroke-dasharray':'3,3' }, g);
+    el('line', { x1:dx, y1:PAD.t, x2:dx, y2:dy-11, stroke:'#c9943a', 'stroke-width':0.8, 'stroke-opacity':0.35, 'stroke-dasharray':'3,3' }, g);
+    el('line', { x1:dx, y1:dy+11, x2:dx, y2:PAD.t+cH, stroke:'#c9943a', 'stroke-width':0.8, 'stroke-opacity':0.35, 'stroke-dasharray':'3,3' }, g);
+    // Glow
+    el('circle', { cx:dx, cy:dy, r:16, fill:'url(#dg)' }, g);
+    // Ring + dot
+    el('circle', { cx:dx, cy:dy, r:7, fill:'#1d1b17', stroke:'#c9943a', 'stroke-width':2.5 }, g);
+    el('circle', { cx:dx, cy:dy, r:3, fill:'#c9943a' }, g);
+  }
+
+  // Axis ticks
+  [14,16,18,20,22,24,26,28].forEach(v => {
+    const t = el('text', { x:PAD.l+toX(v,cW), y:H-10, 'text-anchor':'middle', fill:'#7a7068', 'font-family':'JetBrains Mono,monospace', 'font-size':9 }, svg);
+    t.textContent = v + '%';
+  });
+  [0.8,1.0,1.2,1.4,1.6,1.8].forEach(v => {
+    const t = el('text', { x:PAD.l-6, y:PAD.t+toY(v,cH)+3, 'text-anchor':'end', fill:'#7a7068', 'font-family':'JetBrains Mono,monospace', 'font-size':9 }, svg);
+    t.textContent = v.toFixed(1);
+  });
+
+  // Axis titles
+  const xt = el('text', { x:PAD.l+cW/2, y:H-1, 'text-anchor':'middle', fill:'#4a4540', 'font-family':'JetBrains Mono,monospace', 'font-size':8, 'letter-spacing':1 }, svg);
+  xt.textContent = 'EXTRACTION YIELD (%)';
+
+  const yt = el('text', { x:8, y:PAD.t+cH/2, 'text-anchor':'middle', fill:'#4a4540', 'font-family':'JetBrains Mono,monospace', 'font-size':8, 'letter-spacing':1, transform:`rotate(-90,8,${PAD.t+cH/2})` }, svg);
+  yt.textContent = 'TDS (%)';
+}
+
+// ── Render gauge ───────────────────────────────────────────────────────────
+function renderGauge(containerId, label, value, lo, hi, unit, idealLo, idealHi, decimals) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const pct = Math.max(0, Math.min(100, ((value - lo) / (hi - lo)) * 100));
+  const iLo = Math.max(0, ((idealLo - lo) / (hi - lo)) * 100);
+  const iHi = Math.max(0, Math.min(100, ((idealHi - lo) / (hi - lo)) * 100));
+  const ok  = value >= idealLo && value <= idealHi;
+  const col = ok ? '#4ade80' : value < idealLo ? '#fbbf24' : '#f87171';
+  el.innerHTML = `
+    <div class="gauge-header">
+      <span class="gauge-name">${label}</span>
+      <span class="gauge-val" style="color:${col}">${value.toFixed(decimals)}<span>${unit}</span></span>
+    </div>
+    <div class="gauge-track">
+      <div class="gauge-ideal" style="left:${iLo}%;width:${iHi-iLo}%"></div>
+      <div class="gauge-fill" style="width:${pct}%;background:${col}"></div>
+      <div class="gauge-mark" style="left:${iLo}%"></div>
+      <div class="gauge-mark" style="left:${iHi}%"></div>
+    </div>
+    <div class="gauge-footer">
+      <span class="gauge-lo">${lo}${unit}</span>
+      <span class="gauge-ideal-label">Ideal ${idealLo}–${idealHi}${unit}</span>
+      <span class="gauge-hi">${hi}${unit}</span>
+    </div>`;
+}
+
+// ── Render diagnosis ───────────────────────────────────────────────────────
+function renderDiag(diag) {
+  const box = document.getElementById('diagBox');
+  if (!diag) {
+    box.className = 'status-empty';
+    box.innerHTML = 'Enter values above to see diagnosis';
+    return;
+  }
+  if (diag.type === 'ideal') {
+    box.className = 'status-ideal';
+    box.innerHTML = `
+      <div><span class="check">✓</span><h3>SCA Ideal Cup</h3></div>
+      <p>EY 18–22% · TDS 1.15–1.45% — You're in the sweet spot.</p>`;
+    return;
+  }
+  box.className = 'status-off';
+  box.innerHTML = `
+    <h3>${diag.label}</h3>
+    <div class="status-label">Suggested Adjustments</div>
+    <div class="tags">${diag.fixes.map(f => `<span class="tag">${f}</span>`).join('')}</div>`;
+}
+
+// ── Render adjustment calculator ───────────────────────────────────────────
+function renderAdj(tds, dose, brewed) {
+  const box = document.getElementById('adjBox');
+  if (!tds || !dose || !brewed) {
+    box.innerHTML = '<p class="muted" style="font-family:var(--mono);font-size:11px">Enter values above to calculate.</p>';
+    return;
+  }
+  const idealTds     = 1.30;
+  const solids       = tds / 100 * brewed;
+  const idealBrewed  = solids / (idealTds / 100);
+  const waterAdj     = idealBrewed - brewed;
+  const idealDose    = dose * (tds / idealTds);
+  const doseAdj      = idealDose - dose;
+  const ratioA       = (idealBrewed / dose).toFixed(1);
+  const ratioB       = (brewed / idealDose).toFixed(1);
+
+  const blueA  = waterAdj >= 0 ? '#60a5fa' : '#fbbf24';
+  const blueB  = doseAdj  >= 0 ? '#60a5fa' : '#fbbf24';
+  const signA  = waterAdj >= 0 ? '+' : '';
+  const signB  = doseAdj  >= 0 ? '+' : '';
+  const tipA   = waterAdj >= 0
+    ? 'Add more water — or let drawdown run longer.'
+    : 'Tail-cut earlier. Use less water.';
+  const tipB   = doseAdj  >= 0
+    ? 'Increase dose next brew.'
+    : 'Reduce dose next brew.';
+
+  box.innerHTML = `
+    <div class="adj-card">
+      <div class="adj-label">OPTION A · Keep dose, adjust brewed yield</div>
+      <div class="adj-row">
+        <span class="adj-name">Target yield</span>
+        <span class="adj-value" style="color:${blueA}">${idealBrewed.toFixed(0)}g<span class="adj-delta">(${signA}${waterAdj.toFixed(0)}g)</span></span>
+      </div>
+      <div class="adj-tip">→ ${tipA}</div>
+    </div>
+    <div class="adj-card">
+      <div class="adj-label">OPTION B · Keep yield, adjust dose</div>
+      <div class="adj-row">
+        <span class="adj-name">Target dose</span>
+        <span class="adj-value" style="color:${blueB}">${idealDose.toFixed(1)}g<span class="adj-delta">(${signB}${doseAdj.toFixed(1)}g)</span></span>
+      </div>
+      <div class="adj-tip">→ ${tipB}</div>
+    </div>
+    <div class="ratio-row">
+      <span style="color:var(--muted)">New ratio A: </span>
+      <span style="color:var(--gold-lt)">1:${ratioA}</span>
+      &nbsp;·&nbsp;
+      <span style="color:var(--muted)">New ratio B: </span>
+      <span style="color:var(--gold-lt)">1:${ratioB}</span>
+    </div>`;
+}
+
+// ── Main update ────────────────────────────────────────────────────────────
+function update() {
+  const tds    = parseFloat(document.getElementById('tdsSlider').value);
+  const dose   = parseFloat(document.getElementById('doseSlider').value);
+  const brewed = parseFloat(document.getElementById('brewedSlider').value);
+  const ey     = calcEY(tds, brewed, dose);
+  const ratio  = dose > 0 ? brewed / dose : 0;
+  const diag   = diagnose(ey, tds);
+
+  // Display values
+  document.getElementById('tdsDisplay').innerHTML    = `${tds.toFixed(2)}<span>%</span>`;
+  document.getElementById('doseDisplay').innerHTML   = `${dose.toFixed(1)}<span>g</span>`;
+  document.getElementById('brewedDisplay').innerHTML = `${brewed.toFixed(0)}<span>g</span>`;
+  document.getElementById('ratioDisplay').textContent = `1 : ${ratio.toFixed(1)}`;
+
+  // Gauges
+  renderGauge('tdsGauge', 'Concentration (TDS)', tds, 0.80, 1.80, '%', 1.15, 1.45, 2);
+  if (ey !== null) {
+    renderGauge('eyGauge', 'Extraction Yield (EY)', ey, 14, 28, '%', 18, 22, 1);
+    document.getElementById('formulaResult').innerHTML =
+      `= (${tds.toFixed(2)}% × ${brewed.toFixed(0)}g) / ${dose.toFixed(1)}g = <strong style="color:var(--gold-lt)">${ey.toFixed(2)}%</strong>`;
+  } else {
+    document.getElementById('eyGauge').innerHTML = '';
+    document.getElementById('formulaResult').innerHTML = '';
+  }
+
+  // Chart, diag, adj
+  drawChart(ey, tds);
+  renderDiag(diag);
+  renderAdj(tds, dose, brewed);
+}
+
+// ── Event listeners ────────────────────────────────────────────────────────
+['tdsSlider','doseSlider','brewedSlider'].forEach(id => {
+  document.getElementById(id).addEventListener('input', update);
+});
+
+// ── Init ───────────────────────────────────────────────────────────────────
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloudbrew Pour Over Lab · Brewing Science Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,0,400;9..144,1,300;9..144,1,400&family=Bai+Jamjuree:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--surface:#0d1018;--card:#121620;--card2:#171c26;
+  --border:#1c2235;--border2:#242d42;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#6b4e1e;
+  --blue:#4d7cff;--blue-lt:#7ba4ff;
+  --green:#3fcf8e;--red:#f87171;--amber:#fbbf24;
+  --text:#e8eef8;--muted:#6b7fa3;--dim:#2a3450;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Fraunces',serif;
+  --sans:'Bai Jamjuree',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--sans);min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Blueprint grid bg ───────────────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(77,124,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(77,124,255,.025) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;z-index:0;
+}
+body::after{
+  content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(77,124,255,.08),transparent);
+  pointer-events:none;z-index:0;
+}
+
+/* ── Layout ──────────────────────────────────────────────────────── */
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 20px 80px}
+
+/* ── Hero ────────────────────────────────────────────────────────── */
+.hero{
+  padding:80px 0 64px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:64px;
+  position:relative;
+}
+.hero-eyebrow{
+  font-family:var(--mono);font-size:10px;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:20px;
+  display:flex;align-items:center;gap:12px;
+}
+.hero-eyebrow::after{
+  content:'';height:1px;width:60px;
+  background:linear-gradient(to right,var(--blue),transparent);
+}
+.hero-title{
+  font-family:var(--serif);font-weight:200;
+  font-size:clamp(2.8rem,8vw,6rem);
+  line-height:.95;letter-spacing:-.03em;
+  margin-bottom:12px;
+}
+.hero-title em{font-style:italic;font-weight:300;color:var(--gold)}
+.hero-sub{
+  font-family:var(--serif);font-style:italic;font-weight:300;
+  font-size:clamp(1rem,2.5vw,1.35rem);
+  color:var(--muted);margin-bottom:28px;line-height:1.5;
+  max-width:560px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:100px;
+  background:rgba(201,148,58,.08);border:1px solid rgba(201,148,58,.25);
+  font-family:var(--mono);font-size:9px;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);
+}
+.hero-badge::before{content:'◈';font-size:8px}
+
+/* Corner decorations */
+.hero-corner{
+  position:absolute;top:24px;right:0;
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:.1em;text-align:right;line-height:1.8;
+}
+
+/* ── Section title ───────────────────────────────────────────────── */
+.section-label{
+  font-family:var(--mono);font-size:9px;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:10px;margin-bottom:24px;
+}
+.section-label::before{
+  content:'';width:20px;height:1px;
+  background:linear-gradient(to right,var(--blue),transparent);
+}
+.section-label span{color:var(--blue);font-weight:700;margin-right:4px}
+
+/* ── Tool cards ──────────────────────────────────────────────────── */
+.tools-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:16px;margin-bottom:48px;
+}
+.tool-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+  transition:border-color .25s,transform .2s,box-shadow .25s;
+  text-decoration:none;color:inherit;
+  display:flex;flex-direction:column;
+  position:relative;
+}
+.tool-card:hover{
+  border-color:var(--border2);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(77,124,255,.08);
+}
+.tool-card.featured{
+  border-color:var(--gold-dim);
+  background:linear-gradient(135deg,var(--card) 0%,rgba(201,148,58,.03) 100%);
+}
+.tool-card.featured:hover{
+  border-color:var(--gold);
+  box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 0 1px rgba(201,148,58,.12);
+}
+
+/* Top accent line */
+.tool-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(to right,transparent,var(--card-accent,#4d7cff),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.tool-card:hover::before{opacity:1}
+.tool-card.featured::before{
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  opacity:.5;
+}
+.tool-card.featured:hover::before{opacity:1}
+
+.card-header{padding:20px 20px 0}
+.card-num{
+  font-family:var(--mono);font-size:9px;letter-spacing:.2em;
+  color:var(--dim);font-weight:700;text-transform:uppercase;
+  margin-bottom:10px;
+}
+.card-icon{
+  font-size:28px;margin-bottom:10px;display:block;
+  filter:grayscale(.2);
+}
+.card-title{
+  font-family:var(--serif);font-weight:300;
+  font-size:1.3rem;line-height:1.2;margin-bottom:4px;
+  letter-spacing:-.01em;
+}
+.card-title em{font-style:italic;color:var(--gold)}
+.card-tag-row{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+.card-tag{
+  font-family:var(--mono);font-size:8px;padding:2px 7px;
+  border-radius:3px;letter-spacing:.05em;font-weight:500;
+}
+.card-body{
+  padding:0 20px 20px;flex:1;display:flex;flex-direction:column;
+}
+.card-desc{
+  font-size:13px;color:var(--muted);line-height:1.65;
+  margin-bottom:16px;flex:1;
+}
+.card-features{
+  list-style:none;margin-bottom:16px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.card-features li{
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  padding-left:14px;position:relative;
+}
+.card-features li::before{
+  content:'→';position:absolute;left:0;
+  color:var(--dim);
+}
+.card-cta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:5px;
+  background:var(--card2);border:1px solid var(--border2);
+  font-family:var(--mono);font-size:10px;color:var(--muted);
+  font-weight:500;letter-spacing:.05em;transition:background .2s,color .2s;
+}
+.tool-card:hover .card-cta{background:rgba(77,124,255,.08);color:var(--blue-lt)}
+.tool-card.featured:hover .card-cta{background:rgba(201,148,58,.08);color:var(--gold-lt)}
+.card-cta-arrow{font-size:14px;transition:transform .2s}
+.tool-card:hover .card-cta-arrow{transform:translateX(3px)}
+
+/* ── Research section ────────────────────────────────────────────── */
+.research-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+  margin-bottom:48px;
+}
+@media(max-width:600px){.research-row{grid-template-columns:1fr}}
+.research-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:8px;padding:20px;
+  text-decoration:none;color:inherit;
+  transition:border-color .25s,transform .2s;
+  display:flex;gap:14px;align-items:flex-start;
+}
+.research-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.research-icon{font-size:24px;flex-shrink:0;margin-top:2px}
+.research-title{
+  font-family:var(--serif);font-weight:300;font-size:1.05rem;
+  margin-bottom:4px;line-height:1.3;
+}
+.research-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.footer{
+  border-top:1px solid var(--border);padding-top:32px;
+  display:flex;justify-content:space-between;align-items:flex-end;
+  flex-wrap:wrap;gap:20px;
+}
+.footer-brand{font-family:var(--serif);font-weight:300;font-size:1.1rem}
+.footer-brand em{font-style:italic;color:var(--gold)}
+.footer-tagline{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:.1em;margin-top:4px;
+}
+.footer-links{
+  display:flex;gap:16px;
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.footer-copy{
+  font-family:var(--mono);font-size:8px;color:var(--dim);
+  letter-spacing:.1em;width:100%;text-align:center;margin-top:16px;
+}
+
+/* ── Separator ───────────────────────────────────────────────────── */
+.sep{height:1px;background:var(--border);margin:48px 0}
+
+/* ── Mobile ──────────────────────────────────────────────────────── */
+@media(max-width:640px){
+  .hero{padding:60px 0 48px}
+  .hero-corner{display:none}
+  .tools-grid{grid-template-columns:1fr}
+  .footer{flex-direction:column;align-items:flex-start}
+}
+
+/* ── Subtle entrance animation ───────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.hero{animation:fadeUp .6s ease both}
+.tools-grid .tool-card:nth-child(1){animation:fadeUp .5s .1s ease both}
+.tools-grid .tool-card:nth-child(2){animation:fadeUp .5s .18s ease both}
+.tools-grid .tool-card:nth-child(3){animation:fadeUp .5s .26s ease both}
+.tools-grid .tool-card:nth-child(4){animation:fadeUp .5s .34s ease both}
+.tools-grid .tool-card:nth-child(5){animation:fadeUp .5s .42s ease both}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ── HERO ──────────────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="hero-eyebrow">Cloudbrew Pour Over Lab</div>
+  <h1 class="hero-title">Brewing<br><em>Science</em> Tools</h1>
+  <p class="hero-sub">Precision calculators and research frameworks for specialty coffee — from extraction kinetics to competition preparation.</p>
+  <div class="hero-badge">KBO-P Research Platform · v2.0</div>
+  <div class="hero-corner">
+    ordinary is specialty<br>
+    <span style="color:var(--gold);font-size:8px">◈ CLOUDBREW</span>
+  </div>
+</header>
+
+<!-- ── CALCULATORS ────────────────────────────────────────────────── -->
+<div class="section-label"><span>01</span> Brewing Calculators</div>
+
+<div class="tools-grid">
+
+  <!-- Pour-by-Pour — featured -->
+  <a href="pour_by_pour_calculator.html" class="tool-card featured" style="--card-accent:var(--gold)">
+    <div class="card-header">
+      <div class="card-num">Primary Tool</div>
+      <span class="card-icon">⚗️</span>
+      <div class="card-title">Pour-by-Pour <em>Calculator</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(201,148,58,.12);color:var(--gold)">Mass Balance</span>
+        <span class="card-tag" style="background:rgba(74,207,142,.1);color:var(--green)">Equivalency</span>
+        <span class="card-tag" style="background:rgba(77,124,255,.1);color:var(--blue-lt)">Tail Diagnostic</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Input TDS per pour fraction → visualize on SCA Brewing Control Chart → blend pours → tail-cut diagnostic with Batali et al. (2020) thresholds → X_actual calibration.</p>
+      <ul class="card-features">
+        <li>EEY threshold warning at 19% and 21%</li>
+        <li>Auto-Estimate kinetic model (Liang et al. 2021)</li>
+        <li>Hidden Golden Cup formula: TDS = EY/(R−X)</li>
+        <li>Dilution calculator to target TDS</li>
+      </ul>
+      <div class="card-cta">Open Calculator <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
+  <!-- Coffee Architecture -->
+  <a href="coffee_architecture_calculator.html" class="tool-card" style="--card-accent:#a78bfa">
+    <div class="card-header">
+      <div class="card-num">Competition Tool</div>
+      <span class="card-icon">🏗️</span>
+      <div class="card-title">Coffee Architecture <em>Blueprint</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(167,139,250,.1);color:#a78bfa">WBrC Framework</span>
+        <span class="card-tag" style="background:rgba(201,148,58,.1);color:var(--gold)">CVA Scoring</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">5-stage brewing architecture based on Mr. Happy's workshop. Champion presets: Medina (2023) zero-agitation, Peng (2025) thermal staging. CVA assessment + Cooldown Experience.</p>
+      <ul class="card-features">
+        <li>Thermal narrative visualization</li>
+        <li>Water chemistry panel (Mg/Ca/HCO₃)</li>
+        <li>15-pt descriptive + affective hedonic scoring</li>
+      </ul>
+      <div class="card-cta">Open Calculator <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
+  <!-- SCA TDS -->
+  <a href="sca_brewing_calculator.html" class="tool-card" style="--card-accent:var(--green)">
+    <div class="card-header">
+      <div class="card-num">Quick Tool</div>
+      <span class="card-icon">📊</span>
+      <div class="card-title">TDS → Ideal Cup <em>Model</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(63,207,142,.1);color:var(--green)">SCA Standard</span>
+        <span class="card-tag" style="background:rgba(77,124,255,.1);color:var(--blue-lt)">Brewing Chart</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Input refractometer reading → instant SCA Brewing Control Chart position → diagnosis → adjustment calculator for dose or yield to hit target TDS 1.40%.</p>
+      <ul class="card-features">
+        <li>Real-time dot on SCA chart</li>
+        <li>Option A/B: adjust yield or dose</li>
+        <li>Ideal TDS 1.40% (Happy's framework)</li>
+      </ul>
+      <div class="card-cta">Open Calculator <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
+</div>
+
+<!-- ── RESEARCH & EDUCATION ───────────────────────────────────────── -->
+<div class="section-label"><span>02</span> Research & Education</div>
+
+<div class="tools-grid">
+
+  <!-- Inside the Dripper -->
+  <a href="inside_the_dripper.html" class="tool-card" style="--card-accent:var(--blue)">
+    <div class="card-header">
+      <div class="card-num">Interactive Visualization · EN / TH</div>
+      <span class="card-icon">🔬</span>
+      <div class="card-title">Inside the <em>Dripper</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(77,124,255,.1);color:var(--blue-lt)">20 Molecules</span>
+        <span class="card-tag" style="background:rgba(63,207,142,.1);color:var(--green)">Timeline</span>
+        <span class="card-tag" style="background:rgba(251,191,36,.1);color:var(--amber)">Bilingual</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Interactive exploration of what happens inside a coffee bed — V60 and Kalita Wave anatomy, 20-molecule theater, extraction timeline scrubber, compound chart, pour deep-dive.</p>
+      <ul class="card-features">
+        <li>Molecular Theatre: 5 acts × 20 flavor molecules</li>
+        <li>Dripper anatomy with fluid dynamics</li>
+        <li>EN/TH language toggle</li>
+      </ul>
+      <div class="card-cta">Explore <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
+  <!-- KBO-P Research Overview -->
+  <a href="kbo_p_research_overview.html" class="tool-card" style="--card-accent:var(--amber)">
+    <div class="card-header">
+      <div class="card-num">Research Companion · EN / TH</div>
+      <span class="card-icon">📄</span>
+      <div class="card-title">KBO-P Research <em>Overview</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(251,191,36,.1);color:var(--amber)">JAFC Target</span>
+        <span class="card-tag" style="background:rgba(248,113,113,.1);color:#f87171">Peer Review</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">Plain-language guide to the KBO-P research package — from hypothesis to publication. Four falsifiable hypotheses, experimental design, 6 predicted figures, reviewer challenges.</p>
+      <ul class="card-features">
+        <li>Arrhenius selectivity ratio 1.87×</li>
+        <li>48-brew RCBD study design</li>
+        <li>Pre-registration criteria (OSF)</li>
+      </ul>
+      <div class="card-cta">Read Overview <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
+</div>
+
+<!-- ── FRAMEWORK SUMMARY ───────────────────────────────────────────── -->
+<div class="sep"></div>
+<div class="section-label"><span>03</span> Scientific Framework</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:48px">
+
+  <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Core Equation</div>
+    <div style="font-family:'Cambria Math','Times New Roman',serif;font-size:13px;color:var(--text);font-style:italic;line-height:1.7">
+      M_coffee × EY = Y_out × TDS
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">Lockhart 1957 · validated</div>
+  </div>
+
+  <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Hidden Formula</div>
+    <div style="font-family:'Cambria Math','Times New Roman',serif;font-size:13px;color:var(--gold-lt);font-style:italic;line-height:1.7">
+      TDS = EY / (R − 1.47)
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">X = 1.47 g/g · Happy 2025</div>
+  </div>
+
+  <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">EEY Target</div>
+    <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--green);line-height:1">19%</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">Equivalency threshold · below astringency zone</div>
+  </div>
+
+  <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Selectivity Ratio</div>
+    <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--blue-lt);line-height:1">1.87×</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">94°C → 76°C · Arrhenius spread</div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div>
+    <div class="footer-brand">Cloudbrew <em>Pour Over Lab</em></div>
+    <div class="footer-tagline">ordinary is specialty</div>
+  </div>
+  <div class="footer-links">
+    <span>Bangkok, Thailand</span>
+    <span>KBO-P v2.0</span>
+  </div>
+  <div class="footer-copy">
+    Tools built on: Lockhart (1957) · Hendon et al. (2014) · Batali et al. (2020) · Liang et al. (2021) · Happy Workshop (2025)
+  </div>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inside the Dripper — A Pour-Over Chemistry Visualization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0908;--surface:#161412;--surface-2:#1f1c19;--border:#3a3530;--border-light:#4a4540;--text:#f5efe6;--text-2:#a8a299;--text-3:#6b655e;--acids:#ef4444;--sugars:#f59e0b;--cga:#84cc16;--lactones:#a855f7;--polyphenols:#e11d48;--aromatics:#06b6d4;--body-compound:#fb923c;--pour-1:#fbbf24;--pour-2:#f97316;--pour-3:#d946ef;--pour-4:#6366f1;--safe:#14b8a6;--warn:#f59e0b;--danger:#e11d48;--grid:rgba(245,239,230,0.06);--grid-strong:rgba(245,239,230,0.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Bai Jamjuree',sans-serif;line-height:1.5;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at top,rgba(245,158,11,0.04),transparent 60%),radial-gradient(ellipse at bottom right,rgba(20,184,166,0.03),transparent 60%);pointer-events:none;z-index:0}
+.container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:4rem 2rem}
+@media(max-width:640px){.container{padding:2rem 1rem}}
+.lang-toggle{position:fixed;top:1.25rem;right:1.25rem;z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:100px;padding:0.25rem;display:flex;gap:0.25rem;box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+.lang-btn{background:transparent;border:none;color:var(--text-3);padding:0.4rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;border-radius:100px;cursor:pointer;transition:all 0.2s;font-weight:500}
+.lang-btn.active{background:var(--text);color:var(--bg)}
+.header{margin-bottom:5rem;border-bottom:1px solid var(--border);padding-bottom:3rem}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-3);margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent)}
+.title{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(3rem,8vw,6rem);line-height:0.95;letter-spacing:-0.03em;margin-bottom:1.5rem}
+.title em{font-style:italic;font-weight:400;color:var(--sugars)}
+.subtitle{font-size:1.1rem;color:var(--text-2);max-width:60ch;font-weight:300}
+.meta-row{display:flex;gap:3rem;margin-top:2.5rem;flex-wrap:wrap}
+.meta-item{display:flex;flex-direction:column;gap:0.25rem}
+.meta-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3)}
+.meta-value{font-family:'JetBrains Mono',monospace;font-size:0.95rem;color:var(--text)}
+@media(max-width:640px){.header{margin-bottom:3rem;padding-bottom:2rem}.meta-row{gap:1.5rem;margin-top:1.5rem}.subtitle{font-size:1rem}}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--text-2);margin-bottom:2rem;display:flex;align-items:center;gap:0.75rem}
+.section-title-num{color:var(--sugars);font-weight:700}
+@media(max-width:640px){.section-title{font-size:0.65rem;letter-spacing:0.15em;margin-bottom:1.25rem;flex-wrap:wrap}}
+.dripper-selector{margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border)}
+.dripper-selector-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.75rem}
+.dripper-selector-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.dripper-tabs{display:flex;gap:0.5rem;flex-wrap:wrap}
+.dripper-tab{background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);padding:0.7rem 1.25rem;border-radius:3px;cursor:pointer;transition:all 0.2s;font-family:'Bai Jamjuree',sans-serif;display:flex;flex-direction:column;align-items:flex-start;gap:0.2rem;flex:1;min-width:140px}
+.dripper-tab:hover{border-color:var(--border-light);color:var(--text)}
+.dripper-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.dripper-tab-name{font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:600}
+.dripper-tab-desc{font-size:0.72rem;opacity:0.75}
+.scrubber-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2rem;margin-bottom:3rem}
+@media(max-width:640px){.scrubber-section{padding:1.25rem;margin-bottom:2rem}}
+.scrubber-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-bottom:2rem}
+@media(max-width:900px){.scrubber-grid{grid-template-columns:1fr;gap:2rem}}
+@media(max-width:640px){.scrubber-grid{gap:1.5rem}.dripper-viz{padding:1rem}.current-time{font-size:2.2rem}.state-cell{padding:0.75rem 1rem}.state-cell-value{font-size:1.25rem}}
+.dripper-viz{aspect-ratio:1;background:linear-gradient(180deg,var(--surface-2) 0%,var(--bg) 100%);border:1px solid var(--border);border-radius:4px;padding:2rem;position:relative;overflow:hidden}
+@media(max-width:640px){.dripper-viz{aspect-ratio:5/4;max-height:320px}}
+.dripper-svg{width:100%;height:100%;display:block}
+.state-panel{display:flex;flex-direction:column;gap:1.5rem}
+.state-header{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.current-time{font-family:'JetBrains Mono',monospace;font-size:3rem;font-weight:500;letter-spacing:-0.02em;color:var(--text)}
+.current-time .ms{font-size:1.5rem;color:var(--text-3)}
+.current-pour-badge{font-family:'JetBrains Mono',monospace;font-size:0.75rem;padding:0.4rem 0.9rem;border-radius:100px;background:var(--surface-2);border:1px solid var(--border-light);text-transform:uppercase;letter-spacing:0.15em}
+.state-row{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.state-cell{background:var(--surface-2);border:1px solid var(--border);padding:1rem 1.25rem;border-radius:3px}
+.state-cell-label{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.4rem}
+.state-cell-value{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:500;color:var(--text)}
+.state-cell-value .unit{font-size:0.75rem;color:var(--text-3);margin-left:0.25rem}
+.state-narrative{background:var(--surface-2);border:1px solid var(--border);border-left:3px solid var(--sugars);padding:1.25rem 1.5rem;border-radius:3px;font-size:0.95rem;color:var(--text-2);line-height:1.6;min-height:100px}
+.state-narrative strong{color:var(--text);font-weight:500}
+.scrubber-control{margin-top:1rem}
+.scrubber-track-wrap{position:relative;padding:1.5rem 0 2.5rem}
+.scrubber-pour-bands{position:absolute;inset:1.5rem 0 2.5rem 0;display:flex;pointer-events:none;border-radius:100px;overflow:hidden}
+.pour-band{height:100%;opacity:0.15;transition:opacity 0.2s}
+.pour-band.active{opacity:0.4}
+.scrubber-track{position:relative;height:60px;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;cursor:pointer;overflow:visible}
+.scrubber-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(251,191,36,0.15),rgba(249,115,22,0.15),rgba(217,70,239,0.15),rgba(99,102,241,0.15));border-radius:100px;transition:width 0.05s linear}
+.scrubber-handle{position:absolute;top:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:var(--text);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--text),0 4px 12px rgba(0,0,0,0.4);cursor:grab;z-index:2;transition:transform 0.1s}
+.scrubber-handle:hover{transform:translate(-50%,-50%) scale(1.1)}
+.scrubber-handle:active{cursor:grabbing;transform:translate(-50%,-50%) scale(1.05)}
+.scrubber-handle::after{content:'';position:absolute;inset:8px;border-radius:50%;background:var(--bg)}
+.scrubber-ticks{position:absolute;inset:0;pointer-events:none;display:flex}
+.tick{flex:1;border-right:1px solid var(--grid);position:relative}
+.tick:last-child{border-right:none}
+.tick-label{position:absolute;top:calc(100% + 8px);left:0;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--text-3);letter-spacing:0.05em;white-space:nowrap}
+.scrubber-pour-labels{display:flex;margin-top:1rem}
+.pour-label{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-3);letter-spacing:0.15em;text-transform:uppercase;padding:0.3rem 0;border-bottom:2px solid transparent;transition:all 0.2s;cursor:pointer}
+.pour-label.active{color:var(--text);border-bottom-color:currentColor}
+.pour-label.p1{color:var(--pour-1)}.pour-label.p2{color:var(--pour-2)}.pour-label.p3{color:var(--pour-3)}.pour-label.p4{color:var(--pour-4)}
+.scrubber-buttons{display:flex;gap:0.75rem;margin-top:1.5rem;justify-content:center;flex-wrap:wrap}
+.play-btn{background:var(--text);color:var(--bg);border:none;padding:0.7rem 1.5rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.15em;text-transform:uppercase;font-weight:600;border-radius:3px;cursor:pointer;transition:opacity 0.2s}
+.play-btn:hover{opacity:0.85}
+.preset-btn{background:transparent;color:var(--text-2);border:1px solid var(--border-light);padding:0.7rem 1.25rem;font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;border-radius:3px;cursor:pointer;transition:all 0.2s}
+.preset-btn:hover{border-color:var(--text);color:var(--text)}
+@media(max-width:640px){.scrubber-buttons{gap:0.5rem;margin-top:1rem}.preset-btn{padding:0.55rem 0.8rem;font-size:0.65rem}.play-btn{padding:0.6rem 1.2rem;font-size:0.7rem}.tick-label{font-size:0.55rem}.pour-label{font-size:0.55rem;letter-spacing:0.08em;padding:0.25rem 0}.scrubber-handle{width:28px;height:28px}.scrubber-track{height:50px}}
+.chart-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2rem;margin-bottom:3rem}
+.chart-intro{color:var(--text-2);max-width:70ch;line-height:1.6;margin-bottom:1rem}
+.chart-wrap{position:relative;margin:2rem 0 1rem}
+.chart-svg{width:100%;height:360px;display:block}
+@media(max-width:720px){.chart-section{padding:1.25rem;margin-bottom:2rem}.chart-wrap{margin:1.5rem -1.25rem 0.5rem;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;padding:0 1.25rem;scrollbar-width:thin}.chart-wrap::-webkit-scrollbar{height:4px}.chart-wrap::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:2px}.chart-svg{min-width:640px;width:640px;height:320px}.chart-scroll-hint{display:block;text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:var(--text-3);letter-spacing:0.2em;margin-top:0.5rem;text-transform:uppercase}}
+.chart-scroll-hint{display:none}
+.chart-legend{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1rem}
+.legend-item{display:flex;align-items:center;gap:0.5rem;background:var(--surface-2);border:1px solid var(--border);padding:0.4rem 0.85rem;border-radius:100px;cursor:pointer;transition:all 0.2s;font-size:0.85rem;user-select:none}
+.legend-item:hover{border-color:var(--border-light)}
+.legend-item.muted{opacity:0.3}
+.legend-dot{width:10px;height:10px;border-radius:2px}
+.legend-text{color:var(--text-2);font-size:0.8rem}
+.legend-item.danger .legend-text::after{content:' ⚠';color:var(--danger)}
+.pours-section{margin-bottom:3rem}
+.pours-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+@media(max-width:640px){.pours-section{margin-bottom:2rem}.pours-grid{grid-template-columns:1fr;gap:1rem}.pour-card-num{font-size:3rem}.pour-card-name{font-size:1.2rem}.pour-card-header{padding:1.25rem}.pour-card-body{padding:1.25rem;font-size:0.85rem}.pour-card-detail{padding:0 1.25rem 1.25rem}.detail-grid{grid-template-columns:1fr;gap:0.75rem}.detail-block{padding:0.85rem}}
+.pour-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.pour-card:hover{border-color:var(--border-light);transform:translateY(-2px)}
+.pour-card.expanded{grid-column:1/-1}
+.pour-card-header{padding:1.5rem;border-bottom:1px solid var(--border);position:relative}
+.pour-card-num{font-family:'Fraunces',serif;font-weight:300;font-size:4rem;line-height:1;margin-bottom:0.5rem}
+.pour-card.p1 .pour-card-num{color:var(--pour-1)}
+.pour-card.p2 .pour-card-num{color:var(--pour-2)}
+.pour-card.p3 .pour-card-num{color:var(--pour-3)}
+.pour-card.p4 .pour-card-num{color:var(--pour-4)}
+.pour-card-name{font-family:'Fraunces',serif;font-weight:400;font-style:italic;font-size:1.4rem;margin-bottom:0.25rem}
+.pour-card-thai{font-size:0.9rem;color:var(--text-2);margin-bottom:0.75rem}
+.pour-card-time{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-3);letter-spacing:0.1em}
+.pour-card-body{padding:1.5rem;font-size:0.9rem;color:var(--text-2);line-height:1.6}
+.pour-card-detail{display:none;padding:0 1.5rem 1.5rem}
+.pour-card.expanded .pour-card-detail{display:block}
+.detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1rem}
+.detail-block{background:var(--surface-2);border:1px solid var(--border);padding:1rem;border-radius:3px}
+.detail-block h4{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.75rem;font-weight:500}
+.detail-block ul{list-style:none;font-size:0.9rem;color:var(--text-2);line-height:1.7}
+.detail-block li{padding-left:1rem;position:relative}
+.detail-block li::before{content:'·';position:absolute;left:0;color:var(--text-3)}
+.technique-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:2rem;margin-bottom:3rem}
+.technique-intro{color:var(--text-2);margin-bottom:2rem;max-width:70ch;line-height:1.6}
+.technique-tabs{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem}
+.tech-tab{background:transparent;color:var(--text-2);border:1px solid transparent;padding:0.6rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;border-radius:3px;cursor:pointer;transition:all 0.2s}
+.tech-tab:hover{color:var(--text);background:var(--surface-2)}
+.tech-tab.active{color:var(--bg);background:var(--text)}
+.technique-display{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+@media(max-width:900px){.technique-display{grid-template-columns:1fr;gap:2rem}}
+@media(max-width:640px){.technique-section{padding:1.25rem;margin-bottom:2rem}.technique-display{gap:1.5rem}.technique-viz{padding:1rem}.technique-info h3{font-size:1.5rem}.tech-tab{padding:0.5rem 0.85rem;font-size:0.65rem}.technique-tabs{gap:0.35rem}.rating-label{font-size:0.6rem;min-width:80px}}
+.technique-viz{aspect-ratio:1;background:linear-gradient(135deg,var(--surface-2),var(--bg));border:1px solid var(--border);border-radius:4px;padding:2rem;position:relative}
+.technique-svg{width:100%;height:100%}
+.technique-info h3{font-family:'Fraunces',serif;font-weight:400;font-size:2rem;margin-bottom:0.5rem}
+.technique-info .thai{color:var(--text-2);margin-bottom:1.5rem;font-size:1rem}
+.tech-section{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.tech-section:last-child{border-bottom:none}
+.tech-section h4{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.6rem;font-weight:500}
+.tech-section p{font-size:0.95rem;color:var(--text-2);line-height:1.6}
+.tech-rating{display:flex;align-items:center;gap:1rem;margin-top:1rem}
+.rating-label{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-3);letter-spacing:0.15em;text-transform:uppercase;min-width:100px}
+.rating-bar{flex:1;height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.rating-fill{height:100%;transition:width 0.3s}
+.rating-fill.good{background:var(--safe)}.rating-fill.medium{background:var(--warn)}.rating-fill.bad{background:var(--danger)}
+.anatomy-section{margin-bottom:3rem}
+.anatomy-intro{color:var(--text-2);max-width:70ch;line-height:1.6;margin-bottom:2rem}
+.anatomy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem}
+@media(max-width:900px){.anatomy-grid{grid-template-columns:1fr}}
+.anatomy-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.anatomy-card-header{padding:1.5rem;border-bottom:1px solid var(--border)}
+.anatomy-name-row{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:0.5rem}
+.anatomy-name{font-family:'Fraunces',serif;font-weight:400;font-size:1.4rem}
+.anatomy-thai{font-size:0.9rem;color:var(--text-2)}
+.anatomy-bypass-badge{font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:0.3rem 0.6rem;border-radius:100px;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);white-space:nowrap}
+.anatomy-bypass-badge.low{color:var(--safe);border-color:rgba(20,184,166,0.3)}
+.anatomy-bypass-badge.high{color:var(--danger);border-color:rgba(225,29,72,0.3)}
+.anatomy-viz{aspect-ratio:1.6;background:linear-gradient(135deg,var(--surface-2),var(--bg));padding:1rem;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.anatomy-svg{width:100%;height:100%;display:block}
+.anatomy-body{padding:1.5rem;flex:1;display:flex;flex-direction:column;gap:1rem}
+.anatomy-specs{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem}
+.anatomy-spec{background:var(--surface-2);padding:0.7rem 0.85rem;border-radius:3px;border:1px solid var(--border)}
+.anatomy-spec-label{font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.25rem}
+.anatomy-spec-value{font-size:0.85rem;color:var(--text)}
+.anatomy-section-title{font-family:'JetBrains Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.4rem;font-weight:500}
+.anatomy-text{font-size:0.88rem;color:var(--text-2);line-height:1.55}
+.anatomy-text strong{color:var(--text);font-weight:500}
+.anatomy-pros-cons{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+@media(max-width:480px){.anatomy-pros-cons{grid-template-columns:1fr}}
+.anatomy-pc-box{background:var(--surface-2);border:1px solid var(--border);border-radius:3px;padding:0.85rem}
+.anatomy-pc-box.pros{border-left:2px solid var(--safe)}
+.anatomy-pc-box.cons{border-left:2px solid var(--danger)}
+.anatomy-pc-box h5{font-family:'JetBrains Mono',monospace;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.4rem;font-weight:500}
+.anatomy-pc-box ul{list-style:none;font-size:0.78rem;color:var(--text-2);line-height:1.5}
+.anatomy-pc-box li{padding-left:0.8rem;position:relative;margin-bottom:0.2rem}
+.anatomy-pc-box li::before{content:'·';position:absolute;left:0;color:var(--text-3)}
+@keyframes flowDown{0%{opacity:0;transform:translateY(-20px)}20%{opacity:0.9}80%{opacity:0.9}100%{opacity:0;transform:translateY(80px)}}
+@keyframes flowSide{0%{opacity:0}30%{opacity:0.8}100%{opacity:0}}
+.flow-drop{animation:flowDown 2s linear infinite}
+.bypass-arrow{animation:flowSide 2s ease-in-out infinite}
+.molecular-section{margin-bottom:3rem}
+.acts-nav{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.act-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-2);padding:0.75rem 1.25rem;border-radius:3px;cursor:pointer;transition:all 0.2s;display:flex;align-items:baseline;gap:0.6rem;font-family:'Bai Jamjuree',sans-serif}
+.act-btn:hover{border-color:var(--border-light);color:var(--text)}
+.act-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.act-num{font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:1.3rem;line-height:1}
+.act-name{font-family:'JetBrains Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;font-weight:500}
+.molecules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem}
+.act-header{grid-column:1/-1;display:flex;align-items:baseline;gap:0.75rem;padding:1.25rem 0 0.5rem;border-bottom:1px solid var(--border);margin-top:0.5rem}
+.act-header:first-child{padding-top:0;margin-top:0}
+.act-header-num{font-family:'Fraunces',serif;font-style:italic;font-size:1.8rem;color:var(--sugars);line-height:1}
+.act-header-name{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:400}
+.act-header-count{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--text-3);letter-spacing:0.15em;margin-left:auto}
+.act-group{display:contents}
+.molecule-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;transition:all 0.25s;position:relative}
+.molecule-card:hover{transform:translateY(-3px);border-color:var(--border-light);box-shadow:0 8px 20px rgba(0,0,0,0.3)}
+.molecule-card.danger{border-color:rgba(225,29,72,0.3)}
+.molecule-card.danger::before{content:'⚠';position:absolute;top:0.75rem;right:0.75rem;color:var(--danger);font-size:0.9rem}
+.molecule-viz{background:linear-gradient(135deg,var(--surface-2),var(--bg));aspect-ratio:1.6;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border);padding:1rem}
+.molecule-svg{width:100%;height:100%;max-height:140px}
+.molecule-info{padding:1.25rem}
+.molecule-name{font-family:'Fraunces',serif;font-weight:400;font-size:1.25rem;line-height:1.2;margin-bottom:0.25rem}
+.molecule-formula{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-3);letter-spacing:0.05em;margin-bottom:0.75rem}
+.molecule-tagline{font-size:0.85rem;color:var(--text-2);line-height:1.4;margin-bottom:1rem}
+.molecule-tags{display:flex;gap:0.4rem;flex-wrap:wrap}
+.mol-tag{font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:0.25rem 0.6rem;border-radius:100px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);letter-spacing:0.05em}
+.mol-tag.acid{color:var(--acids);border-color:rgba(239,68,68,0.3)}
+.mol-tag.sweet{color:var(--sugars);border-color:rgba(245,158,11,0.3)}
+.mol-tag.bitter{color:var(--lactones);border-color:rgba(168,85,247,0.3)}
+.mol-tag.aroma{color:var(--aromatics);border-color:rgba(6,182,212,0.3)}
+.mol-tag.danger{color:var(--danger);border-color:rgba(225,29,72,0.3)}
+.molecule-detail{position:fixed;inset:0;background:rgba(10,9,8,0.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;opacity:0;transition:opacity 0.25s}
+.molecule-detail.active{display:flex;opacity:1}
+.detail-content{background:var(--surface);border:1px solid var(--border-light);border-radius:6px;max-width:720px;width:100%;max-height:90vh;overflow-y:auto;padding:2.5rem;position:relative}
+@media(max-width:640px){.detail-content{padding:1.5rem}}
+.detail-close{position:absolute;top:1rem;right:1rem;background:transparent;border:1px solid var(--border);color:var(--text-2);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:1.5rem;line-height:1;transition:all 0.2s}
+.detail-close:hover{border-color:var(--text);color:var(--text)}
+.detail-header{display:flex;gap:2rem;align-items:flex-start;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+@media(max-width:640px){.detail-header{flex-direction:column;gap:1rem}}
+.detail-viz{flex-shrink:0;width:180px;height:140px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;padding:0.75rem}
+.detail-title-block{flex:1}
+.detail-name{font-family:'Fraunces',serif;font-size:2rem;font-weight:400;margin-bottom:0.25rem}
+.detail-formula{font-family:'JetBrains Mono',monospace;font-size:0.85rem;color:var(--text-3);margin-bottom:0.5rem}
+.detail-tagline{color:var(--text-2);font-size:0.95rem;line-height:1.5}
+.detail-section{margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.detail-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.detail-section h4{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.75rem;font-weight:500}
+.detail-section p{color:var(--text-2);font-size:0.95rem;line-height:1.6;margin-bottom:0.5rem}
+.detail-section p strong{color:var(--text);font-weight:500}
+.detail-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem}
+.detail-stat{background:var(--surface-2);padding:0.85rem 1rem;border-radius:3px;border:1px solid var(--border)}
+.detail-stat-label{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-3);margin-bottom:0.3rem}
+.detail-stat-value{font-family:'JetBrains Mono',monospace;font-size:1rem;color:var(--text)}
+.footer{margin-top:5rem;padding-top:3rem;border-top:1px solid var(--border);color:var(--text-3);font-size:0.85rem;line-height:1.7}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2rem;margin-bottom:2rem}
+.footer-block h4{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-2);margin-bottom:0.75rem}
+@keyframes pulse-glow{0%,100%{opacity:0.4}50%{opacity:0.8}}
+.danger-zone-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at center,rgba(225,29,72,0.08),transparent 70%);opacity:0;transition:opacity 0.3s}
+.danger-zone-overlay.active{opacity:1;animation:pulse-glow 2s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button class="lang-btn active" data-lang="en">EN</button>
+  <button class="lang-btn" data-lang="th">TH</button>
+</div>
+
+<div class="container">
+
+<header class="header">
+  <div class="eyebrow"><span>Pour-Over Extraction · Chemistry Visualization · v2.0</span></div>
+  <h1 class="title" id="titleText">Inside the <em>Dripper</em></h1>
+  <p class="subtitle" id="subtitleText">What happens inside a coffee dripper between 0 and 270 seconds — acids releasing, sugars transforming, bitterness forming — every event has its rhythm. This is the tool to see it.</p>
+  <div class="meta-row">
+    <div class="meta-item"><span class="meta-label" data-i="meta_time">Brew Time</span><span class="meta-value">0:00 → 4:30</span></div>
+    <div class="meta-item"><span class="meta-label" data-i="meta_compounds">Compounds Tracked</span><span class="meta-value" data-i="meta_compounds_v">7 Classes</span></div>
+    <div class="meta-item"><span class="meta-label" data-i="meta_pours">Pour Stages</span><span class="meta-value" data-i="meta_pours_v">4 + Drawdown</span></div>
+    <div class="meta-item"><span class="meta-label" data-i="meta_drippers">Drippers</span><span class="meta-value" data-i="meta_drippers_v">2 Compared</span></div>
+  </div>
+</header>
+
+<section class="scrubber-section">
+  <h2 class="section-title"><span class="section-title-num">01</span><span data-i="sec1">Timeline · State of the bed at any moment</span></h2>
+  <div class="dripper-selector">
+    <div class="dripper-selector-label"><span data-i="dripper_select">Select your dripper</span></div>
+    <div class="dripper-tabs" id="dripperTabs">
+      <button class="dripper-tab active" data-dripper="v60"><span class="dripper-tab-name">Hario V60</span><span class="dripper-tab-desc" data-i="v60d">V-shape · deep cone · 60°</span></button>
+      <button class="dripper-tab" data-dripper="flat"><span class="dripper-tab-name">Kalita Wave</span><span class="dripper-tab-desc" data-i="flatd">Flat bottom · 3 holes</span></button>
+    </div>
+  </div>
+  <div class="scrubber-grid">
+    <div class="dripper-viz">
+      <div class="danger-zone-overlay" id="dangerOverlay"></div>
+      <svg class="dripper-svg" viewBox="0 0 400 400" id="dripperSvg">
+        <defs>
+          <linearGradient id="dripperGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2a2622" stop-opacity="0.4"/><stop offset="100%" stop-color="#2a2622" stop-opacity="0.1"/></linearGradient>
+          <linearGradient id="bedGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b4513"/><stop offset="100%" stop-color="#3a2510"/></linearGradient>
+          <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#06b6d4" stop-opacity="0.6"/><stop offset="100%" stop-color="#0891b2" stop-opacity="0.3"/></linearGradient>
+          <radialGradient id="extractionGlowG" cx="0.5" cy="0.5" r="0.5"><stop offset="0%" stop-color="#f59e0b" stop-opacity="0.6"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+        </defs>
+        <path id="dripperOutline" d="" fill="url(#dripperGrad)" stroke="#4a4540" stroke-width="1.5" opacity="0.7"/>
+        <g id="dripperRidges" stroke="#3a3530" stroke-width="0.8" opacity="0.6"></g>
+        <path id="dripperFilter" d="" fill="rgba(245,239,230,0.05)" stroke="rgba(245,239,230,0.2)" stroke-width="0.5"/>
+        <path id="bedShape" d="" fill="url(#bedGrad)"/>
+        <path id="waterLayer" d="" fill="url(#waterGrad)" opacity="0"/>
+        <line id="pourStream" x1="200" y1="60" x2="200" y2="200" stroke="#06b6d4" stroke-width="2" opacity="0" stroke-dasharray="4,2"/>
+        <ellipse id="extractionGlow" cx="200" cy="240" rx="70" ry="30" fill="url(#extractionGlowG)" opacity="0"/>
+        <g id="bloomBubbles" opacity="0"></g>
+        <g id="dripperHoles"></g>
+        <g id="dripDrops"></g>
+        <text id="dripperLabel" x="200" y="40" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b655e" letter-spacing="2">HARIO V60 · CROSS-SECTION</text>
+        <g id="tempIndicator">
+          <rect x="345" y="100" width="6" height="180" rx="3" fill="#2a2622"/>
+          <rect id="tempFill" x="345" y="120" width="6" height="160" rx="3" fill="#ef4444" opacity="0.8"/>
+          <text x="348" y="92" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b655e">T</text>
+          <text x="348" y="298" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#6b655e" id="tempText">94°C</text>
+        </g>
+        <text x="55" y="245" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="8" fill="#6b655e">BED</text>
+      </svg>
+    </div>
+    <div class="state-panel">
+      <div class="state-header">
+        <div class="current-time" id="currentTime">0:00<span class="ms">.0</span></div>
+        <div class="current-pour-badge" id="pourBadge">BLOOM</div>
+      </div>
+      <div class="state-row">
+        <div class="state-cell"><div class="state-cell-label" data-i="s_temp">Bed Temp</div><div class="state-cell-value" id="bedTempVal">94<span class="unit">°C</span></div></div>
+        <div class="state-cell"><div class="state-cell-label" data-i="s_ph">Bed pH</div><div class="state-cell-value" id="phVal">5.8<span class="unit">pH</span></div></div>
+        <div class="state-cell"><div class="state-cell-label" data-i="s_water">Water in</div><div class="state-cell-value" id="waterVal">0<span class="unit">g</span></div></div>
+        <div class="state-cell"><div class="state-cell-label" data-i="s_bitter">Bitter Risk</div><div class="state-cell-value" id="bitterRisk" style="color:var(--safe)">LOW</div></div>
+      </div>
+      <div class="state-narrative" id="stateNarrative"></div>
+    </div>
+  </div>
+  <div class="scrubber-control">
+    <div class="scrubber-track-wrap">
+      <div class="scrubber-pour-bands">
+        <div class="pour-band" data-pour="1" style="flex:45;background:var(--pour-1)"></div>
+        <div class="pour-band" data-pour="2" style="flex:45;background:var(--pour-2)"></div>
+        <div class="pour-band" data-pour="3" style="flex:60;background:var(--pour-3)"></div>
+        <div class="pour-band" data-pour="4" style="flex:60;background:var(--pour-4)"></div>
+        <div class="pour-band" data-pour="5" style="flex:60;background:var(--text-3)"></div>
+      </div>
+      <div class="scrubber-track" id="scrubberTrack">
+        <div class="scrubber-fill" id="scrubberFill"></div>
+        <div class="scrubber-handle" id="scrubberHandle" style="left:0%"></div>
+      </div>
+      <div class="scrubber-ticks">
+        <div class="tick" style="flex:45"><span class="tick-label">0:00</span></div>
+        <div class="tick" style="flex:45"><span class="tick-label">0:45</span></div>
+        <div class="tick" style="flex:60"><span class="tick-label">1:30</span></div>
+        <div class="tick" style="flex:60"><span class="tick-label">2:30</span></div>
+        <div class="tick" style="flex:60"><span class="tick-label">3:30</span></div>
+        <div class="tick" style="width:0"><span class="tick-label" style="transform:translateX(-100%)">4:30</span></div>
+      </div>
+    </div>
+    <div class="scrubber-pour-labels">
+      <div class="pour-label p1" style="flex:45" data-time="22">P1 · BLOOM</div>
+      <div class="pour-label p2" style="flex:45" data-time="68">P2 · MAIN</div>
+      <div class="pour-label p3" style="flex:60" data-time="120">P3 · SWEET</div>
+      <div class="pour-label p4" style="flex:60" data-time="180">P4 · FINISH</div>
+      <div class="pour-label" style="flex:60" data-time="240">DRAWDOWN</div>
+    </div>
+    <div class="scrubber-buttons">
+      <button class="play-btn" id="playBtn">▶ Play</button>
+      <button class="preset-btn" data-jump="0" data-i="b_start">Start</button>
+      <button class="preset-btn" data-jump="30" data-i="b_bloom">Bloom</button>
+      <button class="preset-btn" data-jump="90" data-i="b_sweet">Sweet Spot</button>
+      <button class="preset-btn" data-jump="180" data-i="b_danger">Danger Zone</button>
+      <button class="preset-btn" data-jump="240" data-i="b_draw">Drawdown</button>
+    </div>
+  </div>
+</section>
+
+<section class="chart-section">
+  <h2 class="section-title"><span class="section-title-num">02</span><span data-i="sec2">Compound Concentrations · Live tracking</span></h2>
+  <p class="chart-intro" data-i="sec2d">Each colored line represents a different compound class. Click the legend to toggle visibility. The vertical line tracks your current scrubber time. Numbers on the right show concentration at that moment.</p>
+  <div class="chart-wrap"><svg class="chart-svg" viewBox="0 0 800 360" id="chartSvg"></svg></div>
+  <div class="chart-scroll-hint" data-i="scroll">← Scroll horizontally to see full timeline →</div>
+  <div class="chart-legend" id="chartLegend"></div>
+</section>
+
+<section class="pours-section">
+  <h2 class="section-title"><span class="section-title-num">03</span><span data-i="sec3">Four Pours · One brew · Click any to expand</span></h2>
+  <div class="pours-grid" id="poursGrid"></div>
+</section>
+
+<section class="technique-section">
+  <h2 class="section-title"><span class="section-title-num">04</span><span data-i="sec4">Pour Technique · Choose by goal</span></h2>
+  <p class="technique-intro" data-i="sec4d">Pour technique = agitation control = compound class selector. You choose the technique based on what you want to extract, not based on what "tastes good." Click a technique to see its water flow path and extraction pattern.</p>
+  <div class="technique-tabs" id="techTabs"></div>
+  <div class="technique-display">
+    <div class="technique-viz">
+      <svg class="technique-svg" viewBox="0 0 400 400" id="techSvg">
+        <circle cx="200" cy="200" r="160" fill="rgba(42,38,34,0.3)" stroke="#3a3530" stroke-width="1.5"/>
+        <circle cx="200" cy="200" r="150" fill="rgba(139,69,19,0.15)" stroke="rgba(139,69,19,0.3)" stroke-width="1"/>
+        <g id="heatmap"></g>
+        <path id="waterPath" fill="none" stroke="#06b6d4" stroke-width="3" opacity="0.8" stroke-linecap="round"/>
+        <circle id="pourPos" cx="200" cy="200" r="6" fill="#06b6d4"/>
+        <text x="200" y="30" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#6b655e" letter-spacing="2" data-i="topdown">TOP-DOWN VIEW</text>
+        <text x="200" y="380" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#6b655e" letter-spacing="2" data-i="heat">HEAT = LOCAL EXTRACTION</text>
+      </svg>
+    </div>
+    <div class="technique-info" id="techInfo"></div>
+  </div>
+</section>
+
+<section class="anatomy-section">
+  <h2 class="section-title"><span class="section-title-num">05</span><span data-i="sec5">Dripper Anatomy · Internal mechanics</span></h2>
+  <p class="anatomy-intro" id="sec5desc">A dripper is not just a container — it is a <strong>flow controller</strong> that determines how water passes through the coffee bed. Cone geometry, hole size and position, ridge depth, and how the filter attaches to the wall — all of these create different flow patterns that directly affect extraction uniformity and the final flavor in your cup.</p>
+  <div class="anatomy-grid" id="anatomyGrid"></div>
+</section>
+
+<section class="molecular-section">
+  <h2 class="section-title"><span class="section-title-num">06</span><span data-i="sec6">Molecular Theatre · The molecules inside</span></h2>
+  <p class="technique-intro" data-i="sec6d" style="margin-bottom:2.5rem">From the "compound classes" in the graph, let's meet the real molecules in your coffee cup. Real structures, real reactions, real interactions with your tongue. Click any molecule for an in-depth look.</p>
+  <div class="acts-nav" id="actsNav"></div>
+  <div class="molecules-grid" id="moleculesGrid"></div>
+  <div class="molecule-detail" id="moleculeDetail"><div class="detail-content" id="detailContent"></div></div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-block"><h4 data-i="f_refs">References</h4><p data-i="f_refs_t">Spiro & Selwood (1984) · Cordoba et al. (2020) · Steen et al. (2017) · Hendon et al. (2014) · Mateus & Rodrigues (2009) · Coffee ad Astra modeling</p></div>
+    <div class="footer-block"><h4 data-i="f_method">Method</h4><p data-i="f_method_t">Compound curves are heuristic representations based on first-order extraction kinetics and Arrhenius scaling. Actual extraction varies with bean, grind, water profile, and technique.</p></div>
+    <div class="footer-block"><h4 data-i="f_note">Note</h4><p data-i="f_note_t">Built as a coaching tool. Use alongside brew logging and your own sensory observations to refine your understanding.</p></div>
+  </div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.2em;text-align:center;color:var(--text-3);margin-top:2rem">KME 2.0 · ACTIVATION ENERGY-MATCHED BREWING · v2.0</div>
+</footer>
+
+</div>
+
+<script>
+// I18N strings
+const I18N = {
+  en: {
+    title_html: 'Inside the <em>Dripper</em>',
+    subtitle: 'What happens inside a coffee dripper between 0 and 270 seconds — acids releasing, sugars transforming, bitterness forming — every event has its rhythm. This is the tool to see it.',
+    meta_time: 'Brew Time', meta_compounds: 'Compounds Tracked', meta_compounds_v: '7 Classes',
+    meta_pours: 'Pour Stages', meta_pours_v: '4 + Drawdown', meta_drippers: 'Drippers', meta_drippers_v: '2 Compared',
+    sec1: 'Timeline · State of the bed at any moment',
+    dripper_select: 'Select your dripper',
+    v60d: 'V-shape · deep cone · 60°', flatd: 'Flat bottom · 3 holes',
+    s_temp: 'Bed Temp', s_ph: 'Bed pH', s_water: 'Water in', s_bitter: 'Bitter Risk',
+    b_play: '▶ Play', b_pause: '⏸ Pause', b_start: 'Start', b_bloom: 'Bloom', b_sweet: 'Sweet Spot', b_danger: 'Danger Zone', b_draw: 'Drawdown',
+    sec2: 'Compound Concentrations · Live tracking',
+    sec2d: 'Each colored line represents a different compound class. Click the legend to toggle visibility. The vertical line tracks your current scrubber time. Numbers on the right show concentration at that moment.',
+    scroll: '← Scroll horizontally to see full timeline →',
+    sec3: 'Four Pours · One brew · Click any to expand',
+    sec4: 'Pour Technique · Choose by goal',
+    sec4d: 'Pour technique = agitation control = compound class selector. You choose the technique based on what you want to extract, not based on what "tastes good." Click a technique to see its water flow path and extraction pattern.',
+    topdown: 'TOP-DOWN VIEW', heat: 'HEAT = LOCAL EXTRACTION',
+    sec5: 'Dripper Anatomy · Internal mechanics',
+    sec5d: 'A dripper is not just a container — it is a <strong>flow controller</strong> that determines how water passes through the coffee bed. Cone geometry, hole size and position, ridge depth, and how the filter attaches to the wall — all of these create different flow patterns that directly affect extraction uniformity and the final flavor in your cup.',
+    sec6: 'Molecular Theatre · The molecules inside',
+    sec6d: 'From the "compound classes" in the graph, let\'s meet the real molecules in your coffee cup. Real structures, real reactions, real interactions with your tongue. Click any molecule for an in-depth look.',
+    f_refs: 'References', f_refs_t: 'Spiro & Selwood (1984) · Cordoba et al. (2020) · Steen et al. (2017) · Hendon et al. (2014) · Mateus & Rodrigues (2009) · Coffee ad Astra modeling',
+    f_method: 'Method', f_method_t: 'Compound curves are heuristic representations based on first-order extraction kinetics and Arrhenius scaling. Actual extraction varies with bean, grind, water profile, and technique.',
+    f_note: 'Note', f_note_t: 'Built as a coaching tool. Use alongside brew logging and your own sensory observations to refine your understanding.',
+    l_structure: 'Structure', l_origin: 'Origin', l_mechanism: 'Mechanism', l_extraction: 'Extraction', l_sensory: 'Sensory', l_key: 'Key Insight', l_stats: 'Key Stats',
+    l_physics: 'Physics', l_chemistry: 'Chemistry', l_sensory_sig: 'Sensory signature', l_technique: 'Technique', l_danger: 'Danger window', l_chem_desired: 'Chemistry desired', l_chem_avoid: 'Chemistry to avoid',
+    flow_mech: 'Flow Mechanism', pros: 'Pros', cons: 'Cons', best_for: 'Best For',
+    bitter_low: 'LOW', bitter_med: 'MEDIUM', bitter_high: 'HIGH', bitter_crit: 'CRITICAL'
+  },
+  th: {
+    title_html: 'ภายใน<em>กรวยกาแฟ</em>',
+    subtitle: 'สิ่งที่เกิดขึ้นในกรวยกาแฟ ระหว่าง 0 ถึง 270 วินาที — กรดที่ปล่อยตัว น้ำตาลที่เปลี่ยนรูป ความขมที่ฟอร์มตัว — ทุกอย่างมีจังหวะของมัน นี่คือเครื่องมือดู',
+    meta_time: 'เวลาชง', meta_compounds: 'สารที่ติดตาม', meta_compounds_v: '7 กลุ่ม',
+    meta_pours: 'จำนวน Pour', meta_pours_v: '4 + Drawdown', meta_drippers: 'Dripper', meta_drippers_v: '2 แบบ',
+    sec1: 'Timeline · สถานะของเตียงกาแฟทุกช่วงเวลา',
+    dripper_select: 'เลือกประเภทกรวย',
+    v60d: 'V-shape · ทรงกรวยลึก · 60°', flatd: 'ก้นแบน · 3 รู',
+    s_temp: 'อุณหภูมิเตียง', s_ph: 'pH ของเตียง', s_water: 'น้ำที่เติม', s_bitter: 'ความเสี่ยงขม',
+    b_play: '▶ เล่น', b_pause: '⏸ หยุด', b_start: 'เริ่ม', b_bloom: 'Bloom', b_sweet: 'จุดหวาน', b_danger: 'โซนอันตราย', b_draw: 'Drawdown',
+    sec2: 'ความเข้มข้นของสาร · ติดตามเรียลไทม์',
+    sec2d: 'เส้นแต่ละสีคือกลุ่มสารคนละชนิด คลิกที่ legend เพื่อ toggle ดูเฉพาะที่ต้องการ เส้นแนวตั้งคือเวลาปัจจุบันที่คุณ scrub อยู่ ตัวเลขด้านขวาคือ concentration ที่จุดนั้น',
+    scroll: '← เลื่อนแนวนอนเพื่อดู timeline ทั้งหมด →',
+    sec3: 'สี่ Pour · หนึ่ง Brew · คลิกเพื่อขยาย',
+    sec4: 'เทคนิคการเท · เลือกตาม goal',
+    sec4d: 'เทคนิคการเท = การควบคุม agitation = ตัวเลือกของกลุ่มสาร คุณเลือก technique ตามว่าต้องการสกัดอะไร ไม่ใช่ตามว่า "อันไหนอร่อย" คลิก technique เพื่อดู water flow path + extraction pattern',
+    topdown: 'มุมมองด้านบน', heat: 'ความร้อน = การสกัดเฉพาะจุด',
+    sec5: 'กายวิภาคของ Dripper · กลไกภายใน',
+    sec5d: 'Dripper ไม่ใช่แค่ "ภาชนะ" — มันเป็น <strong>flow controller</strong> ที่กำหนดว่าน้ำจะผ่านเตียงกาแฟอย่างไร geometry ของ cone ตำแหน่งและขนาดของรู ระดับของ ridges และวิธีที่ filter ติดกับผนัง — ทุกอย่างนี้สร้าง flow pattern ที่ต่างกัน ซึ่งส่งผลโดยตรงต่อ extraction uniformity และรสชาติสุดท้ายในแก้ว',
+    sec6: 'Molecular Theatre · ในกรวยมีโมเลกุลอะไรบ้าง',
+    sec6d: 'จาก "compound classes" ในกราฟ มาดูตัวจริงที่อยู่ในแก้วกาแฟของคุณ โครงสร้างจริง ปฏิกริยาจริง ปฏิสัมพันธ์กับลิ้นจริง คลิกแต่ละโมเลกุลเพื่อดูข้อมูลเชิงลึก',
+    f_refs: 'อ้างอิง', f_refs_t: 'Spiro & Selwood (1984) · Cordoba et al. (2020) · Steen et al. (2017) · Hendon et al. (2014) · Mateus & Rodrigues (2009) · Coffee ad Astra modeling',
+    f_method: 'วิธีการ', f_method_t: 'เส้นกราฟ compound เป็นภาพแทนที่อ้างอิงจาก first-order extraction kinetics + Arrhenius scaling การสกัดจริงผันแปรตามเมล็ด เกรนด์ น้ำ และเทคนิค',
+    f_note: 'หมายเหตุ', f_note_t: 'สร้างเป็นเครื่องมือสำหรับการ coach ใช้คู่กับการ log brew + sensory observation ของคุณเองเพื่อพัฒนาความเข้าใจ',
+    l_structure: 'โครงสร้าง', l_origin: 'ที่มา', l_mechanism: 'กลไก', l_extraction: 'การสกัด', l_sensory: 'รสชาติ', l_key: 'ประเด็นสำคัญ', l_stats: 'ตัวเลขสำคัญ',
+    l_physics: 'ฟิสิกส์', l_chemistry: 'เคมี', l_sensory_sig: 'รสที่ได้', l_technique: 'เทคนิค', l_danger: 'ช่วงอันตราย', l_chem_desired: 'เคมีที่ต้องการ', l_chem_avoid: 'เคมีที่ต้องหลีก',
+    flow_mech: 'กลไกการไหล', pros: 'ข้อดี', cons: 'ข้อจำกัด', best_for: 'เหมาะกับ',
+    bitter_low: 'ต่ำ', bitter_med: 'ปานกลาง', bitter_high: 'สูง', bitter_crit: 'วิกฤต'
+  }
+};
+let LANG = 'en';
+function L(k) { return I18N[LANG][k] || I18N.en[k] || k; }
+
+// ============ COMPOUND MODEL ============
+const compounds = [
+  { id:'aromatics', name:{en:'Aromatic Volatiles',th:'กลิ่นหอม · esters · floral'}, color:'#06b6d4', danger:false,
+    curve: t => t<30?(t/30)*95 : t<90?95-((t-30)/60)*15 : t<180?80-((t-90)/90)*30 : 50-((t-180)/90)*20 },
+  { id:'acids', name:{en:'Organic Acids',th:'กรด · citric · malic · acetic'}, color:'#ef4444', danger:false,
+    curve: t => t<60?(t/60)*100 : t<180?100-((t-60)/120)*15 : 85-((t-180)/90)*25 },
+  { id:'sugars', name:{en:'Sugars (post-hydrolysis)',th:'น้ำตาล · glucose + fructose'}, color:'#f59e0b', danger:false,
+    curve: t => t<30?(t/30)*25 : t<120?25+((t-30)/90)*70 : t<240?95-((t-120)/120)*5 : 90-((t-240)/30)*10 },
+  { id:'cga', name:{en:'Chlorogenic Acids',th:'CGA · tartness'}, color:'#84cc16', danger:false,
+    curve: t => t<30?(t/30)*20 : t<150?20+((t-30)/120)*75 : t<240?95-((t-150)/90)*10 : 85-((t-240)/30)*5 },
+  { id:'lactones', name:{en:'CGA Lactones',th:'lactones · heavy bitter'}, color:'#a855f7', danger:true,
+    curve: t => t<90?0 : t<150?((t-90)/60)*30 : t<210?30+((t-150)/60)*40 : 70+((t-210)/60)*30 },
+  { id:'polyphenols', name:{en:'Polyphenols / Tannins',th:'polyphenols · astringency'}, color:'#e11d48', danger:true,
+    curve: t => t<90?0 : t<150?((t-90)/60)*20 : t<210?20+((t-150)/60)*40 : 60+((t-210)/60)*40 },
+  { id:'body', name:{en:'Body / Polysaccharides',th:'body · slow release'}, color:'#fb923c', danger:false,
+    curve: t => t<60?(t/60)*20 : t<150?20+((t-60)/90)*30 : 50+((t-150)/120)*50 }
+];
+
+let currentTime = 0;
+const totalTime = 270;
+let isPlaying = false;
+let mutedCompounds = new Set();
+let currentTechnique = 'spiral-in';
+let currentAct = 'all';
+let currentDripper = 'v60';
+
+const handle = document.getElementById('scrubberHandle');
+const fill = document.getElementById('scrubberFill');
+const track = document.getElementById('scrubberTrack');
+const timeDisplay = document.getElementById('currentTime');
+const pourBadge = document.getElementById('pourBadge');
+const bedTempVal = document.getElementById('bedTempVal');
+const phVal = document.getElementById('phVal');
+const waterVal = document.getElementById('waterVal');
+const bitterRisk = document.getElementById('bitterRisk');
+const stateNarrative = document.getElementById('stateNarrative');
+const tempText = document.getElementById('tempText');
+const tempFill = document.getElementById('tempFill');
+const dangerOverlay = document.getElementById('dangerOverlay');
+
+function formatTime(s) {
+  const m = Math.floor(s/60), sec = Math.floor(s%60), ms = Math.floor((s*10)%10);
+  return { mmss: `${m}:${sec.toString().padStart(2,'0')}`, ms };
+}
+
+const pourBadges = {
+  en: {1:'BLOOM',2:'POUR 2 · MAIN',3:'POUR 3 · SWEET',4:'POUR 4 · FINISH',5:'DRAWDOWN'},
+  th: {1:'BLOOM',2:'POUR 2 · หลัก',3:'POUR 3 · หวาน',4:'POUR 4 · ปิดท้าย',5:'DRAWDOWN'}
+};
+
+function getCurrentPour(t) {
+  if (t < 45) return {num:1, color:'var(--pour-1)'};
+  if (t < 90) return {num:2, color:'var(--pour-2)'};
+  if (t < 150) return {num:3, color:'var(--pour-3)'};
+  if (t < 210) return {num:4, color:'var(--pour-4)'};
+  return {num:5, color:'var(--text-3)'};
+}
+
+function getWaterIn(t) {
+  if (t < 15) return (t/15)*45;
+  if (t < 45) return 45;
+  if (t < 90) return 45+((t-45)/45)*75;
+  if (t < 150) return 120+((t-90)/60)*60;
+  if (t < 210) return 180+((t-150)/60)*60;
+  return 240;
+}
+
+function getBedTemp(t) {
+  if (t < 30) return 88+(t/30)*4;
+  if (t < 90) return 92;
+  if (t < 150) return 92-((t-90)/60)*6;
+  if (t < 210) return 86-((t-150)/60)*6;
+  return 80-((t-210)/60)*5;
+}
+
+function getPh(t) {
+  if (t < 15) return 7-(t/15)*1.2;
+  if (t < 90) return 5.8-((t-15)/75)*0.5;
+  return 5.3-((t-90)/180)*0.3;
+}
+
+function getBitterRisk(t) {
+  const lactones = compounds.find(c => c.id==='lactones').curve(t);
+  const poly = compounds.find(c => c.id==='polyphenols').curve(t);
+  const score = (lactones+poly)/2;
+  if (score < 15) return {text: L('bitter_low'), color:'var(--safe)'};
+  if (score < 35) return {text: L('bitter_med'), color:'var(--warn)'};
+  if (score < 60) return {text: L('bitter_high'), color:'var(--danger)'};
+  return {text: L('bitter_crit'), color:'var(--danger)'};
+}
+
+const NARR = {
+  en: [
+    [5,'<strong>Ignition</strong> Water meets dry coffee for the first time. Capillary action pulls water into cell walls. Beans begin to swell.'],
+    [30,'<strong>CO₂ release peak</strong> Bubbles rise from the bed. Natural process releases more CO₂ than washed. Top-note aromatics escape as vapor.'],
+    [45,'<strong>Bloom rest</strong> Letting CO₂ finish escaping before the next pour. Pour too early and you trap gas → channeling.'],
+    [75,'<strong>Pour 2 active</strong> Steady-state extraction. Sucrose begins to hydrolyze into glucose + fructose (1.5× sweeter). Acids near peak.'],
+    [90,'<strong>Acid peak</strong> Citric and malic released. pH drops. This is where acidity perception is strongest in the brew.'],
+    [120,'<strong>Sweet development</strong> Water temperature drops to 88°C — kinetic suppression of polyphenols. Mid-volatile aldehydes (almond, vanilla) emerge.'],
+    [150,'<strong>CGA peak</strong> Chlorogenic acids hit maximum. ⚠ <strong>Entering danger zone</strong> — lactones are about to form.'],
+    [180,'<strong>Lactone formation accelerating</strong> CGA → CGA lactones. Lactones are the "heavy bitter" many call Starbucks-bitter. Must drop temperature to prevent.'],
+    [210,'<strong>Pour 4 · Finish</strong> At 82°C, polyphenol formation suppressed. Polysaccharides slowly release → body builds.'],
+    [240,'<strong>Drawdown</strong> ⚠ <strong>Critical zone</strong>. Past 4:00 → astringency, lactone accumulation. Tail cut here. If tail tastes bitter, discard.'],
+    [Infinity,'<strong>Brew complete</strong> Keep the good brew, discard tail if needed. Aromatics in the carafe are starting their decay clock.']
+  ],
+  th: [
+    [5,'<strong>การจุดไฟ</strong> น้ำกระทบกาแฟแห้งครั้งแรก capillary action ดึงน้ำเข้า cell walls เม็ดกาแฟเริ่มขยายตัว'],
+    [30,'<strong>CO₂ release peak</strong> ฟองอากาศพุ่งขึ้นจาก bed กาแฟ natural process release CO₂ มากกว่า washed top-note aromatics หนีออกมาเป็น vapor'],
+    [45,'<strong>Bloom rest</strong> ปล่อยให้ CO₂ หนีให้หมดก่อน pour ถัดไป ถ้า pour เลยจะ trap gas → channeling'],
+    [75,'<strong>Pour 2 active</strong> steady-state extraction sucrose เริ่ม hydrolyze เป็น glucose+fructose (หวานกว่าเดิม 1.5×) acids ใกล้ peak'],
+    [90,'<strong>Acid peak</strong> citric + malic ออกครบ pH ลดลง ที่นี่ acidity perception แรงที่สุดใน brew'],
+    [120,'<strong>Sweet development</strong> น้ำลด temp มาที่ 88°C เพื่อ kinetic suppression ของ polyphenols mid-volatile aldehydes (almond, vanilla) ออกมา'],
+    [150,'<strong>CGA peak</strong> chlorogenic acids ถึงจุดสูงสุด ⚠ <strong>เริ่มเข้า danger zone</strong> — lactones กำลังจะฟอร์มตัว'],
+    [180,'<strong>Lactone formation accelerating</strong> CGA → CGA lactones เกิดขึ้น lactones คือ "heavy bitter" ที่หลายคนเรียก Starbucks-bitter ต้อง drop temp ป้องกัน'],
+    [210,'<strong>Pour 4 · Finish</strong> ที่ 82°C polyphenol formation ถูกกด polysaccharides ค่อย ๆ ปล่อยตัว → body builds'],
+    [240,'<strong>Drawdown</strong> ⚠ <strong>Critical zone</strong> ถ้าเลย 4:00 → astringency, lactones สะสม tail cut ที่นี่ ถ้าหางขม discard'],
+    [Infinity,'<strong>Brew complete</strong> เก็บ brew ที่ดี discard tail ถ้าจำเป็น aromatics ใน carafe กำลังเริ่ม decay clock']
+  ]
+};
+
+function getNarrative(t) {
+  const ns = NARR[LANG];
+  for (const [thr,txt] of ns) if (t < thr) return txt;
+  return ns[ns.length-1][1];
+}
+
+// ============ DRIPPER CONFIGS ============
+const drippers = {
+  v60: {
+    name:'Hario V60', label:'HARIO V60 · CROSS-SECTION',
+    bedLeft:130, bedRight:270, bedTopY:215, bedBottomY:280,
+    outline:'M 95 88 L 305 88 L 215 295 L 185 295 Z',
+    filter:'M 105 100 L 295 100 L 213 285 L 187 285 Z',
+    bedShape:'M 130 215 Q 200 208 270 215 L 212 280 L 188 280 Z',
+    ridges:[
+      {x1:120,y1:92,x2:192,y2:285},{x1:155,y1:92,x2:196,y2:285},
+      {x1:200,y1:92,x2:200,y2:285},{x1:245,y1:92,x2:204,y2:285},
+      {x1:280,y1:92,x2:208,y2:285}
+    ],
+    holes:[{cx:200,cy:290,r:9}],
+    dripPositions:[{x:200,y:305}],
+    bypassLevel:'high'
+  },
+  flat: {
+    name:'Kalita Wave', label:'KALITA WAVE · CROSS-SECTION',
+    bedLeft:135, bedRight:265, bedTopY:215, bedBottomY:265,
+    outline:'M 85 88 L 315 88 L 270 270 L 130 270 Z',
+    filter:'M 95 100 L 305 100 L 265 260 L 135 260 Z',
+    bedShape:'M 135 215 Q 200 208 265 215 L 250 265 L 150 265 Z',
+    ridges:[
+      {x1:115,y1:95,x2:140,y2:265},{x1:145,y1:95,x2:162,y2:265},
+      {x1:175,y1:95,x2:184,y2:265},{x1:205,y1:95,x2:200,y2:265},
+      {x1:235,y1:95,x2:216,y2:265},{x1:265,y1:95,x2:238,y2:265},
+      {x1:285,y1:95,x2:260,y2:265}
+    ],
+    holes:[{cx:175,cy:268,r:4},{cx:200,cy:268,r:4},{cx:225,cy:268,r:4}],
+    dripPositions:[{x:175,y:283},{x:200,y:283},{x:225,y:283}],
+    bypassLevel:'low'
+  }
+};
+
+function setDripper(id) {
+  const d = drippers[id]; if (!d) return;
+  currentDripper = id;
+  document.querySelectorAll('.dripper-tab').forEach(t => t.classList.toggle('active', t.dataset.dripper===id));
+  document.getElementById('dripperOutline').setAttribute('d', d.outline);
+  document.getElementById('dripperFilter').setAttribute('d', d.filter);
+  document.getElementById('bedShape').setAttribute('d', d.bedShape);
+  document.getElementById('dripperLabel').textContent = d.label;
+  document.getElementById('dripperRidges').innerHTML = d.ridges.map(r => `<line x1="${r.x1}" y1="${r.y1}" x2="${r.x2}" y2="${r.y2}"/>`).join('');
+  document.getElementById('dripperHoles').innerHTML = d.holes.map(h => `<circle cx="${h.cx}" cy="${h.cy}" r="${h.r}" fill="#0a0908" stroke="#4a4540" stroke-width="1"/>`).join('');
+  const bedCx = (d.bedLeft+d.bedRight)/2, bedW = d.bedRight-d.bedLeft, bY = d.bedTopY-5;
+  document.getElementById('bloomBubbles').innerHTML = `
+    <circle cx="${bedCx-bedW*0.2}" cy="${bY+2}" r="3" fill="rgba(245,239,230,0.4)"/>
+    <circle cx="${bedCx}" cy="${bY-3}" r="2" fill="rgba(245,239,230,0.3)"/>
+    <circle cx="${bedCx+bedW*0.2}" cy="${bY+4}" r="2.5" fill="rgba(245,239,230,0.5)"/>
+    <circle cx="${bedCx-bedW*0.1}" cy="${bY+10}" r="2" fill="rgba(245,239,230,0.3)"/>
+    <circle cx="${bedCx+bedW*0.1}" cy="${bY}" r="3" fill="rgba(245,239,230,0.4)"/>`;
+  const glow = document.getElementById('extractionGlow');
+  glow.setAttribute('cx', bedCx);
+  glow.setAttribute('cy', (d.bedTopY+d.bedBottomY)/2);
+  glow.setAttribute('rx', bedW/2.5);
+  glow.setAttribute('ry', (d.bedBottomY-d.bedTopY)/2.5);
+  document.getElementById('pourStream').setAttribute('y2', d.bedTopY-10);
+  updateDripper(currentTime);
+}
+
+function updateDripper(t) {
+  const d = drippers[currentDripper];
+  const wl = document.getElementById('waterLayer');
+  const ps = document.getElementById('pourStream');
+  const bb = document.getElementById('bloomBubbles');
+  const eg = document.getElementById('extractionGlow');
+  const dd = document.getElementById('dripDrops');
+  const bs = document.getElementById('bedShape');
+  const bedCx = (d.bedLeft+d.bedRight)/2;
+  let isPouring = (t<15)||(t>=45&&t<90)||(t>=90&&t<150)||(t>=150&&t<210);
+  ps.setAttribute('opacity', isPouring ? 0.9 : 0);
+  const wa = getWaterIn(t)/240;
+  if (t < 5) wl.setAttribute('opacity', 0);
+  else if (isPouring) {
+    const wt = d.bedTopY-Math.min(wa*35,35);
+    wl.setAttribute('d', `M ${d.bedLeft} ${d.bedTopY} Q ${bedCx} ${d.bedTopY-7} ${d.bedRight} ${d.bedTopY} L ${d.bedRight} ${wt} Q ${bedCx} ${wt-5} ${d.bedLeft} ${wt} Z`);
+    wl.setAttribute('opacity', 0.6);
+  } else {
+    const wt = d.bedTopY-8;
+    wl.setAttribute('d', `M ${d.bedLeft} ${d.bedTopY} Q ${bedCx} ${d.bedTopY-4} ${d.bedRight} ${d.bedTopY} L ${d.bedRight} ${wt} Q ${bedCx} ${wt-3} ${d.bedLeft} ${wt} Z`);
+    wl.setAttribute('opacity', 0.25);
+  }
+  bb.setAttribute('opacity', (t>3&&t<45)?0.8:0);
+  eg.setAttribute('opacity', (t>5&&t<240)?0.5:0);
+  if (t > 200) dd.innerHTML = d.dripPositions.map((p,i) => `<circle cx="${p.x}" cy="${p.y+(((t*8+i*30)%30)-15)}" r="2.5" fill="#8b4513" opacity="0.7"/>`).join('');
+  else if (t > 100) dd.innerHTML = d.dripPositions.map((p,i) => `<circle cx="${p.x}" cy="${p.y+(((t*4+i*20)%25)-12)}" r="2" fill="#8b4513" opacity="0.4"/>`).join('');
+  else dd.innerHTML = '';
+  bs.setAttribute('opacity', 1-Math.min(1,t/200)*0.3);
+}
+
+function updateState(t) {
+  currentTime = Math.max(0, Math.min(totalTime, t));
+  const pct = (currentTime/totalTime)*100;
+  handle.style.left = pct+'%';
+  fill.style.width = pct+'%';
+  const tf = formatTime(currentTime);
+  timeDisplay.innerHTML = `${tf.mmss}<span class="ms">.${tf.ms}</span>`;
+  const pour = getCurrentPour(currentTime);
+  pourBadge.textContent = pourBadges[LANG][pour.num];
+  pourBadge.style.color = pour.color;
+  document.querySelectorAll('.pour-label').forEach((el,i) => el.classList.toggle('active', pour.num===i+1));
+  document.querySelectorAll('.pour-band').forEach((el,i) => el.classList.toggle('active', pour.num===i+1));
+  const temp = getBedTemp(currentTime);
+  bedTempVal.innerHTML = `${temp.toFixed(0)}<span class="unit">°C</span>`;
+  tempText.textContent = `${temp.toFixed(0)}°C`;
+  const tp = Math.max(0,(temp-60)/(94-60));
+  tempFill.setAttribute('y', 280-160*tp);
+  tempFill.setAttribute('height', 160*tp);
+  tempFill.setAttribute('fill', temp>90?'#ef4444':temp>80?'#f59e0b':'#06b6d4');
+  phVal.innerHTML = `${getPh(currentTime).toFixed(1)}<span class="unit">pH</span>`;
+  waterVal.innerHTML = `${getWaterIn(currentTime).toFixed(0)}<span class="unit">g</span>`;
+  const risk = getBitterRisk(currentTime);
+  bitterRisk.textContent = risk.text;
+  bitterRisk.style.color = risk.color;
+  stateNarrative.innerHTML = getNarrative(currentTime);
+  dangerOverlay.classList.toggle('active', currentTime>180);
+  updateDripper(currentTime);
+  updateChartMarker(currentTime);
+}
+
+// ============ CHART ============
+const chartSvg = document.getElementById('chartSvg');
+const chartLegend = document.getElementById('chartLegend');
+const PE_LABELS = {
+  en: ['BLOOM END','P2 END','P3 END','P4 END'],
+  th: ['จบ BLOOM','จบ P2','จบ P3','จบ P4']
+};
+const DZ_LABEL = {en:'DANGER ZONE →', th:'โซนอันตราย →'};
+
+function renderChart() {
+  chartSvg.innerHTML = '';
+  const W=800,H=360,pL=60,pR=20,pT=20,pB=40;
+  const pW=W-pL-pR, pH=H-pT-pB;
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS,'g');
+  for (let i=0; i<=5; i++) {
+    const y = pT+(i/5)*pH;
+    const ln = document.createElementNS(NS,'line');
+    ln.setAttribute('x1',pL); ln.setAttribute('y1',y); ln.setAttribute('x2',W-pR); ln.setAttribute('y2',y);
+    ln.setAttribute('stroke', i===5?'var(--grid-strong)':'var(--grid)');
+    ln.setAttribute('stroke-width',1);
+    g.appendChild(ln);
+    const lb = document.createElementNS(NS,'text');
+    lb.setAttribute('x',pL-10); lb.setAttribute('y',y+3); lb.setAttribute('text-anchor','end');
+    lb.setAttribute('font-family','JetBrains Mono,monospace'); lb.setAttribute('font-size','9'); lb.setAttribute('fill','var(--text-3)');
+    lb.textContent = `${100-i*20}%`;
+    g.appendChild(lb);
+  }
+  const pbs=[45,90,150,210], pls=PE_LABELS[LANG];
+  pbs.forEach((tb,i) => {
+    const x = pL+(tb/totalTime)*pW;
+    const ln = document.createElementNS(NS,'line');
+    ln.setAttribute('x1',x); ln.setAttribute('y1',pT); ln.setAttribute('x2',x); ln.setAttribute('y2',pT+pH);
+    ln.setAttribute('stroke','var(--grid-strong)'); ln.setAttribute('stroke-dasharray','2,4'); ln.setAttribute('stroke-width',0.7);
+    g.appendChild(ln);
+    const lb = document.createElementNS(NS,'text');
+    lb.setAttribute('x',x); lb.setAttribute('y',pT+pH+18); lb.setAttribute('text-anchor','middle');
+    lb.setAttribute('font-family','JetBrains Mono,monospace'); lb.setAttribute('font-size','8'); lb.setAttribute('fill','var(--text-3)'); lb.setAttribute('letter-spacing','1');
+    lb.textContent = pls[i];
+    g.appendChild(lb);
+  });
+  for (let i=0; i<=4; i++) {
+    const t=(i/4)*totalTime, x=pL+(t/totalTime)*pW;
+    const lb = document.createElementNS(NS,'text');
+    lb.setAttribute('x',x); lb.setAttribute('y',pT+pH+32); lb.setAttribute('text-anchor','middle');
+    lb.setAttribute('font-family','JetBrains Mono,monospace'); lb.setAttribute('font-size','9'); lb.setAttribute('fill','var(--text-2)');
+    lb.textContent = formatTime(t).mmss;
+    g.appendChild(lb);
+  }
+  chartSvg.appendChild(g);
+  const ds = pL+(180/totalTime)*pW;
+  const dr = document.createElementNS(NS,'rect');
+  dr.setAttribute('x',ds); dr.setAttribute('y',pT); dr.setAttribute('width',(W-pR)-ds); dr.setAttribute('height',pH);
+  dr.setAttribute('fill','rgba(225,29,72,0.04)');
+  chartSvg.appendChild(dr);
+  const dl = document.createElementNS(NS,'text');
+  dl.setAttribute('x',ds+6); dl.setAttribute('y',pT+14);
+  dl.setAttribute('font-family','JetBrains Mono,monospace'); dl.setAttribute('font-size','8'); dl.setAttribute('fill','var(--danger)'); dl.setAttribute('letter-spacing','2');
+  dl.textContent = DZ_LABEL[LANG];
+  chartSvg.appendChild(dl);
+  compounds.forEach(comp => {
+    if (mutedCompounds.has(comp.id)) return;
+    const pts = [];
+    for (let t=0; t<=totalTime; t+=2) {
+      const x = pL+(t/totalTime)*pW;
+      const y = pT+pH-(comp.curve(t)/100)*pH;
+      pts.push(`${x},${y}`);
+    }
+    const path = document.createElementNS(NS,'polyline');
+    path.setAttribute('points', pts.join(' '));
+    path.setAttribute('fill','none'); path.setAttribute('stroke',comp.color); path.setAttribute('stroke-width',2); path.setAttribute('stroke-linejoin','round');
+    path.setAttribute('opacity', comp.danger?0.95:0.9);
+    if (comp.danger) path.setAttribute('stroke-dasharray','6,3');
+    chartSvg.appendChild(path);
+  });
+  const mk = document.createElementNS(NS,'g');
+  mk.setAttribute('id','chartMarker');
+  chartSvg.appendChild(mk);
+}
+
+function updateChartMarker(t) {
+  const mk = document.getElementById('chartMarker');
+  if (!mk) return;
+  mk.innerHTML = '';
+  const NS = 'http://www.w3.org/2000/svg';
+  const W=800,pL=60,pR=20,pT=20,pB=40,pW=W-pL-pR,pH=360-pT-pB;
+  const x = pL+(t/totalTime)*pW;
+  const ln = document.createElementNS(NS,'line');
+  ln.setAttribute('x1',x); ln.setAttribute('y1',pT); ln.setAttribute('x2',x); ln.setAttribute('y2',pT+pH);
+  ln.setAttribute('stroke','var(--text)'); ln.setAttribute('stroke-width',1.5); ln.setAttribute('opacity',0.7);
+  mk.appendChild(ln);
+  compounds.forEach(comp => {
+    if (mutedCompounds.has(comp.id)) return;
+    const v = comp.curve(t);
+    const y = pT+pH-(v/100)*pH;
+    const dot = document.createElementNS(NS,'circle');
+    dot.setAttribute('cx',x); dot.setAttribute('cy',y); dot.setAttribute('r',4);
+    dot.setAttribute('fill',comp.color); dot.setAttribute('stroke','var(--bg)'); dot.setAttribute('stroke-width',2);
+    mk.appendChild(dot);
+    const lb = document.createElementNS(NS,'text');
+    lb.setAttribute('x',W-pR+4); lb.setAttribute('y',y+3);
+    lb.setAttribute('font-family','JetBrains Mono,monospace'); lb.setAttribute('font-size','9'); lb.setAttribute('fill',comp.color);
+    lb.textContent = v.toFixed(0)+'%';
+    mk.appendChild(lb);
+  });
+}
+
+function renderLegend() {
+  chartLegend.innerHTML = '';
+  compounds.forEach(comp => {
+    const item = document.createElement('div');
+    item.className = 'legend-item'+(comp.danger?' danger':'');
+    item.dataset.id = comp.id;
+    item.innerHTML = `<div class="legend-dot" style="background:${comp.color}"></div><div class="legend-text">${comp.name[LANG]}</div>`;
+    item.addEventListener('click', () => {
+      if (mutedCompounds.has(comp.id)) { mutedCompounds.delete(comp.id); item.classList.remove('muted'); }
+      else { mutedCompounds.add(comp.id); item.classList.add('muted'); }
+      renderChart(); updateChartMarker(currentTime);
+    });
+    chartLegend.appendChild(item);
+  });
+}
+
+// ============ SCRUBBER INTERACTION ============
+let dragging = false;
+function timeFromPointer(cx) {
+  const r = track.getBoundingClientRect();
+  return Math.max(0, Math.min(1,(cx-r.left)/r.width))*totalTime;
+}
+handle.addEventListener('mousedown', e => { dragging=true; e.preventDefault(); });
+track.addEventListener('mousedown', e => { updateState(timeFromPointer(e.clientX)); dragging=true; });
+document.addEventListener('mousemove', e => { if (dragging) updateState(timeFromPointer(e.clientX)); });
+document.addEventListener('mouseup', () => { dragging=false; });
+handle.addEventListener('touchstart', e => { dragging=true; e.preventDefault(); }, {passive:false});
+document.addEventListener('touchmove', e => { if (!dragging) return; updateState(timeFromPointer(e.touches[0].clientX)); e.preventDefault(); }, {passive:false});
+document.addEventListener('touchend', () => { dragging=false; });
+
+const playBtn = document.getElementById('playBtn');
+let playStart=0, playFrom=0;
+function playFrame(ts) {
+  if (!isPlaying) return;
+  const el = (ts-playStart)/1000;
+  const nt = playFrom+el*15;
+  if (nt >= totalTime) { updateState(totalTime); isPlaying=false; playBtn.textContent=L('b_play'); return; }
+  updateState(nt);
+  requestAnimationFrame(playFrame);
+}
+playBtn.addEventListener('click', () => {
+  if (isPlaying) { isPlaying=false; playBtn.textContent=L('b_play'); }
+  else { isPlaying=true; playBtn.textContent=L('b_pause'); playFrom=currentTime>=totalTime?0:currentTime; playStart=performance.now(); requestAnimationFrame(playFrame); }
+});
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => { isPlaying=false; playBtn.textContent=L('b_play'); updateState(parseFloat(btn.dataset.jump)); });
+});
+document.querySelectorAll('.pour-label').forEach(el => {
+  el.addEventListener('click', () => updateState(parseFloat(el.dataset.time)));
+});
+document.querySelectorAll('.dripper-tab').forEach(tab => {
+  tab.addEventListener('click', () => setDripper(tab.dataset.dripper));
+});
+
+// ============ POUR CARDS ============
+const poursData = [
+  {num:'01', cls:'p1', dp:1, time:22,
+    name:{en:'Bloom',th:'Bloom'}, sub:{en:'Ignition · bed preparation',th:'การจุดไฟ · เตรียมเตียง'},
+    time_label:'0:00 → 0:45 · 94°C · 45g',
+    body:{en:'Water meets dry coffee for the first time — CO₂ erupts, capillary draws water in, surface compounds dissolve. A good bloom predicts the future of the whole brew.',
+          th:'น้ำสัมผัสกาแฟแห้งครั้งแรก — CO₂ พุ่งออก capillary ดูดน้ำเข้าไป compound บนผิวเริ่มละลาย bloom ที่สวยบอกอนาคตของ brew ทั้งหมด'},
+    physics:{en:['Wetting (0-3s): capillary action','CO₂ release (0-30s): natural > washed','Beans expand 10-15% volume','Bed compaction begins'],
+             th:['Wetting (0-3s): capillary action','CO₂ release (0-30s): natural > washed','เม็ดขยายตัว 10-15% volume','Bed compaction เริ่ม']},
+    chemistry:{en:['Acetic acid — releases first (volatile)','Citric / malic — follow','Top-notes: linalool, furaneol','pH drops 7 → 5.8'],
+               th:['Acetic acid — โผล่ก่อน (volatile)','Citric / malic — ออกตามมา','Top-notes: linalool, furaneol','pH drop 7 → 5.8']},
+    sensory:{en:['Strongest aroma of the entire brew','Good bloom → balanced cup','Cracked bloom → uneven extraction','No bloom → stale beans'],
+             th:['กลิ่นแรงที่สุดของ brew','Bloom สวย → balanced cup','Bloom crack → uneven extraction','ไม่พอง → กาแฟเก่า']},
+    technique:{en:['Kettle 2cm high, gentle','Inner-out spiral over 12 seconds','3× dose (15g → 45g water)','Rest 30s for CO₂ escape'],
+               th:['Kettle 2cm สูง, gentle','Inner-out spiral 12 วินาที','3× dose (15g → 45g water)','Rest 30s ให้ CO₂ หนี']}},
+  {num:'02', cls:'p2', dp:2, time:68,
+    name:{en:'Main Extraction',th:'Main Extraction'}, sub:{en:'Building the backbone',th:'สร้าง backbone ของรส'},
+    time_label:'0:45 → 1:30 · 94°C · +75g',
+    body:{en:'Sugars begin hydrolyzing, acids reach peak, aromatics work. This pour defines the backbone — miss this and the whole cup is thin.',
+          th:'น้ำตาลเริ่ม hydrolyze acids ออกครบ aromatics ทำงาน นี่คือ pour ที่กำหนด backbone — พลาด pour นี้แล้วทั้งแก้ว thin'},
+    physics:{en:['Steady-state extraction','Maximum concentration gradient','Water column must stay high','Diffusion driven'],
+             th:['Steady-state extraction','Concentration gradient สูงสุด','Water column ต้องสูงพอ','Diffusion driven']},
+    chemistry:{en:['Sucrose + H₂O → Glucose + Fructose','1.3-1.7× sweeter than sucrose','CGA peak extraction window','Caffeine fully extracts'],
+               th:['Sucrose + H₂O → Glucose + Fructose','หวานกว่าเดิม 1.3-1.7×','CGA peak extraction window','Caffeine ออกครบ']},
+    sensory:{en:['Acidity peak (citric + malic)','Sweetness begins to emerge','Body starts building','Aromatics float on slurry surface'],
+             th:['Acidity peak (citric + malic)','Sweetness เริ่ม emerge','Body เริ่มสร้าง','Aromatics ระเหยบนผิว slurry']},
+    technique:{en:['Inner-out spiral, kettle 4cm','Medium agitation','2.5 g/s flow rate','Stop at 120g cumulative'],
+               th:['Inner-out spiral, kettle 4cm','Medium agitation','2.5 g/s flow rate','หยุดที่ 120g cumulative']}},
+  {num:'03', cls:'p3', dp:3, time:120, sectionKey:'l_danger',
+    name:{en:'Sweet Development',th:'Sweet Development'}, sub:{en:'Extract sugars · suppress bitter',th:'ดึงน้ำตาล · กด bitter'},
+    time_label:'1:30 → 2:30 · 88°C · +60g',
+    body:{en:'The bed depletes in outer surface — but opens pathways for water to reach inner cells with sugars and mid-volatiles. Lower temperature for kinetic selectivity.',
+          th:'Bed เริ่ม deplete ใน outer surface — แต่เปิดทางให้น้ำเข้าถึง inner cells ที่มี sugars + mid-volatiles ลดอุณหภูมิเพื่อ kinetic selectivity'},
+    physics:{en:['Diffusion through intact cell walls','Surface depletion gradient reduces','Flow rate slows','Bed depth maintained'],
+             th:['Diffusion ผ่าน intact cell walls','Surface depletion gradient ลด','Flow rate ช้าลง','Bed depth maintained']},
+    chemistry:{en:['Mid-volatile aldehydes (almond)','Pyrazines (roasted nut)','Furanones (caramel)','Late sugars: fructans hydrolysis'],
+               th:['Mid-volatile aldehydes (almond)','Pyrazines (roasted nut)','Furanones (caramel)','Late sugars: fructans hydrolysis']},
+    sensory:{en:['CGA lactones begin forming (90s+)','Polyphenols accumulating','→ drop T to 88°C','Kinetic suppression of bitter'],
+             th:['CGA lactones เริ่มฟอร์ม (90s+)','Polyphenols accumulation','→ ลด T เป็น 88°C','Kinetic suppression of bitter']},
+    technique:{en:['Low-medium agitation','Gentle spiral','Preserve aromatics','Don\'t disturb bed'],
+               th:['Low-medium agitation','Gentle spiral','Preserve aromatics','Don\'t disturb bed']}},
+  {num:'04', cls:'p4', dp:4, time:180, chemKey:'l_chem_desired', sensoryKey:'l_chem_avoid',
+    name:{en:'Finish',th:'Finish'}, sub:{en:'Closing · balance',th:'ปิดท้าย · บาลานซ์'},
+    time_label:'2:30 → 3:30 · 82°C · +60g',
+    body:{en:'Crisis zone — bed depleted of easy compounds, only "hard tail" + accumulated polyphenols / lactones remain. Use low temperature as selector.',
+          th:'Crisis zone — bed depleted ของของง่าย เหลือแค่ "หางยาก" + polyphenols / lactones ที่สะสม ใช้อุณหภูมิต่ำเป็น selector'},
+    physics:{en:['Bed mostly depleted (easy compounds)','Polysaccharides slowly diffuse','Water column drops → slow flow','Last chance for body'],
+             th:['Bed mostly depleted (easy compounds)','Polysaccharides slowly diffuse','Water column ลด → flow ช้า','Last chance for body']},
+    chemistry:{en:['Polysaccharides → body','Heavy Maillard → chocolate','Lipid release → mouthfeel','Aroma stability'],
+               th:['Polysaccharides → body','Heavy Maillard → chocolate','Lipid release → mouthfeel','Aroma stability']},
+    sensory:{en:['Polyphenols → astringency','CGA lactones (cumulative)','Tannins → mouth-drying','Excess melanoidins → ashy'],
+             th:['Polyphenols → astringency','CGA lactones (cumulative)','Tannins → mouth-drying','Excess melanoidins → ashy']},
+    technique:{en:['Very gentle, center continuous','Low kettle (2cm)','Don\'t disturb bed','Tail cut at 60-70% yield'],
+               th:['Very gentle, center continuous','Low kettle (2cm)','Don\'t disturb bed','Tail cut at 60-70% yield']}}
+];
+
+function renderPours() {
+  const grid = document.getElementById('poursGrid');
+  grid.innerHTML = poursData.map(p => `
+    <div class="pour-card ${p.cls}" data-pour="${p.dp}" data-time="${p.time}">
+      <div class="pour-card-header">
+        <div class="pour-card-num">${p.num}</div>
+        <div class="pour-card-name">${p.name[LANG]}</div>
+        <div class="pour-card-thai">${p.sub[LANG]}</div>
+        <div class="pour-card-time">${p.time_label}</div>
+      </div>
+      <div class="pour-card-body">${p.body[LANG]}</div>
+      <div class="pour-card-detail">
+        <div class="detail-grid">
+          <div class="detail-block"><h4>${L('l_physics')}</h4><ul>${p.physics[LANG].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+          <div class="detail-block"><h4>${L(p.chemKey||'l_chemistry')}</h4><ul>${p.chemistry[LANG].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+          <div class="detail-block"><h4>${L(p.sectionKey||p.sensoryKey||'l_sensory_sig')}</h4><ul>${p.sensory[LANG].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+          <div class="detail-block"><h4>${L('l_technique')}</h4><ul>${p.technique[LANG].map(x=>`<li>${x}</li>`).join('')}</ul></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  document.querySelectorAll('.pour-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const was = card.classList.contains('expanded');
+      document.querySelectorAll('.pour-card').forEach(c => c.classList.remove('expanded'));
+      if (!was) card.classList.add('expanded');
+      updateState(parseFloat(card.dataset.time));
+    });
+  });
+}
+
+// ============ TECHNIQUE ============
+const techniques = {
+  'spiral-in': {
+    name:{en:'Inner-out Spiral',th:'Inner-out Spiral · วนจากกลางออก'},
+    thai:{en:'Standard recommended ⭐',th:'มาตรฐาน · แนะนำ ⭐'},
+    physics:{en:'Distributed water velocity. Bed surface stays even. Water column uniform across bed.',
+             th:'น้ำกระจายความเร็วเท่ากัน ผิว bed คงรูป water column สม่ำเสมอ'},
+    chemistry:{en:'Uniform extraction across all particles. Compounds release at normal kinetic rates. No hot spots.',
+               th:'Extraction สม่ำเสมอทั้ง bed compounds ออกตาม kinetic ปกติ ไม่มี hot spots'},
+    sensory:{en:'Balanced — acidity + sweetness + body together. High clarity, distinct flavor notes. Smooth body, no astringency. Long pleasant aftertaste.',
+             th:'Balance — acidity + sweetness + body พร้อมกัน clarity สูง flavor notes distinct smooth body ไม่ฝาด aftertaste ยาว'},
+    uniformity:90, body:65, risk:15,
+    pathFn:()=>{ let d='M 200 200'; for(let a=0;a<Math.PI*8;a+=0.1){ const r=(a/(Math.PI*8))*110; d+=` L ${200+Math.cos(a)*r} ${200+Math.sin(a)*r}`; } return d; },
+    heat:'uniform'
+  },
+  'static': {
+    name:{en:'Static / Stay-in-place',th:'Static / ย่ำที่เดิม'},
+    thai:{en:'Pour single point ⚠ specific use',th:'น้ำลงจุดเดียวต่อเนื่อง ⚠ ใช้เฉพาะกรณี'},
+    physics:{en:'High local velocity. Drag force pushes particles outward, creates crater. Center over-flushed.',
+             th:'ความเร็วน้ำสูงจุดเดียว แรงลากดันเม็ดออก เกิด crater กลาง over-flush'},
+    chemistry:{en:'Localized over-extraction at crater. Edges under-extracted.',
+               th:'Crater กลาง over-extract ขอบ under-extract'},
+    sensory:{en:'Sour AND bitter together (signature of uneven extraction). Sharp acidity from under-extracted edges. Severe bitter from over-extracted center.',
+             th:'เปรี้ยวและขมพร้อมกัน (signature ของ uneven extraction) ขอบเปรี้ยวแหลม กลางขมหนัก'},
+    uniformity:25, body:80, risk:85,
+    pathFn:()=>'M 200 200 L 200 200', heat:'center-hot'
+  },
+  'spiral-out': {
+    name:{en:'Outer-in Spiral',th:'Outer-in Spiral · วนจากขอบเข้ากลาง'},
+    thai:{en:'Common mistake ⚠',th:'Common mistake ⚠'},
+    physics:{en:'Water near filter wall bypasses bed via wall channeling. Center under-served.',
+             th:'น้ำใกล้ filter wall bypass ผ่านข้าง bed กลาง under-served'},
+    chemistry:{en:'Bypass extracts only edge surfaces. Center mass under-extracted.',
+               th:'Bypass สกัดแค่ผิวขอบ ส่วนกลาง under-extract'},
+    sensory:{en:'Weak, thin. Acidity dominant. Aromatic over-emphasized. Hollow finish, no sweetness.',
+             th:'อ่อน บาง acidity เด่นไป hollow ไม่หวาน'},
+    uniformity:40, body:30, risk:50,
+    pathFn:()=>{ let d=''; for(let a=0;a<Math.PI*8;a+=0.1){ const r=130-(a/(Math.PI*8))*110, x=200+Math.cos(a)*r, y=200+Math.sin(a)*r; d+=(a===0?`M ${x} ${y}`:` L ${x} ${y}`); } return d; },
+    heat:'edge-hot'
+  },
+  'pulse': {
+    name:{en:'Pulse Pour',th:'Pulse Pour · เทเป็นจังหวะ'},
+    thai:{en:'Short bursts + rest · body builder',th:'short bursts + rest · body builder'},
+    physics:{en:'Water column oscillates. Longer bed contact time. Mini-agitation each pulse.',
+             th:'Water column ขึ้นลง bed contact time นานขึ้น agitation เล็กทุก pulse'},
+    chemistry:{en:'Higher extraction per gram. Slow compounds get more time. Risk: uniformity drops.',
+               th:'Extraction ต่อกรัมสูงขึ้น compound ช้าได้เวลา risk: uniformity ตก'},
+    sensory:{en:'Heavier body. More sweetness extraction. Complex finish. Risk astringency if too aggressive.',
+             th:'Body หนัก หวานมากขึ้น finish ซับซ้อน risk ฝาดถ้า aggressive'},
+    uniformity:65, body:90, risk:45,
+    pathFn:()=>{ let d=''; for(let p=0;p<5;p++){ const a=(p/5)*Math.PI*2, x1=200+Math.cos(a)*30, y1=200+Math.sin(a)*30, x2=200+Math.cos(a)*80, y2=200+Math.sin(a)*80; d+=(p===0?`M ${x1} ${y1}`:` M ${x1} ${y1}`); d+=` L ${x2} ${y2}`; } return d; },
+    heat:'pulse'
+  },
+  'continuous': {
+    name:{en:'Center Continuous',th:'Center Continuous · ลำเดียวตรงกลาง'},
+    thai:{en:'Gentle ⭐ best for aromatic light roast',th:'gentle ⭐ ดีสำหรับ light aromatic'},
+    physics:{en:'Single column water. Bed has time to redistribute. Capillary-driven spread.',
+             th:'น้ำลำเดียว bed ปรับตัวได้ capillary นำการกระจาย'},
+    chemistry:{en:'Lower agitation. Diffusion-driven. Clarity preserved.',
+               th:'Agitation ต่ำ diffusion นำ clarity คงตัว'},
+    sensory:{en:'High clarity. Less body. Tea-like. Aromatics preserved. Best for Geisha, Syrina, light naturals.',
+             th:'Clarity สูง body น้อย tea-like aromatic คง เหมาะ Geisha, Syrina, natural light'},
+    uniformity:75, body:40, risk:25,
+    pathFn:()=>'M 200 200 L 200 200', heat:'center-soft'
+  }
+};
+const TECH_LABELS = {
+  en:{'spiral-in':'Inner-out spiral','static':'Static / stay-in-place','spiral-out':'Outer-in spiral','pulse':'Pulse pour','continuous':'Center continuous'},
+  th:{'spiral-in':'วนจากกลางออก','static':'ย่ำที่เดิม','spiral-out':'วนจากขอบเข้า','pulse':'Pulse pour','continuous':'ลำเดียวตรงกลาง'}
+};
+
+function renderTechniqueTabs() {
+  const t = document.getElementById('techTabs');
+  const lb = TECH_LABELS[LANG];
+  t.innerHTML = Object.keys(techniques).map(k => `<button class="tech-tab ${k===currentTechnique?'active':''}" data-tech="${k}">${lb[k]}</button>`).join('');
+  t.querySelectorAll('.tech-tab').forEach(tab => {
+    tab.addEventListener('click', () => { currentTechnique = tab.dataset.tech; renderTechnique(currentTechnique); });
+  });
+}
+
+function renderTechnique(id) {
+  const tech = techniques[id]; if (!tech) return;
+  document.querySelectorAll('.tech-tab').forEach(t => t.classList.toggle('active', t.dataset.tech===id));
+  document.getElementById('waterPath').setAttribute('d', tech.pathFn());
+  const hm = document.getElementById('heatmap'); hm.innerHTML = ''; drawHeatmap(hm, tech.heat);
+  const info = document.getElementById('techInfo');
+  const rl = {en:{u:'Uniformity',b:'Body',r:'Channel Risk'},th:{u:'Uniformity',b:'Body',r:'Channel Risk'}}[LANG];
+  info.innerHTML = `
+    <h3>${tech.name[LANG]}</h3>
+    <p class="thai">${tech.thai[LANG]}</p>
+    <div class="tech-section"><h4>${L('l_physics')}</h4><p>${tech.physics[LANG]}</p></div>
+    <div class="tech-section"><h4>${L('l_chemistry')}</h4><p>${tech.chemistry[LANG]}</p></div>
+    <div class="tech-section"><h4>${L('l_sensory')}</h4><p>${tech.sensory[LANG]}</p></div>
+    <div class="tech-section" style="border-bottom:none">
+      <h4>Profile</h4>
+      <div class="tech-rating"><div class="rating-label">${rl.u}</div><div class="rating-bar"><div class="rating-fill ${tech.uniformity>60?'good':tech.uniformity>40?'medium':'bad'}" style="width:${tech.uniformity}%"></div></div></div>
+      <div class="tech-rating"><div class="rating-label">${rl.b}</div><div class="rating-bar"><div class="rating-fill medium" style="width:${tech.body}%;background:var(--body-compound)"></div></div></div>
+      <div class="tech-rating"><div class="rating-label">${rl.r}</div><div class="rating-bar"><div class="rating-fill ${tech.risk<30?'good':tech.risk<60?'medium':'bad'}" style="width:${tech.risk}%"></div></div></div>
+    </div>`;
+  animateTechniqueDot(id);
+}
+
+function drawHeatmap(g, pattern) {
+  const cx=200, cy=200;
+  for (let r=20; r<=140; r+=20) {
+    for (let a=0; a<Math.PI*2; a+=Math.PI/8) {
+      const x=cx+Math.cos(a)*r, y=cy+Math.sin(a)*r;
+      let i = 0.5;
+      if (pattern==='uniform') i=0.6;
+      else if (pattern==='center-hot') i = r<60?0.95:r>100?0.15:0.4;
+      else if (pattern==='edge-hot') i = r>100?0.85:r<40?0.15:0.35;
+      else if (pattern==='pulse') {
+        const aD=(a*180/Math.PI)%360, np=[0,72,144,216,288].some(p=>Math.abs(aD-p)<20);
+        i = (np && r>30 && r<100)?0.8:0.3;
+      }
+      else if (pattern==='center-soft') i = r<60?0.7:r<100?0.5:0.3;
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',6);
+      c.setAttribute('fill', i>0.7?'#ef4444':i>0.5?'#f59e0b':i>0.3?'#84cc16':'#06b6d4');
+      c.setAttribute('opacity', i*0.6);
+      g.appendChild(c);
+    }
+  }
+}
+
+function animateTechniqueDot(id) {
+  const dot = document.getElementById('pourPos');
+  if (window.techAnim) clearInterval(window.techAnim);
+  let progress = 0;
+  window.techAnim = setInterval(() => {
+    progress += 0.02; if (progress > 1) progress = 0;
+    let x, y;
+    if (id==='spiral-in') { const a=progress*Math.PI*8, r=progress*110; x=200+Math.cos(a)*r; y=200+Math.sin(a)*r; }
+    else if (id==='spiral-out') { const a=progress*Math.PI*8, r=130-progress*110; x=200+Math.cos(a)*r; y=200+Math.sin(a)*r; }
+    else if (id==='static') { x=200+(Math.random()-0.5)*4; y=200+(Math.random()-0.5)*4; }
+    else if (id==='pulse') { const pi=Math.floor(progress*5), sp=(progress*5)%1, a=(pi/5)*Math.PI*2, r=sp<0.5?sp*2*80:(1-(sp-0.5)*2)*80; x=200+Math.cos(a)*r; y=200+Math.sin(a)*r; }
+    else if (id==='continuous') { x=200+Math.sin(progress*Math.PI*4)*8; y=200+Math.cos(progress*Math.PI*4)*8; }
+    dot.setAttribute('cx',x); dot.setAttribute('cy',y);
+  }, 30);
+}
+
+// ============ ANATOMY ============
+const anatomyData = {
+  v60: {
+    name:'Hario V60', thai:{en:'V-shape · deep 60° cone',th:'V-shape · ทรงกรวยลึก 60°'},
+    bypass:'HIGH BYPASS', bypassClass:'high',
+    specs:{en:{'Cone angle':'60°','Holes':'1 large','Flow speed':'Fast','Bypass':'~20-30%','Bed shape':'Tall V','Forgiveness':'Low'},
+           th:{'มุมกรวย':'60°','จำนวนรู':'1 รูใหญ่','ความเร็วน้ำ':'เร็ว','Bypass':'~20-30%','รูปเตียง':'V ลึก','Forgive':'ต่ำ'}},
+    flowDesc:{en:'<strong>Mechanism:</strong> Water flows through 3 pathways — (1) down the center through the bed (extracts most), (2) sideways through spiral ridges (bypass — does not extract), (3) curves into the hole. Ridges prevent filter from sealing flush to wall → creates air channels → prevents vacuum + increases flow rate. <strong>Tall bed depth</strong> → long contact time in lower layers → deep extraction but moderate uniformity.',
+              th:'<strong>กลไก:</strong> น้ำไหลผ่าน 3 เส้นทาง — (1) ลงตรงกลางผ่าน bed (extract มาก) (2) ลงด้านข้างผ่าน spiral ridges (bypass, ไม่ extract) (3) ไหลแฉลบลงรู ridges ทำให้ filter ไม่แนบสนิทกับผนัง → สร้าง air channels → ป้องกัน vacuum + เพิ่ม flow rate <strong>Bed depth สูง</strong> → contact time นานในชั้นล่าง → extraction ลึก แต่ uniformity ปานกลาง'},
+    pros:{en:['Excellent aromatic preservation','Pronounced clarity + brightness','Highly adjustable — technique changes affect result','Versatile across bean types'],
+          th:['Aromatic preservation ดี (flow เร็ว)','Express clarity + brightness เด่น','Adjustable มาก','Versatile กับเมล็ดหลายชนิด']},
+    cons:{en:['Sensitive to technique — channels easily','Bypass 20-30% — "wasted" water','Grind must be precise','Hard for beginners'],
+          th:['Sensitive ต่อ technique — channeling ง่าย','Bypass 20-30% — "เสียน้ำ"','Grind ต้องตรง','Beginners ใช้ลำบาก']},
+    bestFor:{en:'Light to medium roasts · Single origins · Aromatic-driven coffees (Ethiopian, Kenyan, Geisha) · Brewers seeking maximum control',
+             th:'Light to medium roast · Single origins · Aromatic-driven coffees · Brewers ที่ต้องการ control'}
+  },
+  flat: {
+    name:'Kalita Wave', thai:{en:'Flat bottom · 3 holes · wavy filter',th:'Flat bottom · ก้นแบน 3 รู'},
+    bypass:'LOW BYPASS', bypassClass:'low',
+    specs:{en:{'Cone angle':'~75°','Holes':'3 small','Flow speed':'Medium','Bypass':'~5-10%','Bed shape':'Wide flat','Forgiveness':'High'},
+           th:{'มุมกรวย':'~75°','จำนวนรู':'3 รูเล็ก','ความเร็วน้ำ':'ปานกลาง','Bypass':'~5-10%','รูปเตียง':'แบนกว้าง','Forgive':'สูง'}},
+    flowDesc:{en:'<strong>Mechanism:</strong> Bed depth equal across horizontal area → every drop passes through bed of equal thickness → contact time uniform. <strong>Wavy filter</strong> creates small, stable air gaps between paper and wall → flow stable. <strong>3 small holes</strong> distribute drainage uniformly → no single "drain point" for water to shortcut.',
+              th:'<strong>กลไก:</strong> Bed depth เท่ากันทั้ง horizontal area → น้ำทุกหยดผ่าน bed ที่หนาเท่ากัน → contact time สม่ำเสมอ <strong>Wavy filter</strong> สร้าง air gaps คงที่ → flow เสถียร <strong>3 รูเล็ก</strong> distribute drainage uniformly → ไม่มี shortcut'},
+    pros:{en:['Most forgiving — channeling rarely occurs','Highly repeatable','Beginner + competition friendly','Even extraction → balanced flavor'],
+          th:['Most forgiving — channeling เกิดยาก','Repeatable มาก','Beginner + competition-friendly','Even extraction → balanced']},
+    cons:{en:['Less expressive than V60','Lower aromatic intensity','Body relatively heavy','Filters can be hard to find'],
+          th:['Less expressive than V60','Aromatic intensity ต่ำกว่า','Body หนัก','Filter หาย่าก/แพง']},
+    bestFor:{en:'Medium roasts · Blends · Daily drivers · Beginners · Brewers Cup competitors (Tetsu Kasuya)',
+             th:'Medium roast · Blends · Daily drivers · Beginners · Brewers Cup competitors'}
+  }
+};
+
+function buildAnatomySvg(id, d, a) {
+  const bedCx=(d.bedLeft+d.bedRight)/2, bedW=d.bedRight-d.bedLeft, bedH=d.bedBottomY-d.bedTopY;
+  const ridges = d.ridges.map(r=>`<line x1="${r.x1}" y1="${r.y1}" x2="${r.x2}" y2="${r.y2}" stroke="#3a3530" stroke-width="0.8" opacity="0.6"/>`).join('');
+  const holes = d.holes.map(h=>`<circle cx="${h.cx}" cy="${h.cy}" r="${h.r}" fill="#0a0908" stroke="#4a4540" stroke-width="1"/>`).join('');
+  let through = '';
+  const n = id==='flat'?5:3;
+  for (let i=0; i<n; i++) {
+    const x = d.bedLeft+(bedW*(i+1))/(n+1);
+    through += `<g class="flow-drop" style="animation-delay:${i*0.4}s"><path d="M ${x} ${d.bedTopY-5} L ${x} ${d.bedBottomY+5}" stroke="#06b6d4" stroke-width="1.5" opacity="0.7" stroke-dasharray="2,2"/><polygon points="${x-3},${d.bedBottomY+2} ${x+3},${d.bedBottomY+2} ${x},${d.bedBottomY+8}" fill="#06b6d4" opacity="0.7"/></g>`;
+  }
+  let bypass = '';
+  const inten = a.bypassClass==='high'?3:a.bypassClass==='low'?1:2;
+  for (let s=0; s<2; s++) {
+    for (let i=0; i<inten; i++) {
+      const sx = s===0?d.bedLeft-10-i*3:d.bedRight+10+i*3;
+      const ex = s===0?d.bedLeft-4:d.bedRight+4;
+      bypass += `<g class="bypass-arrow" style="animation-delay:${i*0.6}s"><path d="M ${sx} ${d.bedTopY+5} Q ${sx+(s===0?5:-5)} ${(d.bedTopY+d.bedBottomY)/2} ${ex} ${d.bedBottomY-5}" fill="none" stroke="#e11d48" stroke-width="1.2" opacity="0.6" stroke-dasharray="3,2"/></g>`;
+    }
+  }
+  const legend1 = LANG==='en'?'through bed':'ผ่าน bed';
+  const legend2 = LANG==='en'?'bypass':'bypass';
+  const topLb = LANG==='en'?'FLOW CROSS-SECTION':'ภาพตัดขวาง · การไหล';
+  return `<svg class="anatomy-svg" viewBox="0 0 400 320">
+    <defs><linearGradient id="bg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8b4513"/><stop offset="100%" stop-color="#3a2510"/></linearGradient></defs>
+    <path d="${d.outline}" fill="rgba(42,38,34,0.3)" stroke="#4a4540" stroke-width="1.5" opacity="0.7"/>
+    ${ridges}
+    <path d="${d.filter}" fill="rgba(245,239,230,0.05)" stroke="rgba(245,239,230,0.25)" stroke-width="0.5"/>
+    <path d="${d.bedShape}" fill="url(#bg${id})"/>
+    ${through}${bypass}${holes}
+    <text x="${id==='flat'?75:50}" y="${d.bedTopY+bedH/2}" font-family="JetBrains Mono,monospace" font-size="7" fill="#e11d48" letter-spacing="1">BYPASS</text>
+    <text x="200" y="20" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" fill="#a8a299" letter-spacing="2">${topLb}</text>
+    <g transform="translate(20,270)"><line x1="0" y1="0" x2="15" y2="0" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="2,2"/><text x="20" y="3" font-family="JetBrains Mono,monospace" font-size="7" fill="#a8a299">${legend1}</text></g>
+    <g transform="translate(20,285)"><line x1="0" y1="0" x2="15" y2="0" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="3,2"/><text x="20" y="3" font-family="JetBrains Mono,monospace" font-size="7" fill="#a8a299">${legend2}</text></g>
+  </svg>`;
+}
+
+// ============ MOLECULAR THEATRE ============
+const ms = {
+  bond: 'stroke="#a8a299" stroke-width="1.5"',
+  atom: 'font-family="Fraunces,serif" font-size="11" fill="#f5efe6" text-anchor="middle"',
+  atomS: 'font-family="Fraunces,serif" font-size="9" fill="#a8a299" text-anchor="middle"'
+};
+
+const ACTS = ['all','acids','sugars','bitter','aromatics','reactions'];
+const ACT_NAMES = {
+  en:{all:'All',acids:'Acids',sugars:'Sugars',bitter:'Bitter Path',aromatics:'Aromatics',reactions:'Reactions'},
+  th:{all:'ทั้งหมด',acids:'กรด',sugars:'น้ำตาล',bitter:'เส้นทางขม',aromatics:'กลิ่น',reactions:'ปฏิกริยา'}
+};
+const ACT_ROMAN = {all:'★',acids:'I',sugars:'II',bitter:'III',aromatics:'IV',reactions:'V'};
+
+const molecules = {
+  citric: { act:'acids',
+    name:{en:'Citric Acid',th:'กรดซิตริก'}, formula:'C₆H₈O₇',
+    tagline:{en:'Lemon brightness · prominent in Ethiopian, Kenyan',th:'Lemon brightness · เด่นในเอธิโอเปีย, เคนยา'},
+    tags:[{class:'acid',text:'BRIGHTNESS'},{class:'acid',text:'pKa 3.13'}],
+    svg:`<g><line x1="40" y1="50" x2="80" y2="50" ${ms.bond}/><line x1="80" y1="50" x2="120" y2="50" ${ms.bond}/><line x1="80" y1="50" x2="80" y2="25" ${ms.bond}/><line x1="80" y1="50" x2="80" y2="75" ${ms.bond}/><text x="20" y="55" ${ms.atom}>HOOC</text><text x="140" y="55" ${ms.atom}>COOH</text><text x="80" y="20" ${ms.atom}>COOH</text><text x="80" y="90" ${ms.atom}>OH</text></g>`,
+    detail:{
+      structure:{en:'Tricarboxylic acid — three carboxyl groups + one hydroxyl',th:'Tricarboxylic acid — กรด 3 หมู่คาร์บอกซิล + 1 หมู่ไฮดรอกซิล'},
+      origin:{en:'Produced during photosynthesis. Stored in fresh fruit mucilage. Washed process removes mucilage but citric remains in deeper bean cells.',th:'ผลิตในระหว่าง photosynthesis เก็บใน mucilage ของเมล็ดสด washed ล้าง mucilage แต่ citric ยังเหลือใน bean เพราะอยู่ในเซลล์ลึก'},
+      extraction:{en:'Highly water-soluble (low Eₐ ~25-30 kJ/mol) → releases in first 15-60 seconds',th:'ละลายน้ำได้ดีมาก (low Eₐ ~25-30 kJ/mol) → ออกในช่วง 15-60 วินาทีแรก'},
+      sensory:{en:'<strong>Clean lemon-like sourness</strong> — perception strongest at ~45-65°C, sharper when cool',th:'<strong>รสเปรี้ยวสะอาดเหมือนเลมอน</strong> — perception แรงสุดที่ ~45-65°C ตอนเย็นจะแหลมขึ้น'},
+      key:{en:'pKa 3.13 → high dissociation → free H⁺ → strong sour perception',th:'pKa 3.13 → dissociation สูง → free H⁺ → perception เปรี้ยว'},
+      stats:{'pKa₁':'3.13','Eₐ':'~28 kJ/mol','Peak time':'45-60s','Heat stable':'Yes'}
+    }
+  },
+  malic: { act:'acids',
+    name:{en:'Malic Acid',th:'กรดมาลิก'}, formula:'C₄H₆O₅',
+    tagline:{en:'Apple/grape brightness · prominent in Colombian',th:'Apple/grape brightness · เด่นในโคลอมเบีย'},
+    tags:[{class:'acid',text:'BRIGHTNESS'},{class:'acid',text:'pKa 3.40'}],
+    svg:`<g><line x1="40" y1="55" x2="80" y2="35" ${ms.bond}/><line x1="80" y1="35" x2="120" y2="55" ${ms.bond}/><line x1="80" y1="35" x2="80" y2="15" ${ms.bond}/><text x="25" y="65" ${ms.atom}>HOOC</text><text x="135" y="65" ${ms.atom}>COOH</text><text x="80" y="12" ${ms.atom}>OH</text></g>`,
+    detail:{
+      structure:{en:'Dicarboxylic acid + 1 hydroxyl — simpler than citric',th:'Dicarboxylic acid + 1 hydroxyl — เรียบง่ายกว่า citric'},
+      origin:{en:'Found in sour green fruits. In coffee: high in high-altitude beans + washed process',th:'พบในผลไม้สีเขียวเปรี้ยว ในกาแฟพบในระดับสูงในกาแฟที่เก็บที่ระดับสูง + washed'},
+      extraction:{en:'Similar rate to citric → releases together in first pour',th:'ละลายเร็วใกล้เคียง citric → ออกพร้อมกันใน pour แรก'},
+      sensory:{en:'<strong>Round, soft sourness — not sharp.</strong> Perception more stable across 30-65°C → recipes using malic-rich beans have better acidity stability',th:'<strong>เปรี้ยวกลม นุ่ม ไม่แหลม</strong> perception คงที่กว่า citric ในช่วงอุณหภูมิ 30-65°C → recipe ที่ใช้ malic-rich beans มี acidity stability ดีกว่า'},
+      key:{en:'Malic perception changes little with temperature → flavor stability higher → ideal for Three-Stage Serving',th:'Malic perception เปลี่ยนน้อยตามอุณหภูมิ → flavor stability สูงกว่า → เหมาะ Three-Stage Serving'},
+      stats:{'pKa₁':'3.40','Eₐ':'~30 kJ/mol','Peak time':'60-90s','Stability':'High'}
+    }
+  },
+  acetic: { act:'acids',
+    name:{en:'Acetic Acid',th:'กรดอะซิติก'}, formula:'CH₃COOH',
+    tagline:{en:'Vinegar volatile · explodes at bloom · elevated in natural',th:'Vinegar volatile · ฟ้าตอน bloom · เด่นใน natural'},
+    tags:[{class:'acid',text:'VOLATILE'},{class:'aroma',text:'TOP-NOTE'}],
+    svg:`<g><line x1="50" y1="50" x2="90" y2="50" ${ms.bond}/><line x1="90" y1="50" x2="90" y2="25" ${ms.bond}/><line x1="90" y1="50" x2="90" y2="75" ${ms.bond}/><text x="35" y="55" ${ms.atom}>CH₃</text><text x="90" y="20" ${ms.atom}>O</text><text x="90" y="90" ${ms.atom}>OH</text><text x="110" y="55" ${ms.atom}>C</text></g>`,
+    detail:{
+      structure:{en:'Simplest acid in coffee — only 2 carbons',th:'กรดง่ายที่สุดในกาแฟ — มี 2 คาร์บอน'},
+      origin:{en:'<strong>Forms during processing</strong> (especially natural/anaerobic) — yeast fermentation while fruit is on bean',th:'<strong>Acetic เกิดจาก fermentation</strong> ระหว่าง process (natural/anaerobic) — yeast fermentation ที่ผลของกาแฟยังอยู่'},
+      extraction:{en:'Highly volatile (BP 118°C but high vapor pressure at 90°C) → escapes as aroma almost immediately',th:'Volatile มาก (BP 118°C แต่ vapor pressure สูงที่ 90°C) → ระเหยออกมาเป็นกลิ่นแทบจะทันที'},
+      sensory:{en:'<strong>Low levels:</strong> fresh brightness <strong>High levels:</strong> vinegar-like (defect). Source of "raspberry candy" in good naturals',th:'<strong>ต่ำ:</strong> brightness สดชื่น <strong>สูง:</strong> เปรี้ยวเหมือนน้ำส้มสายชู (defect) — ใน natural ดี ๆ เป็นที่มาของ "raspberry candy"'},
+      key:{en:'Evaporates fastest → first to disappear from carafe → reason cup "peaks" 4 minutes post-drip',th:'ระเหยเร็ว → หายไปก่อนใครใน carafe → สาเหตุที่ peak ใน 4 นาทีหลัง drip'},
+      stats:{'pKa':'4.76','BP':'118°C','Volatility':'Very high','In natural':'Elevated'}
+    }
+  },
+  quinic: { act:'acids', danger:true,
+    name:{en:'Quinic Acid',th:'กรดควินิก'}, formula:'C₇H₁₂O₆',
+    tagline:{en:'Bitter + sour · from CGA breakdown · accumulator',th:'Bitter + sour · จาก CGA breakdown · accumulator'},
+    tags:[{class:'danger',text:'BITTER'},{class:'acid',text:'pKa 3.40'}],
+    svg:`<g><polygon points="80,30 110,45 110,75 80,90 50,75 50,45" fill="none" ${ms.bond}/><text x="80" y="20" ${ms.atom}>OH</text><text x="125" y="50" ${ms.atom}>OH</text><text x="125" y="80" ${ms.atom}>OH</text><text x="35" y="50" ${ms.atomS}>HO</text><text x="80" y="105" ${ms.atom}>COOH</text></g>`,
+    detail:{
+      structure:{en:'Cyclohexane ring + 4 hydroxyls + 1 carboxyl — a cyclitol',th:'Cyclohexane ring + 4 hydroxyl + 1 carboxyl — cyclitol'},
+      origin:{en:'<strong>Two sources:</strong> (1) present in raw bean (2) <strong>generated from CGA breakdown</strong> during brewing',th:'<strong>มี 2 แหล่ง:</strong> (1) เกิดในเมล็ดดิบ (2) <strong>สร้างเพิ่มเมื่อ CGA สลายตัว</strong> ระหว่าง brew'},
+      extraction:{en:'Accumulates during brew → keeps rising throughout extraction',th:'Accumulation ระหว่าง brew → เพิ่มขึ้นเรื่อย ๆ ตลอด extraction time'},
+      sensory:{en:'<strong>Sour + slightly bitter + astringent</strong> — main reason coffee gets sourer as it cools',th:'<strong>เปรี้ยว + ขมเล็กน้อย + ฝาด</strong> — เหตุผลหลักที่กาแฟเย็นลงจะเปรี้ยวขึ้น'},
+      key:{en:'<strong>Making coffee taste good cold = controlling quinic accumulation</strong> = controlling CGA breakdown',th:'<strong>กาแฟต้องอร่อยตอนเย็น = ควบคุม quinic accumulation</strong> = ควบคุม CGA breakdown'},
+      stats:{'pKa':'3.40','Source':'CGA breakdown','In cup':'Accumulating','Stability':'Bad'}
+    }
+  },
+  cga: { act:'acids',
+    name:{en:'5-Chlorogenic Acid',th:'กรดคลอโรเจนิก (5-CQA)'}, formula:'C₁₆H₁₈O₉',
+    tagline:{en:'King of coffee phenolics · 6-12% of raw bean · hero and villain',th:'King of coffee phenolics · เป็น 6-12% ของเมล็ดดิบ'},
+    tags:[{class:'acid',text:'TARTNESS'},{class:'danger',text:'PRECURSOR'}],
+    svg:`<g><polygon points="40,40 60,30 80,40 80,60 60,70 40,60" fill="none" ${ms.bond}/><text x="30" y="35" ${ms.atomS}>HO</text><text x="30" y="65" ${ms.atomS}>HO</text><line x1="80" y1="50" x2="100" y2="50" ${ms.bond}/><text x="110" y="55" ${ms.atom}>O</text><line x1="120" y1="50" x2="140" y2="50" ${ms.bond}/><polygon points="155,40 170,50 170,65 155,75 140,65 140,50" fill="none" ${ms.bond}/><text x="180" y="55" ${ms.atomS}>OH</text></g>`,
+    detail:{
+      structure:{en:'<strong>Ester of caffeic acid + quinic acid</strong> — a "combined unit" that breaks apart during brewing',th:'<strong>Ester ของ caffeic acid + quinic acid</strong> — "หน่วยรวม" ที่จะแตกตัวระหว่าง brew'},
+      origin:{en:'6-12% of raw Arabica beans. Roasting reduces CGA by 30-80%',th:'6-12% ของเมล็ดดิบ Arabica การคั่วลด CGA ลง 30-80%'},
+      extraction:{en:'Peak extraction at 90-150s — first-order kinetics (Spiro & Selwood 1984)',th:'Peak extraction ที่ 90-150 วินาที — first-order kinetics'},
+      sensory:{en:'<strong>Small:</strong> tart, bright <strong>Large:</strong> astringent, harsh "green" — converts to lactones with heavy bitterness',th:'<strong>น้อย:</strong> tart, bright <strong>มาก:</strong> astringent, harsh — เปลี่ยนเป็น lactones ที่ขมหนัก'},
+      key:{en:'<strong>CGA = source</strong> of two bitter compounds: CGA lactones (during brew) + quinic/caffeic (during cooling). Control CGA = control coffee',th:'<strong>CGA = ตัวต้นทาง</strong> ของ 2 บิ๊กบอสด้านขม: lactones (ระหว่าง brew) + quinic/caffeic (ระหว่างเย็น)'},
+      stats:{'In raw bean':'6-12%','Eₐ':'~28 kJ/mol','Peak time':'90-150s','Forms lactones':'>90°C, >90s'}
+    }
+  },
+  sucrose: { act:'sugars',
+    name:{en:'Sucrose',th:'น้ำตาลซูโครส'}, formula:'C₁₂H₂₂O₁₁',
+    tagline:{en:'Disaccharide · 6-9% of raw bean · breaks apart during brewing',th:'Disaccharide · เริ่มต้น 6-9% · แตกตัวระหว่าง brew'},
+    tags:[{class:'sweet',text:'SWEET'},{class:'sweet',text:'PRECURSOR'}],
+    svg:`<g><polygon points="40,40 60,30 80,40 80,60 60,70 40,60" fill="none" ${ms.bond}/><line x1="80" y1="50" x2="95" y2="50" ${ms.bond}/><text x="105" y="55" ${ms.atom}>O</text><line x1="115" y1="50" x2="130" y2="50" ${ms.bond}/><polygon points="135,42 152,32 168,42 165,60 148,68 132,60" fill="none" ${ms.bond}/><text x="60" y="22" ${ms.atomS}>OH</text><text x="150" y="22" ${ms.atomS}>OH</text></g>`,
+    detail:{
+      structure:{en:'<strong>Disaccharide = glucose + fructose linked by glycosidic bond</strong>',th:'<strong>Disaccharide = glucose + fructose เชื่อมด้วย glycosidic bond</strong>'},
+      origin:{en:'Stored in parenchyma cells — 6-9% of raw bean. Roasting reduces it (darker = more loss, more Maillard)',th:'เก็บใน parenchyma cells — 6-9% ของเมล็ดดิบ คั่วเข้มลด, Maillard เพิ่ม'},
+      extraction:{en:'Highly soluble — pour 2 (45-90s) → peak 120s',th:'ละลายดี — pour 2 (45-90s) → peak 120s'},
+      sensory:{en:'<strong>Standard sweetness (reference 1.0)</strong> — during brewing parts hydrolyze to glucose+fructose (sweeter)',th:'<strong>หวานปกติ (reference 1.0)</strong> — ระหว่าง brew หลายส่วน hydrolyze เป็น glucose+fructose ที่หวานกว่า'},
+      key:{en:'<strong>Sucrose doesn\'t stay intact in brew</strong>. T > 90°C + pH 5.3-5.8 → hydrolyzes → 1.3-1.7× sweeter',th:'<strong>Sucrose ไม่คงรูป</strong> T > 90°C + pH 5.3-5.8 → hydrolyze → หวานเพิ่ม 1.3-1.7×'},
+      stats:{'In raw bean':'6-9%','After roast':'0.4-2.5%','Hydrolyzes':'>90°C, pH<6','Sweet rating':'1.0 (ref)'}
+    }
+  },
+  glucose: { act:'sugars',
+    name:{en:'Glucose',th:'น้ำตาลกลูโคส'}, formula:'C₆H₁₂O₆',
+    tagline:{en:'Sweet index 0.74 vs sucrose · cleaner perception',th:'หวานกว่า sucrose 0.7× · cleaner perception'},
+    tags:[{class:'sweet',text:'SWEET 0.74'},{class:'sweet',text:'POST-HYDROLYSIS'}],
+    svg:`<g><polygon points="80,30 110,45 110,75 80,90 50,75 50,45" fill="none" ${ms.bond}/><text x="80" y="20" ${ms.atomS}>OH</text><text x="125" y="50" ${ms.atomS}>OH</text><text x="125" y="80" ${ms.atomS}>OH</text><text x="35" y="50" ${ms.atomS}>HO</text><text x="80" y="105" ${ms.atomS}>CH₂OH</text></g>`,
+    detail:{
+      structure:{en:'Aldohexose — 6-carbon ring sugar',th:'Aldohexose — น้ำตาล 6 คาร์บอนแบบ ring'},
+      origin:{en:'Two sources: (1) small amount in raw bean (2) <strong>increases during brewing</strong> from sucrose hydrolysis',th:'มาจาก 2 แหล่ง: (1) ในเมล็ดดิบเล็กน้อย (2) <strong>เพิ่มในระหว่าง brew</strong> จาก sucrose hydrolysis'},
+      extraction:{en:'Highly soluble — releases with sucrose breakdown during pour 2-3',th:'ละลายดีมาก — ออกพร้อมการสลายของ sucrose ในช่วง pour 2-3'},
+      sensory:{en:'<strong>Less sweet than sucrose</strong> (sweet index 0.74) — contributes to "clean sweetness" not "lingering"',th:'<strong>หวานน้อยกว่า sucrose</strong> (0.74) — contribute "clean sweetness" ไม่ใช่ "lingering"'},
+      key:{en:'Glucose moves cleanly through cup → no mouth coating → contributes to clean rather than lingering sweetness',th:'Glucose ลื่นไหลในแก้ว → ไม่ค้างทาง mouth → clean sweetness'},
+      stats:{'Sweet rating':'0.74','Source':'Sucrose hydrolysis','Onset':'~90s','Heat stable':'Yes'}
+    }
+  },
+  fructose: { act:'sugars',
+    name:{en:'Fructose',th:'น้ำตาลฟรุกโทส'}, formula:'C₆H₁₂O₆',
+    tagline:{en:'Sweet index 1.73 · the "secret" of specialty sweetness',th:'หวานกว่า sucrose 1.7× · "secret" ของรสหวานในกาแฟ specialty'},
+    tags:[{class:'sweet',text:'SWEET 1.73'},{class:'sweet',text:'STAR'}],
+    svg:`<g><polygon points="80,35 105,50 105,75 80,90 55,75 55,50" fill="none" ${ms.bond}/><text x="80" y="25" ${ms.atomS}>CH₂OH</text><text x="120" y="55" ${ms.atomS}>OH</text><text x="40" y="55" ${ms.atomS}>HO</text><text x="40" y="82" ${ms.atomS}>HO</text><text x="80" y="105" ${ms.atomS}>CH₂OH</text></g>`,
+    detail:{
+      structure:{en:'Ketohexose — 6-carbon sugar with ketone group',th:'Ketohexose — น้ำตาล 6 คาร์บอนที่มี ketone group'},
+      origin:{en:'From sucrose hydrolysis — 1 sucrose → 1 glucose + <strong>1 fructose</strong>',th:'จาก sucrose hydrolysis — 1 sucrose → 1 glucose + <strong>1 fructose</strong>'},
+      extraction:{en:'With glucose during pour 2-3',th:'พร้อม glucose ในช่วง pour 2-3'},
+      sensory:{en:'<strong>Sweetest of natural sugars</strong> (1.73) — perception strongest at <strong>35-40°C</strong> (matches Stage C of Three-Stage Serving) → cold coffee sometimes sweeter than hot',th:'<strong>หวานสุดในกลุ่ม natural sugars</strong> (1.73) — perception แรงสุดที่ <strong>35-40°C</strong> (ตรงกับ Stage C ของ Three-Stage Serving) → กาแฟเย็นบางครั้งหวานกว่าตอนร้อน'},
+      key:{en:'<strong>Good recipe = maximize sucrose hydrolysis = maximize fructose</strong>. Keep T > 90°C in pour 2-3, pH < 6',th:'<strong>Recipe ที่ดี = maximize sucrose hydrolysis = maximize fructose</strong> รักษา T > 90°C ใน pour 2-3, pH < 6'},
+      stats:{'Sweet rating':'1.73','Best at temp':'35-40°C','Source':'Sucrose hydrolysis','In late brew':'Increasing'}
+    }
+  },
+  melanoidins: { act:'sugars',
+    name:{en:'Melanoidins',th:'เมลานอยดิน'}, formula:'Mixed polymers',
+    tagline:{en:'Final Maillard products · color + body + late bitter',th:'ผลิตภัณฑ์สุดท้ายของ Maillard · ให้สีน้ำตาล + body + bitter'},
+    tags:[{class:'sweet',text:'BODY'},{class:'danger',text:'LATE BITTER'}],
+    svg:`<g><circle cx="80" cy="55" r="35" fill="rgba(139,69,19,0.3)" stroke="#a8a299" stroke-width="1.5"/><text x="80" y="50" ${ms.atom}>Brown</text><text x="80" y="65" ${ms.atomS}>polymer</text><text x="80" y="105" ${ms.atomS}>MW 5-15 kDa</text></g>`,
+    detail:{
+      structure:{en:'<strong>Undefined polymer mix</strong> — from Maillard reaction between sugars + amino acids at high heat',th:'<strong>โพลีเมอร์ที่ไม่ระบุโครงสร้างชัด</strong> — จาก Maillard reaction'},
+      origin:{en:'Forms only during roasting at >150°C. Light roast 10-15% / Dark roast 20-30%',th:'สร้างเฉพาะระหว่างคั่วที่ >150°C light 10-15% / dark 20-30%'},
+      extraction:{en:'<strong>High Eₐ (60-95 kJ/mol)</strong> → needs high T + long time → prominent in pour 4 and drawdown',th:'<strong>Eₐ สูง (60-95 kJ/mol)</strong> → ต้องอุณหภูมิสูง + เวลานาน → เด่นใน pour 4 และ drawdown'},
+      sensory:{en:'<strong>Good:</strong> body, mouthfeel, chocolate notes <strong>Excess:</strong> heavy bitter, astringent, "burnt"',th:'<strong>ดี:</strong> body, mouthfeel, chocolate <strong>มาก:</strong> heavy bitter, astringent, burnt'},
+      key:{en:'Double-edged sword — body but bitter. <strong>Lower Pour 4 temp = limit melanoidins</strong> = body without bitter',th:'Double-edged sword — body แต่ bitter <strong>คุม Pour 4 ต่ำ = limit melanoidins</strong> = body แต่ไม่ขม'},
+      stats:{'Eₐ':'60-95 kJ/mol','Onset':'>150s','Peak':'Drawdown','In dark roast':'High'}
+    }
+  },
+  cgaLactone: { act:'bitter', danger:true,
+    name:{en:'CGA Lactones',th:'CGA แลคโตน'}, formula:'5-CQAL',
+    tagline:{en:'The "Starbucks bitter" · from CGA + prolonged heat',th:'The "Starbucks bitter" · จาก CGA ที่ค้างในความร้อน'},
+    tags:[{class:'bitter',text:'HEAVY BITTER'},{class:'danger',text:'AVOID'}],
+    svg:`<g><polygon points="40,40 60,30 80,40 80,60 60,70 40,60" fill="none" ${ms.bond}/><text x="30" y="35" ${ms.atomS}>HO</text><line x1="80" y1="50" x2="100" y2="50" ${ms.bond}/><line x1="100" y1="50" x2="120" y2="35" ${ms.bond}/><line x1="120" y1="35" x2="140" y2="50" ${ms.bond}/><line x1="100" y1="50" x2="120" y2="65" ${ms.bond}/><line x1="120" y1="65" x2="140" y2="50" ${ms.bond}/><text x="155" y="55" ${ms.atomS}>(lactone)</text></g>`,
+    detail:{
+      structure:{en:'<strong>Intramolecular ester</strong> — CGA loses 1 H₂O, forms closed ring (lactone)',th:'<strong>Intramolecular ester</strong> — CGA สูญเสีย H₂O 1 โมเลกุล แล้วเชื่อมเป็น ring ปิด'},
+      origin:{en:'<strong>Reaction:</strong> 5-CQA → 5-CQA lactone + H₂O at <strong>T > 90°C + time > 90s</strong>. Main reason over-extracted coffee is bitter',th:'<strong>ปฏิกริยา:</strong> 5-CQA → 5-CQA lactone + H₂O ที่ <strong>T > 90°C + time > 90s</strong> เหตุผลหลักที่กาแฟ over-extracted ขม'},
+      extraction:{en:'Forms during brewing → enters cup immediately → continues forming if still hot',th:'ฟอร์มขึ้นในระหว่าง brew → ออกเข้าแก้วทันที → ยังคงฟอร์มต่อในแก้วถ้ายังร้อน'},
+      sensory:{en:'<strong>"Heavy bitter"</strong> — thick, lingering, tongue-sticking bitter — different from caffeine\'s "bright bitter"',th:'<strong>"Heavy bitter"</strong> — รสขมหนัก ยาว ติดลิ้น — ต่างจาก "bright bitter" ของ caffeine'},
+      key:{en:'<strong>To avoid:</strong> (1) drop T to 82-88°C in pour 3-4 (2) total brew < 3:30 (3) tail cut at 60-70% drawdown',th:'<strong>วิธีหลีก:</strong> (1) drop T เป็น 82-88°C ใน pour 3-4 (2) total brew < 3:30 (3) tail cut หลัง 60-70% drawdown'},
+      stats:{'Forms at':'>90°C + >90s','Half-life':'~60s at 95°C','Peak':'180-270s','In cup':'Stable, accumulating'}
+    }
+  },
+  caffeine: { act:'bitter',
+    name:{en:'Caffeine',th:'คาเฟอีน'}, formula:'C₈H₁₀N₄O₂',
+    tagline:{en:'The stimulant · "bright bitter" · stable in heat',th:'The stimulant · "bright bitter" · เสถียร'},
+    tags:[{class:'bitter',text:'BITTER'},{class:'bitter',text:'STIMULANT'}],
+    svg:`<g><polygon points="50,35 80,35 95,50 80,65 50,65 35,50" fill="none" ${ms.bond}/><polygon points="95,50 115,40 130,55 115,70 95,50" fill="none" ${ms.bond}/><text x="65" y="55" ${ms.atomS}>N</text><text x="115" y="55" ${ms.atomS}>N</text><text x="50" y="55" ${ms.atomS}>CH₃</text></g>`,
+    detail:{
+      structure:{en:'<strong>Purine alkaloid</strong> — 2 fused rings (pyrimidine + imidazole) + 3 methyl groups',th:'<strong>Purine alkaloid</strong> — 2 ring fused (pyrimidine + imidazole) + 3 methyl groups'},
+      origin:{en:'Plant natural pesticide — Arabica 1.0-1.5% / Robusta 2.0-2.5%',th:'พืชสร้างเป็น natural pesticide — Arabica 1.0-1.5% / Robusta 2.0-2.5%'},
+      extraction:{en:'Highly soluble at all temps → <strong>always fully extracts</strong>. Solubility at 100°C = 2.17 g/100mL (far above coffee concentration)',th:'ละลายน้ำได้ดีที่ทุกอุณหภูมิ → <strong>ออกครบเสมอ</strong> — solubility ที่ 100°C = 2.17 g/100mL'},
+      sensory:{en:'<strong>"Bright bitter"</strong> — sharp, short, doesn\'t linger — strongest at room temp',th:'<strong>"Bright bitter"</strong> — รสขมแหลม สั้น ไม่ติดลิ้นนาน — perception แรงสุดที่อุณหภูมิห้อง'},
+      key:{en:'<strong>Caffeine = only 10-15% of coffee bitterness</strong>. 70-85% comes from CGA lactones, melanoidins, polyphenols → "decaf coffee can still be bitter"',th:'<strong>Caffeine = 10-15% ของรสขมในกาแฟ</strong> เท่านั้น — 70-85% มาจาก CGA lactones, melanoidins, polyphenols'},
+      stats:{'In Arabica':'1.0-1.5%','Solubility 100°C':'2.17 g/100mL','Bitter share':'~15%','Heat stable':'Yes'}
+    }
+  },
+  trigonelline: { act:'bitter',
+    name:{en:'Trigonelline',th:'ไตรโกเนลลิน'}, formula:'C₇H₇NO₂',
+    tagline:{en:'Roasted aroma precursor · breaks into pyridines during roast',th:'Roasted aroma precursor · แตกตัวระหว่างคั่ว → pyridines'},
+    tags:[{class:'bitter',text:'ROASTED'},{class:'aroma',text:'PRECURSOR'}],
+    svg:`<g><polygon points="60,35 90,30 110,50 100,75 70,80 50,55" fill="none" ${ms.bond}/><text x="85" y="55" ${ms.atom}>N⁺</text><text x="85" y="68" ${ms.atomS}>CH₃</text><text x="140" y="42" ${ms.atomS}>COO⁻</text></g>`,
+    detail:{
+      structure:{en:'<strong>N-methyl niacin</strong> — alkaloid from vitamin B3 family',th:'<strong>N-methyl niacin</strong> — alkaloid จากกลุ่ม vitamin B3'},
+      origin:{en:'Raw bean has 1-2%. During roasting <strong>50-80% breaks down</strong> into pyridines, pyrroles, N-methylpyridinium → these are key coffee aroma components',th:'เมล็ดดิบมี 1-2% ระหว่างคั่ว <strong>50-80% สลายตัว</strong> เป็น pyridines, pyrroles → สำคัญต่อ coffee aroma'},
+      extraction:{en:'Highly soluble (more than caffeine) — Eₐ ~42 kJ/mol → fully extracts in pour 2-3',th:'ละลายน้ำดี (สูงกว่า caffeine) — Eₐ ~42 kJ/mol → ออกครบในช่วง pour 2-3'},
+      sensory:{en:'<strong>Slightly sour + slightly bitter</strong> itself. But its breakdown products give "roasted, coffee-like" smell',th:'<strong>เปรี้ยวเล็กน้อย + ขมเล็กน้อย</strong> เป็นตัวเอง แต่ผลิตภัณฑ์การแตกตัว (pyridines) ให้กลิ่น "roasted, coffee-like"'},
+      key:{en:'Trigonelline content tells roast level: <strong>high = light roast</strong> (preserves precursors) <strong>low = dark roast</strong> (degraded)',th:'Trigonelline content บอกระดับคั่ว: <strong>มาก = คั่วอ่อน</strong> <strong>น้อย = คั่วเข้ม</strong>'},
+      stats:{'In raw':'1-2%','After light roast':'0.5-1.5%','After dark roast':'<0.5%','Eₐ':'~42 kJ/mol'}
+    }
+  },
+  polyphenols: { act:'bitter', danger:true,
+    name:{en:'Polyphenols / Tannins',th:'โพลีฟีนอล / แทนนิน'}, formula:'Varied phenolics',
+    tagline:{en:'Astringency · "drying" mouthfeel · accumulator',th:'Astringency · "drying" mouthfeel · accumulator'},
+    tags:[{class:'danger',text:'ASTRINGENT'},{class:'danger',text:'LATE-STAGE'}],
+    svg:`<g><polygon points="35,40 50,30 65,40 65,55 50,65 35,55" fill="none" ${ms.bond}/><text x="25" y="35" ${ms.atomS}>HO</text><line x1="65" y1="50" x2="85" y2="50" ${ms.bond}/><polygon points="85,40 100,30 115,40 115,55 100,65 85,55" fill="none" ${ms.bond}/><text x="125" y="50" ${ms.atomS}>OH</text><text x="80" y="80" ${ms.atomS}>(polymerized)</text></g>`,
+    detail:{
+      structure:{en:'<strong>Diverse group</strong> — phenol rings + hydroxyls + polymers — includes catechins, proanthocyanidins, hydrolysable tannins',th:'<strong>กลุ่มที่หลากหลาย</strong> — phenol rings + hydroxyls + polymers'},
+      origin:{en:'From plant defense compounds + CGA degradation products',th:'จาก plant defense compounds + ผลิตภัณฑ์จาก CGA degradation'},
+      extraction:{en:'<strong>High Eₐ (40-65 kJ/mol)</strong> + non-linear accumulation → high in pour 4 and drawdown → accumulates if brew time is long',th:'<strong>Eₐ สูง (40-65 kJ/mol)</strong> + accumulate non-linearly → ออกมามากใน pour 4 และ drawdown'},
+      sensory:{en:'<strong>"Astringency"</strong> — feels like "drying mouth" — polyphenols bind to saliva proteins → mouth-coating loss → drying',th:'<strong>"Astringency"</strong> — รู้สึก "ดูดความชื้นใน mouth" — polyphenols จับกับ proteins ใน saliva'},
+      key:{en:'<strong>Astringency ≠ Bitterness</strong> — it\'s <strong>tactile</strong> not taste — defect in specialty coffee — from over-extraction',th:'<strong>Astringency ≠ Bitterness</strong> — เป็น <strong>tactile</strong> ไม่ใช่ taste — defect ใน specialty'},
+      stats:{'Eₐ':'40-65 kJ/mol','Accumulation':'Non-linear','In late brew':'High','Threshold':'Variable'}
+    }
+  },
+  linalool: { act:'aromatics',
+    name:{en:'Linalool',th:'ไลนาลูล'}, formula:'C₁₀H₁₈O',
+    tagline:{en:'Jasmine, lavender · "the floral" of Ethiopian',th:'Jasmine, lavender · "the floral" of Ethiopian'},
+    tags:[{class:'aroma',text:'FLORAL'},{class:'aroma',text:'TERPENE'}],
+    svg:`<g><line x1="30" y1="50" x2="50" y2="40" ${ms.bond}/><line x1="50" y1="40" x2="70" y2="50" ${ms.bond}/><line x1="70" y1="50" x2="90" y2="40" ${ms.bond}/><line x1="90" y1="40" x2="110" y2="50" ${ms.bond}/><line x1="110" y1="50" x2="130" y2="40" ${ms.bond}/><line x1="110" y1="50" x2="110" y2="70" ${ms.bond}/><text x="110" y="85" ${ms.atom}>OH</text><text x="50" y="30" ${ms.atomS}>CH₃</text></g>`,
+    detail:{
+      structure:{en:'<strong>Monoterpene tertiary alcohol</strong> — 10 carbons + 2 double bonds + 1 hydroxyl',th:'<strong>Monoterpene tertiary alcohol</strong> — 10 carbons + 2 double bonds + 1 hydroxyl'},
+      origin:{en:'Found in lavender, coriander, tea. In coffee: high in <strong>Ethiopian and Kenyan varieties</strong>, especially <strong>natural process</strong>',th:'พบใน lavender, coriander, tea, basil — ในกาแฟพบมากใน <strong>Ethiopian และ Kenya varieties</strong> โดยเฉพาะ <strong>natural process</strong>'},
+      extraction:{en:'Volatile (BP 198°C but high vapor pressure at 90°C) → evaporates in pour 1-2 → <strong>escapes fast from open carafe</strong>',th:'Volatile (BP 198°C แต่ vapor pressure ที่ 90°C สูง) → ระเหยใน pour 1-2 → <strong>หนีเร็วจาก carafe ที่เปิดฝา</strong>'},
+      sensory:{en:'<strong>"Jasmine, lavender, honeysuckle"</strong> — sweet herbal — very low threshold (a few ppb)',th:'<strong>กลิ่น "jasmine, lavender, honeysuckle"</strong> — สมุนไพรหวานละมุน — perception threshold ต่ำมาก'},
+      key:{en:'<strong>Linalool = star of Ethiopian floral note</strong> → preservation: cover carafe, pre-warm cups, serve quickly → basis of Three-Stage Serving Stage A',th:'<strong>Linalool คือ "ตัวเอก" ของ Ethiopian floral note</strong> → preservation: ปิดฝา carafe, pre-warm cups → Stage A ของ Three-Stage Serving'},
+      stats:{'BP':'198°C','Threshold':'~0.5 ppb','In Ethiopian':'High','Volatility 90°C':'Very high'}
+    }
+  },
+  furaneol: { act:'aromatics',
+    name:{en:'Furaneol',th:'ฟูราเนออล'}, formula:'C₆H₈O₃',
+    tagline:{en:'Strawberry, pineapple, caramel · "raspberry candy" in Syrina',th:'Strawberry, pineapple, caramel · "raspberry candy" ใน Syrina'},
+    tags:[{class:'aroma',text:'FRUIT'},{class:'sweet',text:'CARAMEL'}],
+    svg:`<g><polygon points="60,45 90,35 110,55 95,80 65,75" fill="none" ${ms.bond}/><text x="50" y="50" ${ms.atom}>O</text><text x="85" y="55" ${ms.atom}>=O</text><text x="125" y="60" ${ms.atom}>OH</text></g>`,
+    detail:{
+      structure:{en:'<strong>Furanone</strong> — 5-membered ring with O + C=O + hydroxyl + 2 methyls',th:'<strong>Furanone</strong> — 5-membered ring กับ O + double bond C=O + hydroxyl + 2 methyls'},
+      origin:{en:'<strong>Maillard reaction product</strong> — forms during roasting. High in long-fermented coffees (anaerobic, extended natural)',th:'<strong>ผลิตภัณฑ์จาก Maillard reaction</strong> — เกิดในระหว่างคั่ว — สูงในกาแฟที่ผ่าน fermentation นาน'},
+      extraction:{en:'Mid-volatility (BP 207°C) → pour 2-3 → <strong>more stable than linalool</strong> → stays in carafe longer',th:'Mid-volatility (BP 207°C) → ออกใน pour 2-3 → <strong>เสถียรกว่า linalool</strong> → คงอยู่ใน carafe นานกว่า'},
+      sensory:{en:'<strong>Complex aroma:</strong> strawberry, raspberry, pineapple, cooked sugar, caramel. Part of the "fruit candy" Ford perceived in Syrina',th:'<strong>กลิ่นซับซ้อน:</strong> strawberry, raspberry, pineapple, cooked sugar, caramel — เป็นส่วนหนึ่งของ "fruit candy" ที่ Ford ได้ใน Syrina'},
+      key:{en:'Used as flavor compound in food industry. <strong>Dual contribution: aroma + perceived sweetness</strong>',th:'<strong>Dual contribution: aroma + perceived sweetness</strong> — รับรู้เป็น "sweet + fruit" ไม่ใช่ acid'},
+      stats:{'BP':'207°C','Threshold':'~10 ppb','In fermented':'High','Stability':'Medium-good'}
+    }
+  },
+  furfurylthiol: { act:'aromatics',
+    name:{en:'2-Furfurylthiol',th:'ฟูร์ฟูริล ไธออล'}, formula:'C₅H₆OS',
+    tagline:{en:'Roasted coffee aroma · "the coffee smell"',th:'Roasted coffee aroma · "the coffee smell"'},
+    tags:[{class:'aroma',text:'ROASTED'},{class:'aroma',text:'KEY'}],
+    svg:`<g><polygon points="50,40 80,35 95,55 80,75 55,70" fill="none" ${ms.bond}/><text x="40" y="45" ${ms.atom}>O</text><line x1="95" y1="55" x2="115" y2="50" ${ms.bond}/><line x1="115" y1="50" x2="135" y2="60" ${ms.bond}/><text x="145" y="65" ${ms.atom}>SH</text></g>`,
+    detail:{
+      structure:{en:'<strong>Furan ring + CH₂-SH (thiol)</strong> — sulfur-containing aromatic',th:'<strong>Furan ring + CH₂-SH (thiol)</strong> — sulfur-containing aromatic'},
+      origin:{en:'<strong>Specific Maillard product</strong> — sulfur amino acids (cysteine) react with sugars during roasting',th:'<strong>ผลิตจาก Maillard ที่เฉพาะเจาะจง</strong> — sulfur amino acids (cysteine) ทำปฏิกริยากับ sugars ที่อุณหภูมิคั่ว'},
+      extraction:{en:'Very volatile (BP 155°C) → emerges in early brew',th:'Volatile มาก (BP 155°C) → ออกในช่วงต้น brew'},
+      sensory:{en:'<strong>"The smell of roasted coffee"</strong> — the character compound most defining "coffee" — extremely low threshold (0.01 ppb)',th:'<strong>"The smell of roasted coffee"</strong> — character compound ที่เด่นที่สุดสำหรับ "กาแฟ" — threshold ต่ำมาก (0.01 ppb)'},
+      key:{en:'This is the "coffee smell" we recognize since childhood — walking past a coffee shop and "smelling coffee" — mostly <strong>2-furfurylthiol</strong>',th:'นี่คือ "coffee smell" ที่เราจำได้ตั้งแต่เด็ก — ทุกครั้งที่เดินผ่านร้านกาแฟ — ส่วนใหญ่คือ <strong>2-furfurylthiol</strong>'},
+      stats:{'BP':'155°C','Threshold':'~0.01 ppb','Source':'Roast Maillard','Volatility':'Extreme'}
+    }
+  },
+  ethylEsters: { act:'aromatics',
+    name:{en:'Ethyl Esters',th:'เอทิลเอสเทอร์'}, formula:'CH₃CH₂-OOC-R',
+    tagline:{en:'Fruit · candy · "raspberry, apricot" notes',th:'Fruit · candy · "raspberry, apricot" notes'},
+    tags:[{class:'aroma',text:'FRUIT'},{class:'aroma',text:'CANDY'}],
+    svg:`<g><text x="35" y="55" ${ms.atom}>R</text><line x1="45" y1="50" x2="65" y2="50" ${ms.bond}/><text x="75" y="55" ${ms.atom}>C</text><line x1="75" y1="45" x2="75" y2="30" ${ms.bond}/><text x="75" y="22" ${ms.atom}>O</text><line x1="85" y1="50" x2="100" y2="55" ${ms.bond}/><text x="110" y="60" ${ms.atom}>O</text><line x1="120" y1="55" x2="140" y2="50" ${ms.bond}/><text x="155" y="55" ${ms.atom}>CH₂CH₃</text></g>`,
+    detail:{
+      structure:{en:'<strong>Ester group with ethyl tail</strong> — R-COO-CH₂CH₃ — many variants depending on R',th:'<strong>Ester group ที่มี ethyl tail</strong> — R-COO-CH₂CH₃ — มีหลายตัวขึ้นกับ R'},
+      origin:{en:'<strong>Forms during fermentation</strong> in coffee processing (yeast + bacteria create esters) — natural > washed, anaerobic + carbonic maceration highest',th:'<strong>เกิดจาก fermentation</strong> ระหว่าง process — natural มีเยอะกว่า washed มาก — anaerobic + carbonic maceration มากที่สุด'},
+      extraction:{en:'Highly volatile (BP 60-150°C depending on R) → in bloom + pour 1 → <strong>escapes fastest from cup</strong>',th:'Volatile สูงมาก (BP 60-150°C ขึ้นกับ R) → ออกใน bloom + pour 1 → <strong>หนีเร็วที่สุดจากแก้ว</strong>'},
+      sensory:{en:'<strong>"Fruit candy, sweet fruit"</strong>: ethyl butyrate (pineapple), ethyl hexanoate (apple), ethyl-2-methylbutyrate (fruity) — very low threshold',th:'<strong>"Fruit candy, sweet fruit"</strong> notes: ethyl butyrate (pineapple), ethyl hexanoate (apple), ethyl-2-methylbutyrate (fruity)'},
+      key:{en:'<strong>Ethyl esters = signature of natural process</strong>. Syrina natural\'s "raspberry candy, apricot" comes mostly from ethyl esters → preserve with <strong>serve immediately + cover + pre-warm cups</strong>',th:'<strong>Ethyl esters = signature ของ natural process</strong> — Syrina ของ Ford "raspberry candy, apricot" จาก ethyl esters → preserve ด้วย <strong>เสิร์ฟทันที + ปิดฝา + cup pre-warmed</strong>'},
+      stats:{'BP':'60-150°C','Threshold':'0.001-1 ppb','In natural':'High','Volatility':'Highest'}
+    }
+  },
+  sucroseHydrolysis: { act:'reactions',
+    name:{en:'Sucrose Hydrolysis',th:'ปฏิกริยาการสลาย sucrose'}, formula:'Sucrose + H₂O → Glu + Fru',
+    tagline:{en:'Sugars become sweeter sugars · "sweetness blooming"',th:'น้ำตาลกลายเป็นน้ำตาลที่หวานกว่า · "sweetness blooming"'},
+    tags:[{class:'sweet',text:'POSITIVE'},{class:'sweet',text:'90°C+'}],
+    svg:`<g><text x="40" y="40" ${ms.atomS}>Sucrose</text><text x="100" y="55" ${ms.atom}>→</text><text x="160" y="40" ${ms.atomS}>Glu+Fru</text><text x="40" y="60" ${ms.atomS}>(1.0)</text><text x="160" y="60" ${ms.atomS}>(1.2× sweeter)</text><text x="100" y="90" ${ms.atomS}>+ H₂O</text></g>`,
+    detail:{
+      structure:{en:'<strong>Hydrolysis</strong> — water acts as nucleophile, cleaves glycosidic bond between glucose-fructose',th:'<strong>Hydrolysis</strong> — น้ำเป็น nucleophile ตัดพันธะ glycosidic'},
+      origin:{en:'Occurs naturally when sucrose meets hot water + slight acid',th:'เกิดเมื่อ sucrose โดนน้ำร้อน + slight acid'},
+      mechanism:{en:'<strong>Conditions:</strong> T > 90°C + pH < 6 + time ≥ 60s → rate constant doubles every 10°C',th:'<strong>เงื่อนไข:</strong> T > 90°C + pH < 6 + เวลา ≥ 60 วินาที → rate constant เพิ่ม 2× ทุก 10°C'},
+      sensory:{en:'<strong>Result:</strong> "perceived sweetness" increases 20-40% because glu+fru combined is 1.2× sweeter than sucrose. Fructose perception peaks at 35-40°C → <strong>cooler coffee can be sweeter if recipe is right</strong>',th:'<strong>ผลลัพธ์ในแก้ว:</strong> "perceived sweetness" เพิ่ม 20-40% เพราะ glucose+fructose รวมหวานกว่า sucrose 1.2× — fructose แรงสุดที่ 35-40°C → กาแฟยิ่งเย็น <strong>หวานยิ่งเด่นถ้า recipe คุมเงื่อนไขถูก</strong>'},
+      key:{en:'<strong>This is why champion brewers use ≥ 90°C in pour 2-3 — not just for extraction but to activate hydrolysis</strong>',th:'<strong>นี่คือเหตุผลที่ recipe brewers cup champion ใช้น้ำ ≥ 90°C ใน pour 2-3 — ไม่ใช่แค่ extraction แต่เพื่อ activate hydrolysis</strong>'},
+      stats:{'Activation':'T > 90°C','Rate':'~2× per 10°C','pH catalyst':'< 6','Result':'1.2-1.5× sweeter'}
+    }
+  },
+  cgaDegradation: { act:'reactions', danger:true,
+    name:{en:'CGA Degradation Cascade',th:'การสลาย CGA'}, formula:'CGA → Lactone → Quinic + Caffeic',
+    tagline:{en:'The bitter cascade · happens in brew AND in cup',th:'The bitter cascade · เกิดในแก้วและตู้เย็น'},
+    tags:[{class:'danger',text:'NEGATIVE'},{class:'danger',text:'CASCADE'}],
+    svg:`<g><text x="40" y="35" ${ms.atomS}>CGA</text><text x="80" y="40" ${ms.atom}>→</text><text x="125" y="35" ${ms.atomS}>Lactone</text><text x="80" y="65" ${ms.atom}>→</text><text x="130" y="65" ${ms.atomS}>Quinic+Caffeic</text><text x="85" y="95" ${ms.atomS}>(time + heat)</text></g>`,
+    detail:{
+      structure:{en:'<strong>Two-step cascade:</strong> Step 1: 5-CQA → 5-CQA lactone + H₂O (intramolecular ester). Step 2: lactone → quinic + caffeic acid (ester hydrolysis)',th:'<strong>Two-step cascade:</strong> Step 1: 5-CQA → 5-CQA lactone + H₂O. Step 2: lactone → quinic + caffeic acid'},
+      origin:{en:'Occurs continuously during brewing + after drip in the cup',th:'เกิดต่อเนื่องระหว่าง brew + เก็บในแก้วหลัง drip'},
+      mechanism:{en:'<strong>Step 1:</strong> T > 90°C, time > 90s — accelerates with both. <strong>Step 2:</strong> continues in carafe → quinic + caffeic accumulate even after cooling',th:'<strong>Step 1:</strong> T > 90°C, time > 90s. <strong>Step 2:</strong> ดำเนินต่อใน carafe → quinic + caffeic ค่อย ๆ สะสม'},
+      sensory:{en:'<strong>Lactone:</strong> heavy bitter, lingering. <strong>Quinic + caffeic:</strong> sour-bitter-astringent — coffee gets more sour, bitter, astringent as it cools',th:'<strong>Lactone:</strong> "heavy bitter" — รสขมหนัก ยาว ติดลิ้น <strong>Quinic + caffeic:</strong> "เปรี้ยว-ขม-ฝาด" — กาแฟเย็นเปรี้ยวขึ้น ขมขึ้น ฝาดขึ้น'},
+      key:{en:'<strong>Why coffee peaks then drops:</strong> 4 min post-drip the coffee cools but lactones + quinic accumulation continues → after 10+ min becomes unbearable. <strong>Mitigation:</strong> drop temp pour 3-4, tail cut, serve immediately',th:'<strong>เหตุผลหลักที่กาแฟ peak แล้ว drop:</strong> ตอน 4 นาทีหลัง drip กาแฟเย็น แต่ lactones + quinic accumulation ยังต่อในแก้ว → 10+ นาที unbearable <strong>แก้ด้วย:</strong> drop temp pour 3-4, tail cut, immediate serving'},
+      stats:{'Step 1 onset':'>90s at 95°C','Step 2':'Immediate after step 1','In cup':'Continues!','Mitigation':'Drop T + serve fast'}
+    }
+  },
+  maillard: { act:'reactions',
+    name:{en:'Maillard Reaction',th:'ปฏิกริยา Maillard'}, formula:'Sugar + Amino acid → Aromatics + Polymers',
+    tagline:{en:'The roast magic · happens during roasting, not brewing',th:'The roast magic · เกิดระหว่างคั่ว ไม่ใช่ในการ brew'},
+    tags:[{class:'aroma',text:'ROAST-ONLY'},{class:'aroma',text:'KEY'}],
+    svg:`<g><text x="30" y="40" ${ms.atomS}>Sugar+</text><text x="30" y="55" ${ms.atomS}>amino</text><text x="90" y="50" ${ms.atom}>→</text><text x="135" y="40" ${ms.atomS}>Aromatics</text><text x="135" y="55" ${ms.atomS}>+ Melanoidins</text><text x="85" y="90" ${ms.atomS}>(>150°C roast)</text></g>`,
+    detail:{
+      structure:{en:'<strong>Multi-step cascade</strong>: sugar + amine → glycosylamine → Amadori rearrangement → dehydration → furanones → Strecker degradation → aldehydes + pyrazines → polymerization → melanoidins',
+                 th:'<strong>Multi-step cascade reaction</strong>: (1) Sugar + amine → glycosylamine (2) Amadori rearrangement (3) dehydration → furanones (4) Strecker degradation → aldehydes + pyrazines (5) Polymerization → melanoidins'},
+      origin:{en:'Occurs at roasting temp 150-220°C — <strong>does NOT occur during brewing</strong> (too cool)',th:'เกิดที่อุณหภูมิคั่ว 150-220°C — <strong>ไม่เกิดในระหว่าง brew</strong> (อุณหภูมิต่ำเกินไป)'},
+      mechanism:{en:'Heat energy causes reducing sugars (from sucrose breakdown) to react with amino acids (proline, leucine, etc.) in the bean',th:'พลังงานความร้อนทำให้ reducing sugars เข้าทำปฏิกริยากับ amino acids (proline, leucine, etc.) ในเมล็ด'},
+      sensory:{en:'<strong>Produces every important aromatic in coffee:</strong> furaneol (caramel/fruit), 2-furfurylthiol (coffee smell), pyrazines (nutty/roasted), furans (sweet), aldehydes (almond/vanilla), melanoidins (body/color)',th:'<strong>ผลิตทุก aromatic สำคัญในกาแฟ</strong>: furaneol (caramel/fruit), 2-furfurylthiol (coffee smell), pyrazines (nutty/roasted), furans (sweet), aldehydes (almond/vanilla), melanoidins (body/color)'},
+      key:{en:'<strong>Maillard = "the DNA of roasted coffee"</strong>. A good profile = balance of compounds produced. Light roast: furaneol + esters → fruit/floral. Dark roast: melanoidins → body/chocolate/bitter. <strong>Brewing only releases what Maillard already created</strong>',th:'<strong>Maillard = "DNA ของกาแฟคั่ว"</strong> — โพรไฟล์ที่ดี = balance ของ compounds — Light roast: furaneol + esters เด่น → fruit/floral — Dark roast: melanoidins เด่น → body/chocolate — <strong>Brewing เป็นแค่ "การปลดปล่อย" สิ่งที่ Maillard สร้างไว้แล้ว</strong>'},
+      stats:{'Temperature':'150-220°C','Where':'Roaster only','Products':'100s of aromatics','Control':'Roast profile'}
+    }
+  }
+};
+
+function renderActsNav() {
+  const nav = document.getElementById('actsNav');
+  const names = ACT_NAMES[LANG];
+  nav.innerHTML = ACTS.map(a => `<button class="act-btn ${a===currentAct?'active':''}" data-act="${a}"><span class="act-num">${ACT_ROMAN[a]}</span><span class="act-name">${names[a]}</span></button>`).join('');
+  nav.querySelectorAll('.act-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      currentAct = b.dataset.act;
+      document.querySelectorAll('.act-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderMolecules(currentAct);
+    });
+  });
+}
+
+function renderMolecules(actFilter) {
+  const grid = document.getElementById('moleculesGrid');
+  const names = ACT_NAMES[LANG];
+  // If actFilter is 'all' or null, show ALL grouped by category
+  // Otherwise show only that category
+  if (!actFilter || actFilter === 'all') {
+    let html = '';
+    ACTS.forEach(act => {
+      const mols = Object.entries(molecules).filter(([_,m])=>m.act===act);
+      if (mols.length === 0) return;
+      html += `<div class="act-header"><span class="act-header-num">${ACT_ROMAN[act]}</span><span class="act-header-name">${names[act]}</span><span class="act-header-count">${mols.length}</span></div>`;
+      html += `<div class="act-group">`;
+      html += mols.map(([id,m]) => molCardHtml(id, m)).join('');
+      html += `</div>`;
+    });
+    grid.innerHTML = html;
+  } else {
+    grid.innerHTML = Object.entries(molecules).filter(([_,m])=>m.act===actFilter).map(([id,m]) => molCardHtml(id, m)).join('');
+  }
+  grid.querySelectorAll('.molecule-card').forEach(c => c.addEventListener('click', () => openMolecule(c.dataset.id)));
+}
+
+function molCardHtml(id, m) {
+  return `<div class="molecule-card ${m.danger?'danger':''}" data-id="${id}">
+    <div class="molecule-viz"><svg class="molecule-svg" viewBox="0 0 200 120">${m.svg}</svg></div>
+    <div class="molecule-info">
+      <div class="molecule-name">${m.name[LANG]}</div>
+      <div class="molecule-formula">${m.formula}</div>
+      <div class="molecule-tagline">${m.tagline[LANG]}</div>
+      <div class="molecule-tags">${m.tags.map(t=>`<span class="mol-tag ${t.class}">${t.text}</span>`).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function openMolecule(id) {
+  const m = molecules[id]; if (!m) return;
+  const d = m.detail;
+  const sections = [];
+  if (d.structure) sections.push([L('l_structure'), d.structure[LANG]]);
+  if (d.origin) sections.push([L('l_origin'), d.origin[LANG]]);
+  if (d.mechanism) sections.push([L('l_mechanism'), d.mechanism[LANG]]);
+  if (d.extraction) sections.push([L('l_extraction'), d.extraction[LANG]]);
+  if (d.sensory) sections.push([L('l_sensory'), d.sensory[LANG]]);
+  if (d.key) sections.push([L('l_key'), d.key[LANG]]);
+  const statsHtml = d.stats ? `<div class="detail-section"><h4>${L('l_stats')}</h4><div class="detail-stats">${Object.entries(d.stats).map(([k,v])=>`<div class="detail-stat"><div class="detail-stat-label">${k}</div><div class="detail-stat-value">${v}</div></div>`).join('')}</div></div>` : '';
+  document.getElementById('detailContent').innerHTML = `
+    <button class="detail-close" id="detailClose">×</button>
+    <div class="detail-header">
+      <div class="detail-viz"><svg class="molecule-svg" viewBox="0 0 200 120" style="width:100%;height:100%">${m.svg}</svg></div>
+      <div class="detail-title-block">
+        <div class="detail-name">${m.name[LANG]}</div>
+        <div class="detail-formula">${m.formula}</div>
+        <div class="detail-tagline">${m.tagline[LANG]}</div>
+      </div>
+    </div>
+    ${sections.map(([h,b])=>`<div class="detail-section"><h4>${h}</h4><p>${b}</p></div>`).join('')}
+    ${statsHtml}`;
+  document.getElementById('detailClose').addEventListener('click', closeMolecule);
+  document.getElementById('moleculeDetail').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMolecule() {
+  document.getElementById('moleculeDetail').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('moleculeDetail').addEventListener('click', e => {
+  if (e.target.id==='moleculeDetail') closeMolecule();
+});
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeMolecule(); });
+
+// ============ LANGUAGE APPLY ============
+function applyLanguage() {
+  document.documentElement.lang = LANG;
+  // Title (HTML)
+  document.getElementById('titleText').innerHTML = L('title_html');
+  document.getElementById('subtitleText').textContent = L('subtitle');
+  document.getElementById('sec5desc').innerHTML = L('sec5d');
+  // All [data-i] elements
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const k = el.dataset.i;
+    if (k === 'sec5d' || k === 'sec2d' || k === 'sec4d' || k === 'sec6d') {
+      el.innerHTML = L(k);
+    } else {
+      el.textContent = L(k);
+    }
+  });
+  // Play button
+  if (isPlaying) playBtn.textContent = L('b_pause');
+  else playBtn.textContent = L('b_play');
+  // Re-render dynamic content
+  renderChart();
+  updateChartMarker(currentTime);
+  renderLegend();
+  renderPours();
+  renderTechniqueTabs();
+  renderTechnique(currentTechnique);
+  renderAnatomy();
+  renderActsNav();
+  renderMolecules(currentAct);
+  updateState(currentTime);
+}
+
+// Language toggle
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    LANG = btn.dataset.lang;
+    applyLanguage();
+  });
+});
+
+// ============ INIT ============
+setDripper('v60');
+renderChart();
+renderLegend();
+renderTechniqueTabs();
+renderTechnique('spiral-in');
+renderPours();
+renderAnatomy();
+renderActsNav();
+renderMolecules('all');
+updateState(0);
+applyLanguage();
+</script>
+</body>
+</html>

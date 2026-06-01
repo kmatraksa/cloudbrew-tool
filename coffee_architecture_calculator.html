@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Coffee Architecture Calculator · Blueprint Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070b14;--surface:#0d1520;--card:#121c2e;--card2:#172035;
+  --border:#1e2d44;--border2:#2a3d58;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#6b4e1e;
+  --blue:#60a5fa;--blue-dim:#1e3a5f;
+  --green:#4ade80;--red:#f87171;--amber:#fbbf24;--violet:#a78bfa;
+  --mg:#06b6d4;--ca:#f59e0b;--hco3:#84cc16;
+  --text:#e8f0f8;--muted:#6b8aad;--dim:#2d4060;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);min-height:100vh;padding:20px 14px 60px}
+/* Blueprint grid background */
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(96,165,250,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{max-width:980px;margin:0 auto;position:relative;z-index:1}
+
+/* ─── Layout ────────────────────────────────────────────────── */
+.section{margin-bottom:32px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.col{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:16px 18px}
+.card-gold{background:var(--card);border:1px solid var(--gold-dim);border-radius:6px;padding:16px 18px;box-shadow:0 0 0 1px rgba(201,148,58,.08),inset 0 1px 0 rgba(201,148,58,.06)}
+
+/* ─── Typography ────────────────────────────────────────────── */
+.eyebrow{font-family:var(--mono);font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted)}
+.label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.label-gold{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-weight:700}
+h1{font-size:clamp(1.5rem,5vw,2.8rem);font-weight:300;letter-spacing:-.025em;line-height:1.05}
+.hero-quote{font-family:var(--serif);font-style:italic;font-size:clamp(.9rem,2.5vw,1.15rem);color:var(--muted);line-height:1.5;border-left:2px solid var(--gold-dim);padding-left:14px;margin:12px 0 20px}
+
+/* ─── Inputs ────────────────────────────────────────────────── */
+.s-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.s-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.s-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--gold-lt)}
+.s-val span{font-size:9px;color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px rgba(201,148,58,.4);margin-top:-5px;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--border2)}
+input[type=number]{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:7px 8px;font-family:var(--mono);font-size:14px;width:74px;outline:none;-moz-appearance:textfield;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+input[type=number]:focus{border-color:var(--gold);outline:none;box-shadow:0 0 0 2px rgba(201,148,58,.18)}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+@media(max-width:640px){input[type=number]{font-size:16px;padding:9px 10px;width:80px;border-radius:5px}}
+.num-unit{font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:2px}
+
+/* ─── Presets ───────────────────────────────────────────────── */
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.preset-btn{padding:14px;border-radius:5px;border:1px solid var(--border2);background:var(--surface);cursor:pointer;text-align:left;transition:all .2s;position:relative;overflow:hidden}
+.preset-btn:hover{border-color:var(--gold-dim);background:rgba(201,148,58,.04)}
+.preset-btn.active{border-color:var(--gold);background:rgba(201,148,58,.07)}
+.preset-btn::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,var(--gold),transparent);opacity:0;transition:opacity .2s}
+.preset-btn.active::before{opacity:1}
+.preset-name{font-family:var(--serif);font-size:15px;color:var(--text);margin-bottom:2px;font-weight:300}
+.preset-year{font-family:var(--mono);font-size:8px;color:var(--gold);letter-spacing:.15em;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+.preset-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px}
+.preset-tag{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);color:var(--blue)}
+.preset-sub{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.4}
+
+/* ─── Stage cards ───────────────────────────────────────────── */
+.stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.stage-card{background:var(--card2);border:1px solid var(--border2);border-radius:5px;padding:12px;position:relative;transition:border-color .2s}
+.stage-card.selected{border-color:var(--gold-dim)}
+.stage-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.stage-badge{font-family:var(--mono);font-size:7px;font-weight:700;letter-spacing:.12em;padding:2px 6px;border-radius:2px;text-transform:uppercase}
+.stage-check{width:16px;height:16px;border-radius:3px;border:1px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.stage-check.on{border-color:var(--gold);background:rgba(201,148,58,.1)}
+.stage-name{font-family:var(--serif);font-size:13px;color:var(--text);margin-bottom:1px}
+.stage-sub{font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:8px}
+.stage-inputs{display:flex;flex-direction:column;gap:6px}
+.stage-row{display:flex;justify-content:space-between;align-items:center}
+.stage-row-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.05em}
+.stage-row-lbl.gold{color:var(--gold-lt)}
+.stage-row-lbl.blue{color:var(--blue)}
+.temp-badge{font-family:var(--mono);font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;transition:background .25s,color .25s}
+.stat4{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:8px}
+.s4-cell{background:var(--surface);padding:6px 4px;text-align:center}
+.s4-val{font-family:var(--mono);font-size:11px;font-weight:700;line-height:1}
+.s4-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:1px}
+
+/* ─── Gauge ─────────────────────────────────────────────────── */
+.gauge{margin-bottom:10px}
+.g-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.g-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.g-val{font-family:var(--mono);font-size:15px;font-weight:700}
+.g-val span{font-size:9px;color:var(--dim)}
+.g-track{position:relative;height:6px;border-radius:3px;background:var(--surface);border:1px solid var(--border)}
+.g-fill{position:absolute;top:0;bottom:0;left:0;border-radius:3px;transition:width .3s,background .3s}
+.g-zone{position:absolute;top:0;bottom:0;background:rgba(74,222,128,.1);border-radius:3px}
+.g-mark{position:absolute;top:-2px;bottom:-2px;width:1.5px}
+.g-footer{display:flex;justify-content:space-between;margin-top:3px;font-family:var(--mono);font-size:8px;color:var(--dim)}
+
+/* ─── Status ────────────────────────────────────────────────── */
+.status-ideal{padding:12px 14px;border-radius:5px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.25)}
+.status-off{padding:12px 14px;border-radius:5px;background:rgba(201,148,58,.05);border:1px solid rgba(201,148,58,.2)}
+.status-empty{padding:10px 14px;border-radius:5px;background:var(--card2);border:1px solid var(--border);text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.tag{padding:2px 8px;border-radius:3px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.2);color:var(--amber);font-size:10px;font-family:var(--mono)}
+
+/* ─── SCA Chart ─────────────────────────────────────────────── */
+.chart-svg{width:100%;height:auto;display:block}
+
+/* ─── Thermal Narrative ─────────────────────────────────────── */
+.thermal-bar{position:relative;height:44px;border-radius:4px;overflow:hidden;margin:10px 0}
+.thermal-stage{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;transition:all .3s}
+.thermal-labels{display:grid;margin-top:4px;font-family:var(--mono);font-size:8px;color:var(--muted)}
+
+/* ─── Water Chemistry ───────────────────────────────────────── */
+.water-tri{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.mineral-card{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:10px 12px;text-align:center}
+.mineral-icon{font-size:18px;margin-bottom:4px}
+.mineral-name{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:2px}
+.mineral-role{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--muted);margin-bottom:6px}
+.mineral-bar{height:4px;border-radius:2px;margin:4px 0;transition:width .3s}
+.mineral-val{font-family:var(--mono);font-size:14px;font-weight:700}
+.mineral-val span{font-size:9px;color:var(--muted)}
+.water-insight{padding:8px 12px;border-radius:4px;font-family:var(--mono);font-size:10px;line-height:1.6;margin-top:8px}
+
+/* ─── Cooldown ──────────────────────────────────────────────── */
+.cooldown-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.cool-card{padding:12px;border-radius:5px;border:1px solid var(--border);background:var(--surface)}
+.cool-temp{font-family:var(--mono);font-size:18px;font-weight:700;margin-bottom:4px}
+.cool-name{font-family:var(--serif);font-size:13px;color:var(--text);margin-bottom:4px}
+.cool-action{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.5}
+.cool-flavors{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.cool-tag{font-family:var(--mono);font-size:8px;padding:2px 5px;border-radius:2px;font-weight:500}
+
+/* ─── CVA Scoring ───────────────────────────────────────────── */
+.cva-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.cva-side{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:12px}
+.cva-side-title{font-family:var(--mono);font-size:8px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:10px}
+.cva-attr{margin-bottom:8px}
+.cva-attr-header{display:flex;justify-content:space-between;margin-bottom:3px}
+.cva-attr-name{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.cva-attr-val{font-family:var(--mono);font-size:11px;font-weight:700}
+.cva-track{height:4px;border-radius:2px;background:var(--border);position:relative}
+.cva-fill{height:100%;border-radius:2px;transition:width .25s}
+.hedonic-score{text-align:center;padding:10px;margin-top:6px}
+.hedonic-num{font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--gold-lt);line-height:1}
+.hedonic-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* ─── Table ─────────────────────────────────────────────────── */
+.brew-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:10px}
+.brew-table th,.brew-table td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
+.brew-table th{background:var(--surface);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.brew-table tr:last-child td{border-bottom:none}
+
+/* ─── Era badge ─────────────────────────────────────────────── */
+.era-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:100px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;font-weight:700;text-transform:uppercase}
+
+/* ─── Misc ──────────────────────────────────────────────────── */
+.note{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.55;margin-top:5px}
+.note b{color:var(--muted)}
+.divider{height:1px;background:var(--border);margin:8px 0}
+.derived{display:flex;justify-content:space-between;padding:7px 10px;border-radius:4px;background:var(--surface);border:1px solid var(--border);font-family:var(--mono);font-size:10px}
+
+/* ─── Radar ─────────────────────────────────────────────────── */
+.radar-svg{width:100%;height:auto;display:block}
+
+@media(max-width:480px){
+  .presets{grid-template-columns:1fr}
+  .stages{grid-template-columns:1fr 1fr}
+  .water-tri{grid-template-columns:1fr}
+  .cooldown-strip{grid-template-columns:1fr}
+  .cva-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<div class="section" style="margin-bottom:20px">
+  <div class="eyebrow" style="margin-bottom:8px">Coffee Architecture Blueprint · Calculator</div>
+  <h1>The <em style="color:var(--gold);font-style:italic">Sensory Narrative</em> Brewer</h1>
+  <p class="hero-quote">"The cup is not the destination. It is the architecture of the experience.<br>Design the path. Brew the narrative."</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <span class="era-badge" style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171">Era 1 · 2017–2021</span>
+    <span style="font-family:var(--mono);font-size:9px;color:var(--dim);align-self:center">Max TDS/EY → muddiness</span>
+    <span style="font-family:var(--mono);font-size:14px;color:var(--dim);align-self:center">→</span>
+    <span class="era-badge" style="background:rgba(201,148,58,.08);border:1px solid rgba(201,148,58,.3);color:var(--gold)">Era 2 · 2023–2025</span>
+    <span style="font-family:var(--mono);font-size:9px;color:var(--muted);align-self:center">Selective extraction · temporal narrative</span>
+  </div>
+</div>
+
+<!-- ── CHAMPION PRESETS ─────────────────────────────────────── -->
+<div class="section">
+  <div class="label-gold" style="margin-bottom:10px">Champion Presets</div>
+  <div class="presets">
+    <div class="preset-btn" id="presetMedina" onclick="loadPreset('medina')">
+      <div class="preset-year">WBrC Champion 2023</div>
+      <div class="preset-name">Carlos Medina</div>
+      <div class="preset-tags">
+        <span class="preset-tag">Zero Agitation</span>
+        <span class="preset-tag">Structural Clarity</span>
+      </div>
+      <div class="preset-sub">Origami + Brewista · 15.5g / 250ml · 91°C constant<br>5 equal pulses × 50g · 30s intervals · Laminar flow</div>
+    </div>
+    <div class="preset-btn" id="presetPeng" onclick="loadPreset('peng')">
+      <div class="preset-year">WBrC Champion 2025</div>
+      <div class="preset-name">George Jinyang Peng</div>
+      <div class="preset-tags">
+        <span class="preset-tag" style="border-color:rgba(201,148,58,.3);background:rgba(201,148,58,.08);color:var(--gold)">Thermal Staging</span>
+        <span class="preset-tag" style="border-color:rgba(201,148,58,.3);background:rgba(201,148,58,.08);color:var(--gold)">Melodrip</span>
+      </div>
+      <div class="preset-sub">Solo + Melodrip · 15g / 210ml · 40–45ppm water<br>96°C × 2 stages → 80°C via Melodrip · 1:45 total</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RECIPE SETUP ────────────────────────────────────────── -->
+<div class="section">
+  <div class="card-gold">
+    <div class="label-gold" style="margin-bottom:14px">① Recipe Setup</div>
+    <div class="s-row"><span class="s-lbl">Coffee Dose</span><span class="s-val" id="doseVal">15.0<span>g</span></span></div>
+    <input type="range" id="doseSlider" min="10" max="30" step="0.5" value="15" oninput="onDose(this.value)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div class="derived"><span class="s-lbl">Brew Ratio</span><span id="ratioVal" style="font-family:var(--mono);font-size:11px">—</span></div>
+      <div class="derived"><span class="s-lbl">Total EXT</span><span id="totalEXT" style="font-family:var(--mono);font-size:11px;color:var(--gold-lt)">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STAGE INPUTS ───────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:8px">② Stage-by-Stage Input <span style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-left:8px">5 stages · measure each fraction with refractometer</span></div>
+  <div class="stages" id="stageCards"></div>
+  <div class="note" style="margin-top:8px">
+    <b>Tip:</b> Collect 20–30mL from dripper exit at each stage separately. Measure TDS, weigh yield. Pour measured volumes into serving vessel.
+    <span style="color:var(--amber);margin-left:8px">⚠ Temperature shown is kettle inlet temperature — not bed temperature</span>
+  </div>
+</div>
+
+<!-- ── BLEND + CHART ──────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">③ Blend Selector — toggle stages · selective extraction not max extraction</div>
+  <div class="grid2">
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:10px">Blended Result</div>
+        <div id="blendGauges"></div>
+        <div id="blendStatus" style="margin-top:8px"></div>
+      </div>
+      <!-- Dilution -->
+      <div class="card">
+        <div class="label" style="margin-bottom:10px">Dilution to Target</div>
+        <div class="s-row"><span class="s-lbl">Target TDS</span><span class="s-val" id="targetTDSval">1.30<span>%</span></span></div>
+        <input type="range" id="targetTDS" min=".80" max="1.80" step=".01" value="1.30" oninput="onTargetTDS(this.value)">
+        <div id="dilResult" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:8px">SCA Brewing Control Chart · Selective Extraction Zone</div>
+        <svg id="scaChart" class="chart-svg" viewBox="0 0 420 260"></svg>
+        <div id="scaLegend" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── THERMAL NARRATIVE ──────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">④ Thermal Narrative — your temperature story</div>
+  <div class="card">
+    <div id="thermalViz"></div>
+    <div class="note" style="margin-top:8px">
+      <b>Three Pillars of Modern Brewing:</b>
+      Low Turbulence (laminar flow, prevent fines collapse) ·
+      Water Chemistry (GH:KH ratio, origin-specific) ·
+      Thermal Progression (stage temperature drops to suppress late bitters)
+    </div>
+  </div>
+</div>
+
+<!-- ── WATER CHEMISTRY ────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">⑤ Water Chemistry — engineering the mineral substrate</div>
+  <div class="card">
+    <div class="water-tri">
+      <div class="mineral-card">
+        <div class="mineral-icon">💎</div>
+        <div class="mineral-name" style="color:var(--mg)">Magnesium</div>
+        <div class="mineral-role" style="color:var(--mg)">The Brightness Booster</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span class="s-lbl">ppm GH</span>
+          <span id="mgVal" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--mg)">35<span style="font-size:9px;color:var(--muted)">ppm</span></span>
+        </div>
+        <input type="range" min="0" max="80" step="1" value="35" oninput="onMineral('mg',this.value)" style="accent-color:var(--mg)">
+        <div class="mineral-bar" id="mgBar" style="background:var(--mg);width:44%"></div>
+        <div class="note" style="text-align:left;margin-top:4px">Targets vibrant fruit acids · increases flavor clarity up to 35% vs distilled water</div>
+      </div>
+      <div class="mineral-card">
+        <div class="mineral-icon">🏛</div>
+        <div class="mineral-name" style="color:var(--ca)">Calcium</div>
+        <div class="mineral-role" style="color:var(--ca)">The Body Builder</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span class="s-lbl">ppm GH</span>
+          <span id="caVal" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ca)">25<span style="font-size:9px;color:var(--muted)">ppm</span></span>
+        </div>
+        <input type="range" min="0" max="80" step="1" value="25" oninput="onMineral('ca',this.value)" style="accent-color:var(--ca)">
+        <div class="mineral-bar" id="caBar" style="background:var(--ca);width:31%"></div>
+        <div class="note" style="text-align:left;margin-top:4px">Enhances tactile texture + mouthfeel · boosts perceived sweetness/body ~26%</div>
+      </div>
+      <div class="mineral-card">
+        <div class="mineral-icon">⚖️</div>
+        <div class="mineral-name" style="color:var(--hco3)">Bicarbonate</div>
+        <div class="mineral-role" style="color:var(--hco3)">The Peacekeeper</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span class="s-lbl">ppm KH</span>
+          <span id="hco3Val" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--hco3)">20<span style="font-size:9px;color:var(--muted)">ppm</span></span>
+        </div>
+        <input type="range" min="0" max="60" step="1" value="20" oninput="onMineral('hco3',this.value)" style="accent-color:var(--hco3)">
+        <div class="mineral-bar" id="hco3Bar" style="background:var(--hco3);width:33%"></div>
+        <div class="note" style="text-align:left;margin-top:4px">Acidity buffer · every +10ppm dials back perceived acidity ~15%</div>
+      </div>
+    </div>
+    <div id="waterInsight" class="water-insight"></div>
+  </div>
+</div>
+
+<!-- ── COOLDOWN EXPERIENCE ────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">⑥ The Cooldown Experience — Peng's temporal narrative design</div>
+  <div class="card">
+    <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:12px">Design your cup to shift through sensory compartments as it cools. Modern coffee is a spatial and temporal architecture.</p>
+    <div class="cooldown-strip">
+      <div class="cool-card" style="border-color:rgba(248,113,113,.3)">
+        <div class="cool-temp" style="color:#f87171">65°C</div>
+        <div class="cool-name">The Orthonasal Peak</div>
+        <div class="cool-action">Action: Swirl and assess Aroma<br>SCA section: Fragrance/Aroma</div>
+        <div class="cool-flavors">
+          <span class="cool-tag" style="background:rgba(248,113,113,.1);color:#f87171">Muscat grape</span>
+          <span class="cool-tag" style="background:rgba(248,113,113,.1);color:#f87171">Apricot</span>
+          <span class="cool-tag" style="background:rgba(248,113,113,.1);color:#f87171">Raspberry</span>
+        </div>
+      </div>
+      <div class="cool-card" style="border-color:rgba(201,148,58,.4)">
+        <div class="cool-temp" style="color:var(--gold)">50°C</div>
+        <div class="cool-name">The Flavor & Acidity Apex</div>
+        <div class="cool-action">Action: First sip<br>SCA section: Flavor · Acidity</div>
+        <div class="cool-flavors">
+          <span class="cool-tag" style="background:rgba(201,148,58,.1);color:var(--gold)">Bright acidity</span>
+          <span class="cool-tag" style="background:rgba(201,148,58,.1);color:var(--gold)">Honey sweetness</span>
+          <span class="cool-tag" style="background:rgba(201,148,58,.1);color:var(--gold)">Brown sugar</span>
+        </div>
+      </div>
+      <div class="cool-card" style="border-color:rgba(96,165,250,.3)">
+        <div class="cool-temp" style="color:var(--blue)">&lt;45°C</div>
+        <div class="cool-name">The Mouthfeel Shift</div>
+        <div class="cool-action">Action: Final sips<br>SCA section: Mouthfeel · Aftertaste</div>
+        <div class="cool-flavors">
+          <span class="cool-tag" style="background:rgba(96,165,250,.1);color:var(--blue)">Juicy texture</span>
+          <span class="cool-tag" style="background:rgba(96,165,250,.1);color:var(--blue)">Peach finish</span>
+          <span class="cool-tag" style="background:rgba(96,165,250,.1);color:var(--blue)">Lingering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CVA SCORING ────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">⑦ CVA Assessment — SCA 2024+ framework</div>
+  <div class="card">
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span class="era-badge" style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);color:var(--blue)">Descriptive · Objective · What is it?</span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--dim);align-self:center">+</span>
+      <span class="era-badge" style="background:rgba(201,148,58,.08);border:1px solid rgba(201,148,58,.2);color:var(--gold)">Affective · Subjective · How much do I like it?</span>
+    </div>
+    <div class="cva-grid">
+      <!-- Descriptive -->
+      <div class="cva-side">
+        <div class="cva-side-title" style="color:var(--blue)">Descriptive Assessment · 15-pt intensity scale</div>
+        <div id="cvaDescriptive"></div>
+        <div class="note" style="margin-top:8px"><b>Tools:</b> CATA (Check-All-That-Apply) lists · World Coffee Research Sensory Lexicon</div>
+      </div>
+      <!-- Affective -->
+      <div class="cva-side">
+        <div class="cva-side-title" style="color:var(--gold)">Affective Assessment · Impression of Quality</div>
+        <div class="hedonic-score">
+          <div class="hedonic-num" id="hedonicNum">—</div>
+          <div class="hedonic-lbl">Impression of Quality</div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px">Derived from descriptive score × personal preference weight</div>
+        </div>
+        <div class="s-row" style="margin-top:10px"><span class="s-lbl">Preference Weight</span><span class="s-val" id="prefWeightVal">1.0<span>×</span></span></div>
+        <input type="range" id="prefWeight" min=".5" max="1.5" step=".1" value="1.0" oninput="onPrefWeight(this.value)">
+        <div class="note" style="margin-top:6px"><b>Note:</b> SCA CVA decouples "what it tastes like" (descriptive, objective) from "how much you like it" (affective, hedonic). Both matter for competition.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── EXTRACTION TABLE ───────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">⑧ Extraction Analysis — per-stage breakdown</div>
+  <div class="card" style="overflow-x:auto">
+    <table id="stageTable" class="brew-table"></table>
+  </div>
+</div>
+
+<!-- ── FLAVOR RADAR ───────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">⑨ Blend Flavor Architecture</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="label" style="margin-bottom:8px">Radar — weighted by soluble contribution</div>
+      <svg id="radarChart" class="radar-svg" viewBox="0 0 280 280"></svg>
+    </div>
+    <div class="card">
+      <div class="label" style="margin-bottom:12px">Attribute Bars</div>
+      <div id="flavorBars"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+const IDEAL = { eyLo:18, eyHi:22, tdsLo:1.15, tdsHi:1.45 };
+// "Selective extraction zone" — Era 2 targets (slightly lower TDS/EY than max)
+const SEL  = { eyLo:16, eyHi:21, tdsLo:1.10, tdsHi:1.50 };
+const CHART = { eyMin:14, eyMax:28, tdsMin:.80, tdsMax:1.80 };
+
+const STAGE_META = [
+  { name:'Stage 1', sub:'Bloom · acidic primer',    color:'#ef4444', badge:'S1', bg:'rgba(239,68,68,.12)', defWater:30,  defYield:14, defTDS:2.00, defTemp:96, philosophy:'Rapidly expands coffee · extracts soluble organic acids + florals' },
+  { name:'Stage 2', sub:'Core structure',           color:'#f59e0b', badge:'S2', bg:'rgba(245,158,11,.12)', defWater:80, defYield:70, defTDS:1.52, defTemp:96, philosophy:'Heavy sweetness + primary flavor compounds' },
+  { name:'Stage 3', sub:'Sweet development',        color:'#4ade80', badge:'S3', bg:'rgba(74,222,128,.12)', defWater:70, defYield:60, defTDS:1.28, defTemp:96, philosophy:'Sugar hydrolysis · sucrose → glucose + fructose' },
+  { name:'Stage 4', sub:'Thermal restraint',        color:'#60a5fa', badge:'S4', bg:'rgba(96,165,250,.12)', defWater:50, defYield:43, defTDS:0.72, defTemp:80, philosophy:'Low-temp via Melodrip · prevents bitter/wood compounds' },
+  { name:'Stage 5', sub:'Equivalent / dilution',   color:'#a78bfa', badge:'EQ', bg:'rgba(167,139,250,.12)', defWater:0,  defYield:0,  defTDS:0,    defTemp:0,  philosophy:'Optional: add clean water to adjust final TDS' },
+];
+
+// Flavor profiles per stage [Fragrance, Flavor, Acidity, Sweetness, Body, Mouthfeel, Bitterness, Aftertaste]
+const FLAVOR_AXES = ['Fragrance','Flavor','Acidity','Sweetness','Body','Mouthfeel','Bitterness','Aftertaste'];
+const STAGE_FLAVORS = [
+  [90, 65, 88, 30, 10, 20, 5,  35],  // S1: bloom — high fragrance/acidity
+  [70, 85, 65, 78, 45, 55, 15, 70],  // S2: core — full flavor
+  [50, 80, 42, 92, 60, 72, 20, 85],  // S3: sweet — peak sweetness/aftertaste
+  [25, 55, 28, 45, 85, 88, 32, 65],  // S4: low-temp — heavy body/mouthfeel, some bitter
+  [10, 15, 10, 30, 20, 40, 5,  20],  // S5: equivalent — dilution character
+];
+
+// CVA Descriptive attributes (15-point scale, 1=very low, 15=very high)
+const CVA_ATTRS = ['Fragrance', 'Aroma', 'Flavor', 'Acidity', 'Sweetness', 'Mouthfeel'];
+const CVA_COLORS = ['#c084fc','#60a5fa','#f59e0b','#ef4444','#4ade80','#06b6d4'];
+
+// State
+const S = {
+  dose: 15,
+  targetTDS: 1.30,
+  prefWeight: 1.0,
+  minerals: { mg:35, ca:25, hco3:20 },
+  stages: STAGE_META.map(m => ({
+    water:    m.defWater,
+    yieldOut: m.defYield,
+    tds:      m.defTDS,
+    temp:     m.defTemp,
+    selected: m.defWater > 0,
+  })),
+  cva: [8, 7, 9, 8, 10, 8],  // initial CVA descriptive scores (out of 15)
+  activePreset: null,
+};
+
+// ── Presets ──────────────────────────────────────────────────────────────────
+const PRESETS = {
+  medina: {
+    dose: 15.5,
+    stages: [
+      { water:50, yieldOut:28, tds:2.10, temp:91, selected:true },
+      { water:50, yieldOut:45, tds:1.55, temp:91, selected:true },
+      { water:50, yieldOut:47, tds:1.35, temp:91, selected:true },
+      { water:50, yieldOut:48, tds:1.10, temp:91, selected:true },
+      { water:50, yieldOut:48, tds:0.85, temp:91, selected:true },
+    ]
+  },
+  peng: {
+    dose: 15,
+    stages: [
+      { water:30, yieldOut:14, tds:2.54, temp:96, selected:true },
+      { water:90, yieldOut:80, tds:1.09, temp:96, selected:true },
+      { water:75, yieldOut:67, tds:0.53, temp:80, selected:true },
+      { water:0,  yieldOut:0,  tds:0,    temp:0,  selected:false },
+      { water:0,  yieldOut:0,  tds:0,    temp:0,  selected:false },
+    ]
+  }
+};
+
+function loadPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  S.dose = p.dose;
+  S.stages = p.stages.map(s => ({...s}));
+  S.activePreset = name;
+  document.getElementById('doseSlider').value = p.dose;
+  document.getElementById('doseVal').innerHTML = `${p.dose.toFixed(1)}<span>g</span>`;
+  document.getElementById('presetMedina').classList.toggle('active', name === 'medina');
+  document.getElementById('presetPeng').classList.toggle('active', name === 'peng');
+  renderAll();
+}
+
+// ── Calculations ─────────────────────────────────────────────────────────────
+function calcStage(i) {
+  const st = S.stages[i];
+  const liq  = st.yieldOut;
+  const soli = (st.tds / 100) * liq;
+  const ey   = S.dose > 0 ? (soli / S.dose) * 100 : 0;
+  return { liq, soli, ey };
+}
+
+function calcBlend(idxs) {
+  if (!idxs.length) return null;
+  let totalLiq = 0, totalSoli = 0;
+  idxs.forEach(i => {
+    const c = calcStage(i);
+    totalLiq  += c.liq;
+    totalSoli += c.soli;
+  });
+  if (!totalLiq) return null;
+  return { tds: totalSoli/totalLiq*100, ey: totalSoli/S.dose*100, volume: totalLiq };
+}
+
+function diagnose(ey, tds) {
+  if (!ey || !tds) return null;
+  const ok = ey >= IDEAL.eyLo && ey <= IDEAL.eyHi && tds >= IDEAL.tdsLo && tds <= IDEAL.tdsHi;
+  if (ok) return { type:'ideal' };
+  const sel = ey >= SEL.eyLo && ey <= SEL.eyHi && tds >= SEL.tdsLo && tds <= SEL.tdsHi;
+  const parts = [], fixes = [];
+  if (ey < IDEAL.eyLo)  { parts.push('Under-extracted'); fixes.push('Grind finer','↑ Temp','↑ Contact time'); }
+  if (ey > IDEAL.eyHi)  { parts.push('Over-extracted');  fixes.push('Grind coarser','↓ Temp','Tail-cut earlier'); }
+  if (tds < IDEAL.tdsLo){ parts.push('Too weak');         fixes.push('Tighter ratio','↑ Dose'); }
+  if (tds > IDEAL.tdsHi){ parts.push('Too strong');       fixes.push('Looser ratio','Dilute'); }
+  return { type: sel ? 'selective' : 'off', label: parts.join(' · '), fixes, isSelective: sel };
+}
+
+function selectedIdxs() {
+  return S.stages.map((s,i) => s.selected ? i : -1).filter(i => i >= 0);
+}
+
+// ── SVG helper ───────────────────────────────────────────────────────────────
+function svgEl(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svgTxt(par, x, y, txt, attrs) {
+  const t = svgEl('text', {x,y,...attrs}, par);
+  t.textContent = txt;
+  return t;
+}
+function toX(ey, W) { return ((ey - CHART.eyMin)/(CHART.eyMax - CHART.eyMin))*W; }
+function toY(tds, H) { return H - ((tds - CHART.tdsMin)/(CHART.tdsMax - CHART.tdsMin))*H; }
+
+// ── SCA Chart ─────────────────────────────────────────────────────────────────
+function renderChart() {
+  const svg = document.getElementById('scaChart');
+  svg.innerHTML = '';
+  const W=420, H=260, P={l:42,r:12,t:12,b:32};
+  const cW=W-P.l-P.r, cH=H-P.t-P.b;
+
+  const defs = svgEl('defs',{},svg);
+  const clip = svgEl('clipPath',{id:'cclip'},defs);
+  svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH},clip);
+
+  svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH,fill:'#0d1520',stroke:'#1e2d44','stroke-width':1,rx:2},svg);
+  const g = svgEl('g',{'clip-path':'url(#cclip)'},svg);
+
+  // Grid
+  [14,16,18,20,22,24,26,28].forEach(v => svgEl('line',{x1:P.l+toX(v,cW),y1:P.t,x2:P.l+toX(v,cW),y2:P.t+cH,stroke:'#1e2d44','stroke-width':1},g));
+  [.8,.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8].forEach(v => svgEl('line',{x1:P.l,y1:P.t+toY(v,cH),x2:P.l+cW,y2:P.t+toY(v,cH),stroke:'#1e2d44','stroke-width':1},g));
+
+  // Selective extraction zone (Era 2 — broader, lower)
+  const sx1=toX(SEL.eyLo,cW), sx2=toX(SEL.eyHi,cW);
+  const sy1=toY(SEL.tdsHi,cH), sy2=toY(SEL.tdsLo,cH);
+  svgEl('rect',{x:P.l+sx1,y:P.t+sy1,width:sx2-sx1,height:sy2-sy1,fill:'rgba(201,148,58,.05)',stroke:'rgba(201,148,58,.25)','stroke-width':1.2,'stroke-dasharray':'3,2',rx:2},g);
+  svgTxt(g, P.l+(sx1+sx2)/2, P.t+sy1+10, 'SELECTIVE', {'text-anchor':'middle',fill:'rgba(201,148,58,.5)','font-family':'JetBrains Mono,monospace','font-size':6,'letter-spacing':2,'font-weight':700});
+
+  // SCA ideal zone
+  const ix1=toX(IDEAL.eyLo,cW), ix2=toX(IDEAL.eyHi,cW);
+  const iy1=toY(IDEAL.tdsHi,cH), iy2=toY(IDEAL.tdsLo,cH);
+  svgEl('rect',{x:P.l+ix1,y:P.t+iy1,width:ix2-ix1,height:iy2-iy1,fill:'rgba(74,222,128,.06)',stroke:'rgba(74,222,128,.3)','stroke-width':1,'stroke-dasharray':'4,3',rx:2},g);
+  svgTxt(g, P.l+(ix1+ix2)/2, P.t+iy1+11, 'SCA IDEAL', {'text-anchor':'middle',fill:'rgba(74,222,128,.55)','font-family':'JetBrains Mono,monospace','font-size':6,'letter-spacing':2,'font-weight':700});
+
+  // Zone shading (over/under)
+  svgEl('rect',{x:P.l,y:P.t,width:toX(IDEAL.eyLo,cW),height:cH,fill:'rgba(248,113,113,.03)'},g);
+  svgEl('rect',{x:P.l+toX(IDEAL.eyHi,cW),y:P.t,width:cW-toX(IDEAL.eyHi,cW),height:cH,fill:'rgba(248,113,113,.03)'},g);
+
+  // Stage dots
+  STAGE_META.forEach((meta,i) => {
+    const st  = S.stages[i];
+    const c   = calcStage(i);
+    if (!st.yieldOut || !st.tds) return;
+    if (c.ey < CHART.eyMin || c.ey > CHART.eyMax || st.tds < CHART.tdsMin || st.tds > CHART.tdsMax) return;
+    const dx = P.l + toX(c.ey, cW), dy = P.t + toY(st.tds, cH);
+    const dim = !st.selected;
+    svgTxt(g, dx, dy-9, meta.badge, {'text-anchor':'middle',fill:dim?'rgba(100,120,150,.3)':meta.color,'font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1});
+    svgEl('circle',{cx:dx,cy:dy,r:5,fill:dim?'rgba(13,21,32,.9)':meta.color,stroke:dim?'rgba(50,80,100,.3)':meta.color,'stroke-width':dim?1:0,'fill-opacity':dim?.3:.85},g);
+  });
+
+  // Blend dot
+  const sel = selectedIdxs();
+  const blend = calcBlend(sel);
+  if (blend && blend.tds >= CHART.tdsMin && blend.tds <= CHART.tdsMax && blend.ey >= CHART.eyMin && blend.ey <= CHART.eyMax) {
+    const bx = P.l + toX(blend.ey,cW), by = P.t + toY(blend.tds,cH);
+    const rg = svgEl('radialGradient',{id:'bglw',cx:'50%',cy:'50%',r:'50%'},defs);
+    const s1=svgEl('stop',{offset:'0%'},rg);s1.style.stopColor='#c9943a';s1.style.stopOpacity='.45';
+    const s2=svgEl('stop',{offset:'100%'},rg);s2.style.stopColor='#c9943a';s2.style.stopOpacity='0';
+    svgEl('circle',{cx:bx,cy:by,r:13,fill:'url(#bglw)'},g);
+    ['l','r','t','b'].forEach((d,i) => {
+      const [x1,y1,x2,y2] = d==='l'?[P.l,by,bx-8,by]:d==='r'?[bx+8,by,P.l+cW,by]:d==='t'?[bx,P.t,bx,by-8]:[bx,by+8,bx,P.t+cH];
+      svgEl('line',{x1,y1,x2,y2,stroke:'#c9943a','stroke-width':.7,'stroke-opacity':.3,'stroke-dasharray':'3,3'},g);
+    });
+    svgEl('circle',{cx:bx,cy:by,r:6.5,fill:'#121c2e',stroke:'#c9943a','stroke-width':2.2},g);
+    svgEl('circle',{cx:bx,cy:by,r:3,fill:'#c9943a'},g);
+    svgTxt(g,bx,by-14,'BLEND',{'text-anchor':'middle',fill:'#e8be78','font-family':'JetBrains Mono,monospace','font-size':6.5,'font-weight':700,'letter-spacing':1.5});
+  }
+
+  // Axis ticks
+  [14,16,18,20,22,24,26,28].forEach(v => svgTxt(svg,P.l+toX(v,cW),H-9,v+'%',{'text-anchor':'middle',fill:'#6b8aad','font-family':'JetBrains Mono,monospace','font-size':8}));
+  [.8,1.0,1.2,1.4,1.6,1.8].forEach(v => svgTxt(svg,P.l-5,P.t+toY(v,cH)+3,v.toFixed(1),{'text-anchor':'end',fill:'#6b8aad','font-family':'JetBrains Mono,monospace','font-size':8}));
+  svgTxt(svg,P.l+cW/2,H-1,'EXTRACTION YIELD (%)',{'text-anchor':'middle',fill:'#2d4060','font-family':'JetBrains Mono,monospace','font-size':7,'letter-spacing':1});
+  svgTxt(svg,8,P.t+cH/2,'TDS (%)',{'text-anchor':'middle',fill:'#2d4060','font-family':'JetBrains Mono,monospace','font-size':7,'letter-spacing':1,transform:`rotate(-90,8,${P.t+cH/2})`});
+
+  // Legend
+  document.getElementById('scaLegend').innerHTML =
+    STAGE_META.map((m,i) => `<span style="display:flex;align-items:center;gap:4px;opacity:${S.stages[i].selected?1:.3}"><span style="width:8px;height:8px;border-radius:50%;background:${m.color};display:inline-block"></span>${m.name}</span>`).join('') +
+    `<span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block"></span>Blend</span>` +
+    `<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:6px;border:1px dashed rgba(201,148,58,.4);display:inline-block"></span>Selective Zone</span>`;
+}
+
+// ── Gauge ────────────────────────────────────────────────────────────────────
+function renderGauge(lbl, val, lo, hi, unit, iLo, iHi, dec) {
+  const p   = Math.max(0,Math.min(100,((val-lo)/(hi-lo))*100));
+  const ilp = Math.max(0,((iLo-lo)/(hi-lo))*100);
+  const ihp = Math.max(0,Math.min(100,((iHi-lo)/(hi-lo))*100));
+  const ok  = val>=iLo && val<=iHi;
+  const col = ok?'#4ade80':val<iLo?'#fbbf24':'#f87171';
+  return `<div class="gauge">
+    <div class="g-header"><span class="g-lbl">${lbl}</span><span class="g-val" style="color:${col}">${val.toFixed(dec)}<span>${unit}</span></span></div>
+    <div class="g-track">
+      <div class="g-zone" style="left:${ilp}%;width:${ihp-ilp}%"></div>
+      <div class="g-fill" style="width:${p}%;background:${col}"></div>
+      <div class="g-mark" style="left:${ilp}%;background:rgba(74,222,128,.4)"></div>
+      <div class="g-mark" style="left:${ihp}%;background:rgba(74,222,128,.4)"></div>
+    </div>
+    <div class="g-footer"><span>${lo}${unit}</span><span style="color:rgba(74,222,128,.5)">Ideal ${iLo}–${iHi}${unit}</span><span>${hi}${unit}</span></div>
+  </div>`;
+}
+
+// ── Blend result ──────────────────────────────────────────────────────────────
+function renderBlend() {
+  const sel   = selectedIdxs();
+  const blend = calcBlend(sel);
+  const ge    = document.getElementById('blendGauges');
+  const st    = document.getElementById('blendStatus');
+
+  if (!blend) {
+    ge.innerHTML = '';
+    st.innerHTML = '<div class="status-empty">Select at least one stage</div>';
+    return;
+  }
+  ge.innerHTML =
+    renderGauge('TDS (blend)', blend.tds, .8, 1.8, '%', 1.15, 1.45, 2) +
+    renderGauge('Extraction Yield (blend)', blend.ey, 14, 28, '%', 18, 22, 1) +
+    `<div class="derived"><span class="s-lbl">Volume</span><span style="font-family:var(--mono);font-size:11px">${blend.volume.toFixed(0)}mL</span></div>`;
+
+  const diag = diagnose(blend.ey, blend.tds);
+  if (!diag) { st.innerHTML = ''; return; }
+  if (diag.type === 'ideal') {
+    st.innerHTML = `<div class="status-ideal"><div style="font-family:var(--serif);font-size:16px;font-weight:300;color:#4ade80;margin-bottom:3px">✓ SCA Ideal Zone</div><div style="font-family:var(--mono);font-size:9px;color:rgba(74,222,128,.6)">EY 18–22% · TDS 1.15–1.45%</div></div>`;
+  } else if (diag.type === 'selective') {
+    st.innerHTML = `<div class="status-off" style="border-color:rgba(201,148,58,.3)"><div style="font-family:var(--serif);font-size:14px;color:var(--gold);margin-bottom:4px">Selective Extraction Zone</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted)">Era 2 champion style — below max EY by design</div></div>`;
+  } else {
+    st.innerHTML = `<div class="status-off"><div style="font-family:var(--serif);font-size:15px;color:var(--amber);margin-bottom:6px">${diag.label}</div><div class="tags">${diag.fixes.map(f=>`<span class="tag">${f}</span>`).join('')}</div></div>`;
+  }
+}
+
+// ── Dilution ──────────────────────────────────────────────────────────────────
+function renderDilution() {
+  const sel   = selectedIdxs();
+  const blend = calcBlend(sel);
+  const el    = document.getElementById('dilResult');
+  if (!blend) { el.innerHTML = ''; return; }
+  const T = S.targetTDS, C = blend.tds, V = blend.volume;
+  if (C <= T) {
+    el.innerHTML = `<div class="note" style="color:var(--green)">Blend TDS (${C.toFixed(2)}%) ≤ target — no dilution needed</div>`;
+    return;
+  }
+  const newV = C/T*V, add = newV-V;
+  el.innerHTML = `
+    <div style="padding:10px 12px;border-radius:4px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Water to add</span>
+        <span style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--blue)">${add.toFixed(0)}g</span>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7">
+        ${C.toFixed(2)}% → ${T.toFixed(2)}% · Final: ${newV.toFixed(0)}mL · Ratio 1:${(newV/S.dose).toFixed(1)}
+      </div>
+    </div>`;
+}
+
+// ── Thermal Narrative ─────────────────────────────────────────────────────────
+function renderThermal() {
+  const el    = document.getElementById('thermalViz');
+  const total = S.stages.reduce((s, st) => s + st.water, 0);
+  if (!total) { el.innerHTML = ''; return; }
+
+  let html = `<div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Temperature · Pour Timeline</div>`;
+  html += `<div class="thermal-bar" id="thermalBar">`;
+
+  let pct = 0;
+  const validStages = S.stages.filter((s,i) => s.water > 0 && i < 5);
+  validStages.forEach((st, i) => {
+    const w     = st.water / total * 100;
+    const T     = st.temp;
+    const t_pct = (T - 70) / (100 - 70);
+    const r     = Math.round(255 * (1 - t_pct) + 96 * t_pct);
+    const g2    = Math.round(100 * (1 - t_pct) + 165 * t_pct);
+    const b     = Math.round(71 * (1 - t_pct) + 250 * t_pct);
+    const bg    = `rgba(${r},${g2},${b},.25)`;
+    const border= `rgba(${r},${g2},${b},.6)`;
+    html += `<div class="thermal-stage" style="left:${pct}%;width:${w}%;background:${bg};border-right:1px solid ${border};text-transform:uppercase;color:rgba(${r},${g2},${b},.9)">${T > 0 ? T + '°C' : ''}</div>`;
+    pct += w;
+  });
+  html += `</div>`;
+
+  // Stage labels
+  pct = 0;
+  html += `<div style="display:flex;position:relative;height:28px">`;
+  validStages.forEach((st, i) => {
+    const w = st.water / total * 100;
+    const meta = STAGE_META[i];
+    html += `<div style="flex:${st.water};font-family:var(--mono);font-size:8px;color:${st.selected?meta.color:'rgba(100,120,150,.3)'};text-align:center;line-height:1.3;padding-top:3px">${meta.badge}<br>${st.water}g</div>`;
+    pct += w;
+  });
+  html += `</div>`;
+
+  // Temperature drop indicator
+  const temps = validStages.filter(s => s.temp > 0).map(s => s.temp);
+  if (temps.length > 1) {
+    const maxT = Math.max(...temps), minT = Math.min(...temps);
+    if (maxT !== minT) {
+      html += `<div style="margin-top:6px;padding:6px 10px;border-radius:3px;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.15);font-family:var(--mono);font-size:9px;color:var(--blue)">
+        Thermal drop: ${maxT}°C → ${minT}°C (−${maxT-minT}°C)
+        · <span style="color:var(--muted)">Staging temperature drops to selectively extract organic acids early + prevent bitter compound extraction late</span>
+      </div>`;
+    }
+  }
+  el.innerHTML = html;
+}
+
+// ── Water Chemistry ───────────────────────────────────────────────────────────
+function renderWater() {
+  const { mg, ca, hco3 } = S.minerals;
+  const gh = mg + ca;
+  const ratio = hco3 > 0 ? (gh/hco3).toFixed(1) : '∞';
+  const target_gh_lo = 50, target_gh_hi = 70, target_kh_lo = 15, target_kh_hi = 25;
+  const ghOk = gh >= target_gh_lo && gh <= target_gh_hi;
+  const khOk = hco3 >= target_kh_lo && hco3 <= target_kh_hi;
+  const ratioOk = gh > 0 && hco3 > 0 && (gh/hco3) >= 2.5 && (gh/hco3) <= 3.5;
+
+  // Update bars
+  document.getElementById('mgBar').style.width = Math.min(100, mg/80*100) + '%';
+  document.getElementById('caBar').style.width = Math.min(100, ca/80*100) + '%';
+  document.getElementById('hco3Bar').style.width = Math.min(100, hco3/60*100) + '%';
+
+  const ghColor = ghOk ? '#4ade80' : '#fbbf24';
+  const khColor = khOk ? '#4ade80' : '#fbbf24';
+  const rColor  = ratioOk ? '#4ade80' : '#fbbf24';
+
+  const acidEffect = (-hco3 * 0.15).toFixed(0);
+  const bodyBoost  = (ca * 0.0026 * 100).toFixed(0);
+  const clarityBoost = (mg * 0.0044 * 100).toFixed(0);
+
+  document.getElementById('waterInsight').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:8px">
+      <div style="text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${ghColor}">${gh}ppm</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted)">GH (Mg+Ca)</div><div style="font-family:var(--mono);font-size:7px;color:${ghColor}">${ghOk?'✓ Ideal (50–70)':'Target: 50–70ppm'}</div></div>
+      <div style="text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${khColor}">${hco3}ppm</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted)">KH (Bicarbonate)</div><div style="font-family:var(--mono);font-size:7px;color:${khColor}">${khOk?'✓ Ideal (15–25)':'Target: 15–25ppm'}</div></div>
+      <div style="text-align:center"><div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${rColor}">${ratio}:1</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted)">GH:KH Ratio</div><div style="font-family:var(--mono);font-size:7px;color:${rColor}">${ratioOk?'✓ Ideal (3:1)':'WBrC 2024 target: 3:1'}</div></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;padding:8px 10px;background:var(--surface);border-radius:4px;border:1px solid var(--border)">
+      Predicted effects: 
+      <span style="color:var(--mg)">+${clarityBoost}% flavor clarity</span> (Mg) · 
+      <span style="color:var(--ca)">+${bodyBoost}% perceived sweetness/body</span> (Ca) · 
+      <span style="color:var(--hco3)">perceived acidity ${acidEffect}%</span> (Bicarbonate buffer) · 
+      <span style="color:var(--muted)">Blueprint baseline: 2024 WBrC trends · origin-specific tuning recommended</span>
+    </div>`;
+}
+
+// ── Stage Cards ──────────────────────────────────────────────────────────────
+function renderStages() {
+  const con = document.getElementById('stageCards');
+  con.innerHTML = STAGE_META.map((meta, i) => {
+    const st  = S.stages[i];
+    const c   = calcStage(i);
+    const T   = st.temp;
+    const retain = st.water - st.yieldOut;
+    const tpct = T > 0 ? ((T-70)/(100-70))*100 : 0;
+    const r = Math.round(239 + (96-239)*(tpct/100));
+    const g2= Math.round(68 + (165-68)*(tpct/100));
+    const b = Math.round(68 + (250-68)*(tpct/100));
+    const tempCol = T > 0 ? `rgb(${r},${g2},${b})` : 'var(--dim)';
+    const tdsCol  = st.tds >= 1.15 && st.tds <= 1.45 ? '#4ade80' : st.tds < .80 ? '#6b8aad' : st.tds < 1.0 ? '#fbbf24' : '#f0ead8';
+
+    return `<div class="stage-card ${st.selected?'selected':''}" id="stCard${i}">
+      <div class="stage-header">
+        <div><span class="stage-badge" style="background:${meta.bg};color:${meta.color}">${meta.badge}</span></div>
+        <div class="stage-check ${st.selected?'on':''}" onclick="toggleStage(${i})">
+          ${st.selected?'<svg width="9" height="9" viewBox="0 0 9 9"><polyline points="1,4.5 3.5,7 8,1.5" stroke="#c9943a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>':''}
+        </div>
+      </div>
+      <div class="stage-name">${meta.name}</div>
+      <div class="stage-sub">${meta.sub}</div>
+      <div class="stage-inputs">
+        <div class="stage-row">
+          <span class="stage-row-lbl">Water in</span>
+          <div style="display:flex;align-items:center;gap:2px">
+            <input type="number" min="0" max="200" step="5" value="${st.water}" onchange="onStageField(${i},'water',this.value)" inputmode="decimal" autocomplete="off">
+            <span class="num-unit">g</span>
+          </div>
+        </div>
+        <div class="stage-row">
+          <span class="stage-row-lbl gold">Yield out</span>
+          <div style="display:flex;align-items:center;gap:2px">
+            <input type="number" min="0" max="200" step="1" value="${st.yieldOut}" onchange="onStageField(${i},'yieldOut',this.value)" style="border-color:rgba(201,148,58,.3)" inputmode="decimal" autocomplete="off">
+            <span class="num-unit" style="color:var(--gold-lt)">g</span>
+          </div>
+        </div>
+        <div class="stage-row">
+          <span class="stage-row-lbl">TDS</span>
+          <div style="display:flex;align-items:center;gap:2px">
+            <input type="number" min="0" max="3.0" step="0.01" value="${st.tds.toFixed(2)}" onchange="onStageField(${i},'tds',this.value)" inputmode="decimal" autocomplete="off">
+            <span class="num-unit">%</span>
+          </div>
+        </div>
+        <div class="stage-row">
+          <span class="stage-row-lbl blue">Temp</span>
+          <div style="display:flex;align-items:center;gap:4px">
+            <input type="number" min="0" max="100" step="1" value="${T}" onchange="onStageField(${i},'temp',this.value)" style="border-color:rgba(96,165,250,.3)" inputmode="numeric" autocomplete="off">
+            <span class="num-unit" style="color:var(--blue)">°C</span>
+          </div>
+        </div>
+      </div>
+      <div class="stat4">
+        <div class="s4-cell"><div class="s4-val" style="color:${tdsCol}">${st.tds.toFixed(2)}<span style="font-size:8px;color:var(--dim)">%</span></div><div class="s4-lbl">TDS</div></div>
+        <div class="s4-cell"><div class="s4-val">${c.ey.toFixed(1)}<span style="font-size:8px;color:var(--dim)">%</span></div><div class="s4-lbl">EY</div></div>
+        <div class="s4-cell"><div class="s4-val" style="color:var(--gold-lt)">${st.yieldOut.toFixed(0)}<span style="font-size:8px;color:var(--dim)">g</span></div><div class="s4-lbl">Yield</div></div>
+        <div class="s4-cell"><div class="s4-val" style="color:${tempCol}">${T > 0 ? T + '°' : '—'}</div><div class="s4-lbl">Temp</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Radar ─────────────────────────────────────────────────────────────────────
+function calcFlavorBlend() {
+  const sel = selectedIdxs();
+  if (!sel.length) return FLAVOR_AXES.map(()=>0);
+  const weights = sel.map(i => calcStage(i).soli);
+  const totalW  = weights.reduce((s,w)=>s+w, 0);
+  if (!totalW) return FLAVOR_AXES.map(()=>0);
+  return FLAVOR_AXES.map((_, ai) => {
+    let s = 0;
+    sel.forEach((pi, si) => s += STAGE_FLAVORS[pi][ai] * weights[si]);
+    return s / totalW;
+  });
+}
+
+function renderRadar() {
+  const svg = document.getElementById('radarChart');
+  svg.innerHTML = '';
+  const cx=140, cy=148, R=100, N=FLAVOR_AXES.length;
+  svgEl('rect',{x:0,y:0,width:280,height:280,fill:'transparent'},svg);
+  [.25,.5,.75,1].forEach(f => {
+    const pts = Array.from({length:N},(_,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2;return`${cx+Math.cos(a)*R*f},${cy+Math.sin(a)*R*f}`;}).join(' ');
+    svgEl('polygon',{points:pts,fill:'none',stroke:'#1e2d44','stroke-width':1},svg);
+  });
+  FLAVOR_AXES.forEach((name,i) => {
+    const a=(i/N)*Math.PI*2-Math.PI/2;
+    svgEl('line',{x1:cx,y1:cy,x2:cx+Math.cos(a)*R,y2:cy+Math.sin(a)*R,stroke:'#2a3d58','stroke-width':1},svg);
+    const lx=cx+Math.cos(a)*(R+16), ly=cy+Math.sin(a)*(R+16);
+    const ta = Math.abs(Math.cos(a)) < .2 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end';
+    svgTxt(svg,lx,ly+3,name,{'text-anchor':ta,fill:'#6b8aad','font-family':'JetBrains Mono,monospace','font-size':8});
+  });
+  const flavor = calcFlavorBlend();
+  const pts2 = flavor.map((v,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2,r=(v/100)*R;return`${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;}).join(' ');
+  svgEl('polygon',{points:pts2,fill:'rgba(201,148,58,.12)',stroke:'#c9943a','stroke-width':2},svg);
+  flavor.forEach((v,i)=>{const a=(i/N)*Math.PI*2-Math.PI/2,r=(v/100)*R;svgEl('circle',{cx:cx+Math.cos(a)*r,cy:cy+Math.sin(a)*r,r:3,fill:'#c9943a'},svg);});
+
+  // Flavor bars
+  const cols=['#c084fc','#60a5fa','#f87171','#4ade80','#06b6d4','#f59e0b','#f87171','#a78bfa'];
+  document.getElementById('flavorBars').innerHTML = FLAVOR_AXES.map((n,i)=>{
+    const v=flavor[i];
+    return `<div style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${n}</span>
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;color:${cols[i]}">${v.toFixed(0)}<span style="font-size:7px;color:var(--dim)">/100</span></span>
+      </div>
+      <div style="height:4px;border-radius:2px;background:var(--border)"><div style="height:100%;width:${v}%;background:${cols[i]};border-radius:2px;transition:width .3s"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── CVA Descriptive ───────────────────────────────────────────────────────────
+function renderCVA() {
+  const colors = ['#c084fc','#60a5fa','#f59e0b','#f87171','#4ade80','#06b6d4'];
+  document.getElementById('cvaDescriptive').innerHTML = CVA_ATTRS.map((name,i) => {
+    const v = S.cva[i];
+    const pct = (v/15)*100;
+    return `<div class="cva-attr">
+      <div class="cva-attr-header">
+        <span class="cva-attr-name">${name}</span>
+        <span class="cva-attr-val" style="color:${colors[i]}">${v}<span style="font-size:8px;color:var(--dim)">/15</span></span>
+      </div>
+      <div class="cva-track">
+        <div class="cva-fill" style="width:${pct}%;background:${colors[i]}"></div>
+      </div>
+      <input type="range" min="1" max="15" step="1" value="${v}" oninput="onCVA(${i},this.value)" style="margin-top:3px;accent-color:${colors[i]}">
+    </div>`;
+  }).join('');
+  updateHedonic();
+}
+
+function updateHedonic() {
+  const mean = S.cva.reduce((s,v)=>s+v,0)/S.cva.length;
+  // CVA affective: map 15-pt mean to hedonic 50-100 scale (as per PDF chart)
+  // At mean=5, score≈70; at mean=9, score≈95 (matches chart data)
+  const hedonic = Math.min(100, Math.max(50, 55 + (mean-1)/(15-1)*50));
+  const adjusted = Math.min(100, hedonic * S.prefWeight);
+  document.getElementById('hedonicNum').textContent = adjusted.toFixed(0);
+  document.getElementById('hedonicNum').style.color = adjusted >= 85 ? '#4ade80' : adjusted >= 75 ? '#e8be78' : '#fbbf24';
+}
+
+// ── Extraction Table ──────────────────────────────────────────────────────────
+function renderTable() {
+  const table = document.getElementById('stageTable');
+  const H = `padding:7px 9px;text-align:left;white-space:nowrap`;
+  let cumEY = 0, cumLiq = 0, cumSoli = 0;
+  const TH = `font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;background:var(--surface)`;
+
+  let html = `<tr>
+    <th style="${H};${TH}">Stage</th><th style="${H};${TH}">Water</th>
+    <th style="${H};${TH}">Yield out</th><th style="${H};${TH}">Retained</th>
+    <th style="${H};${TH}">Yield%</th><th style="${H};${TH}">TDS</th>
+    <th style="${H};${TH}">Temp</th><th style="${H};${TH}">EY/Stage</th>
+    <th style="${H};${TH}">Cum.EY</th><th style="${H};${TH}">Solubles</th>
+    <th style="${H};${TH}">Character</th>
+  </tr>`;
+
+  const chars = [
+    'Organic acids · florals · high volatiles',
+    'Heavy sweetness · primary flavor compounds',
+    'Sugar hydrolysis · sweetness peak',
+    'Low-temp restraint · prevent bitters (Melodrip zone)',
+    'Equivalent / dilution',
+  ];
+  const rowBgs = ['rgba(239,68,68,.06)','rgba(245,158,11,.06)','rgba(74,222,128,.06)','rgba(96,165,250,.06)','rgba(167,139,250,.06)'];
+
+  STAGE_META.forEach((meta, i) => {
+    const st = S.stages[i];
+    if (!st.water && !st.yieldOut) return;
+    const c   = calcStage(i);
+    const ret = st.water - st.yieldOut;
+    const yp  = st.water > 0 ? ((st.yieldOut/st.water)*100).toFixed(0) : '—';
+    cumEY  += c.ey;
+    cumLiq += c.liq;
+    cumSoli+= c.soli;
+    const sel = st.selected;
+    const tdsCol = st.tds>=1.15&&st.tds<=1.45?'#4ade80':st.tds<.9?'#f87171':'#f0ead8';
+    const tempPct = st.temp > 0 ? ((st.temp-70)/(100-70)) : 0;
+    const tr = Math.round(239*(1-tempPct)+96*tempPct), tg=Math.round(68*(1-tempPct)+165*tempPct), tb=Math.round(68*(1-tempPct)+250*tempPct);
+    html += `<tr style="background:${sel?rowBgs[i]:'transparent'};opacity:${sel?1:.4}">
+      <td style="${H};color:${meta.color};font-weight:700;font-family:var(--mono);font-size:10px">${meta.name}</td>
+      <td style="${H};font-family:var(--mono);font-size:10px">${st.water}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:var(--gold-lt);font-weight:600">${st.yieldOut.toFixed(0)}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:${ret>st.water*.3?'#fbbf24':'#f0ead8'}">${ret.toFixed(0)}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:var(--muted)">${yp}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;font-weight:600;color:${tdsCol}">${st.tds.toFixed(2)}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;font-weight:700;color:rgb(${tr},${tg},${tb})">${st.temp > 0 ? st.temp+'°C' : '—'}</td>
+      <td style="${H};font-family:var(--mono);font-size:10px">${c.ey.toFixed(1)}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:var(--gold-lt)">${cumEY.toFixed(1)}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px">${c.soli.toFixed(2)}g</td>
+      <td style="${H};font-family:var(--mono);font-size:9px;color:var(--muted)">${chars[i]}</td>
+    </tr>`;
+  });
+
+  // Total
+  const allIdxs=[0,1,2,3,4];
+  const tot = calcBlend(allIdxs);
+  if (tot) {
+    const tw = S.stages.reduce((s,st)=>s+st.water,0);
+    const ty = S.stages.reduce((s,st)=>s+st.yieldOut,0);
+    html += `<tr style="border-top:2px solid var(--border2)">
+      <td style="${H};font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-lt)">TOTAL</td>
+      <td style="${H};font-family:var(--mono);font-size:10px">${tw}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-lt)">${ty.toFixed(0)}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px">${(tw-ty).toFixed(0)}g</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:var(--muted)">${((ty/tw)*100).toFixed(0)}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-lt)">${tot.tds.toFixed(2)}%</td>
+      <td style="${H};font-family:var(--mono);font-size:10px;color:var(--muted)">—</td>
+      <td colspan="2" style="${H};font-family:var(--mono);font-size:10px;color:var(--gold-lt)">${tot.ey.toFixed(1)}% total EY</td>
+      <td colspan="2" style="${H};font-family:var(--mono);font-size:9px;color:var(--muted)">Ratio 1:${(ty/S.dose).toFixed(1)} · Equivalent EY: ${tot.ey.toFixed(1)}%</td>
+    </tr>`;
+  }
+
+  table.innerHTML = html;
+
+  // Update top stats
+  const blend = calcBlend(selectedIdxs());
+  document.getElementById('ratioVal').textContent = blend ? `1 : ${(blend.volume/S.dose).toFixed(1)}` : '—';
+  document.getElementById('totalEXT').textContent = blend ? `${blend.ey.toFixed(1)}%` : '—';
+}
+
+// ── Event Handlers ────────────────────────────────────────────────────────────
+function onDose(v) {
+  S.dose = parseFloat(v);
+  document.getElementById('doseVal').innerHTML = `${parseFloat(v).toFixed(1)}<span>g</span>`;
+  renderAll();
+}
+function onTargetTDS(v) {
+  S.targetTDS = parseFloat(v);
+  document.getElementById('targetTDSval').innerHTML = `${parseFloat(v).toFixed(2)}<span>%</span>`;
+  renderDilution();
+}
+function onMineral(key, v) {
+  S.minerals[key] = parseFloat(v);
+  document.getElementById(`${key}Val`).innerHTML = `${v}<span>ppm</span>`;
+  renderWater();
+}
+function onStageField(idx, field, v) {
+  const val = parseFloat(v);
+  if (!isNaN(val) && val >= 0) S.stages[idx][field] = val;
+  S.activePreset = null;
+  ['presetMedina','presetPeng'].forEach(id => document.getElementById(id).classList.remove('active'));
+  // Update stat cells in-place WITHOUT rebuilding stage cards (prevents focus loss on mobile)
+  updateStageStat(idx);
+  renderChart();
+  renderBlend();
+  renderDilution();
+  renderThermal();
+  renderTable();
+  renderRadar();
+}
+
+// Update just the stat4 cells of one stage card after a value change
+function updateStageStat(idx) {
+  const card = document.getElementById('stCard' + idx);
+  if (!card) return;
+  const st   = S.stages[idx];
+  const meta = STAGE_META[idx];
+  const c    = calcStage(idx);
+  const T    = st.temp;
+  const tpct = T > 0 ? ((T-70)/(100-70))*100 : 0;
+  const r    = Math.round(239 + (96-239)*(tpct/100));
+  const g2   = Math.round(68 + (165-68)*(tpct/100));
+  const b    = Math.round(68 + (250-68)*(tpct/100));
+  const tempCol = T > 0 ? `rgb(${r},${g2},${b})` : 'var(--dim)';
+  const tdsCol  = st.tds>=1.15&&st.tds<=1.45?'#4ade80':st.tds<.9?'#f87171':'#f0ead8';
+  const cells   = card.querySelectorAll('.s4-val');
+  if (cells.length >= 4) {
+    cells[0].innerHTML = `${st.tds.toFixed(2)}<span style="font-size:8px;color:var(--dim)">%</span>`;
+    cells[0].style.color = tdsCol;
+    cells[1].innerHTML = `${c.ey.toFixed(1)}<span style="font-size:8px;color:var(--dim)">%</span>`;
+    cells[2].innerHTML = `${st.yieldOut.toFixed(0)}<span style="font-size:8px;color:var(--dim)">g</span>`;
+    cells[2].style.color = 'var(--gold-lt)';
+    cells[3].innerHTML = T > 0 ? T + '°' : '—';
+    cells[3].style.color = tempCol;
+  }
+}
+function toggleStage(idx) {
+  S.stages[idx].selected = !S.stages[idx].selected;
+  renderAll();
+}
+function onCVA(idx, v) {
+  S.cva[idx] = parseInt(v);
+  renderCVA();
+}
+function onPrefWeight(v) {
+  S.prefWeight = parseFloat(v);
+  document.getElementById('prefWeightVal').innerHTML = `${parseFloat(v).toFixed(1)}<span>×</span>`;
+  updateHedonic();
+}
+
+// ── Master render ─────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStages();
+  renderChart();
+  renderBlend();
+  renderDilution();
+  renderThermal();
+  renderTable();
+  renderRadar();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+renderAll();
+renderWater();
+renderCVA();
+</script>
+</body>
+</html>
