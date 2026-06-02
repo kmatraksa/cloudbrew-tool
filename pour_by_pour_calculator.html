@@ -142,6 +142,31 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .tds-scale{position:relative;height:24px;border-radius:4px;overflow:hidden;margin:8px 0;background:linear-gradient(to right,rgba(74,222,128,.3) 0%,rgba(74,222,128,.3) 30%,rgba(251,191,36,.3) 30%,rgba(251,191,36,.3) 60%,rgba(248,113,113,.3) 60%,rgba(248,113,113,.3) 100%)}
 .tds-scale-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px}
 .tds-needle{position:absolute;top:0;bottom:0;width:2px;background:white;box-shadow:0 0 4px rgba(255,255,255,.8);transition:left .35s ease}
+/* ── Brew Log ─────────────────────────────────────────────────────────────── */
+.log-entry{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:12px 14px;margin-bottom:8px;position:relative;transition:border-color .2s}
+.log-entry:hover{border-color:var(--border2)}
+.log-entry-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.log-entry-id{font-family:var(--mono);font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.1em}
+.log-entry-date{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.log-entry-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-bottom:6px}
+.log-meta-cell{background:var(--surface);border-radius:3px;padding:5px 8px;text-align:center}
+.log-meta-val{font-family:var(--mono);font-size:12px;font-weight:700;line-height:1}
+.log-meta-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.log-notes{font-family:var(--mono);font-size:9px;color:var(--muted);font-style:italic;margin-top:4px}
+.log-delete{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:3px;transition:color .2s}
+.log-delete:hover{color:var(--red)}
+.log-empty{text-align:center;padding:32px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.log-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.log-btn{font-family:var(--mono);font-size:9px;padding:6px 14px;border-radius:4px;border:none;cursor:pointer;font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.log-btn-save{background:var(--gold);color:#000}
+.log-btn-save:hover{background:var(--gold-lt)}
+.log-btn-csv{background:var(--surface);border:1px solid var(--border2);color:var(--muted)}
+.log-btn-csv:hover{border-color:var(--green);color:var(--green)}
+.log-btn-clear{background:var(--surface);border:1px solid var(--border);color:var(--dim)}
+.log-btn-clear:hover{border-color:var(--red);color:var(--red)}
+.notes-input{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:7px 10px;font-family:var(--mono);font-size:12px;width:100%;outline:none;resize:none}
+.notes-input:focus{border-color:var(--gold)}
+.eey-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-family:var(--mono);font-size:8px;font-weight:700;margin-left:4px}
 @media(max-width:500px){
   .pour-cards{grid-template-columns:1fr 1fr}
   body{padding:14px 10px 50px}
@@ -377,6 +402,27 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── BREW LOG ──────────────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">⑦ Brew Log — Research Record</div>
+  <div class="card">
+    <!-- Save controls -->
+    <div style="margin-bottom:12px">
+      <div class="label" style="margin-bottom:6px">Session Notes</div>
+      <textarea id="brewNotes" class="notes-input" rows="2"
+        placeholder="e.g. Syrina natural, 3 weeks post-roast, TWW water, competition practice #4..."></textarea>
+    </div>
+    <div class="log-bar">
+      <button class="log-btn log-btn-save" onclick="saveBrewLog()">⊕ Log This Brew</button>
+      <button class="log-btn log-btn-csv"  onclick="exportCSV()">↓ Export CSV</button>
+      <button class="log-btn log-btn-clear" onclick="clearLog()">✕ Clear All</button>
+      <span id="logCount" style="font-family:var(--mono);font-size:10px;color:var(--muted);align-self:center"></span>
+    </div>
+    <!-- Log entries -->
+    <div id="logEntries"></div>
   </div>
 </div>
 
@@ -921,6 +967,17 @@ function renderTable() {
 }
 
 // ── Render Pour Cards ────────────────────────────────────────────────────────
+// Helper — avoids nested template literal quoting issues
+function retentionNote(water, yieldOut) {
+  if (!water || !yieldOut || water <= 0) return '';
+  if (yieldOut >= water) {
+    return '<div style="font-family:var(--mono);font-size:8px;margin-top:2px;color:#f87171">⚠ Yield cannot exceed water in</div>';
+  }
+  const retained = (water - yieldOut).toFixed(0);
+  const pct      = ((1 - yieldOut / water) * 100).toFixed(0);
+  return '<div style="font-family:var(--mono);font-size:8px;margin-top:2px;color:var(--dim)">Retained: ' + retained + 'g (' + pct + '% absorbed)</div>';
+}
+
 function renderPourCards() {
   const container = document.getElementById('pourCards');
   // Update auto params display if in auto mode
@@ -995,7 +1052,7 @@ function renderPourCards() {
               <span class="num-unit" style="color:var(--gold-lt)">g</span>
             </div>
           </div>
-          ${state.pours[i].water > 0 && state.pours[i].yieldOut > 0 ? (`<div style="font-family:var(--mono);font-size:8px;margin-top:2px;line-height:1.4;color:${state.pours[i].yieldOut >= state.pours[i].water ? '#f87171' : 'var(--dim)'};">${state.pours[i].yieldOut >= state.pours[i].water ? '⚠ Yield cannot exceed water in' : 'Retained: ' + (state.pours[i].water - state.pours[i].yieldOut).toFixed(0) + 'g (' + ((1 - state.pours[i].yieldOut/state.pours[i].water)*100).toFixed(0) + '% absorbed)'}</div>`) : ''}
+          ${retentionNote(state.pours[i].water, state.pours[i].yieldOut)}
           ${tdsInput}
         </div>
         <div class="stat-grid" style="margin-top:10px;grid-template-columns:repeat(4,1fr)">
@@ -1249,6 +1306,189 @@ function renderAll() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 renderAll();
 renderTailDiagnostic();
+renderLogEntries();
+
+// ── Brew Log ──────────────────────────────────────────────────────────────────
+function getLog() {
+  try { return JSON.parse(localStorage.getItem('cloudbrew_log') || '[]'); }
+  catch(e) { return []; }
+}
+function saveLog(entries) {
+  localStorage.setItem('cloudbrew_log', JSON.stringify(entries));
+}
+
+function saveBrewLog() {
+  const sel    = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+  const blend  = calcBlend(sel, state.dose);
+  const waterTotal = state.pours.reduce((s,p) => s + p.water, 0);
+  const yieldTotal = state.pours.reduce((s,p) => s + p.yieldOut, 0);
+  const xActual    = waterTotal > 0 && yieldTotal < waterTotal
+    ? ((waterTotal - yieldTotal) / state.dose).toFixed(2) : null;
+
+  const entry = {
+    id:        Date.now(),
+    datetime:  new Date().toISOString(),
+    dose:      state.dose,
+    mode:      state.mode,
+    notes:     document.getElementById('brewNotes').value.trim(),
+    pours: state.pours.map((p, i) => ({
+      water:    p.water,
+      yieldOut: p.yieldOut,
+      tds:      state.mode === 'auto'
+                  ? parseFloat(calcAutoTDS(i, state.dose, state.pours).toFixed(2))
+                  : p.tds,
+      selected: p.selected,
+    })),
+    blend: blend ? {
+      tds:    parseFloat(blend.tds.toFixed(2)),
+      ey:     parseFloat(blend.ey.toFixed(1)),
+      volume: parseFloat(blend.volume.toFixed(0)),
+    } : null,
+    tailTDS:  state.pours[3].tds || null,
+    xActual:  xActual ? parseFloat(xActual) : null,
+    grind:    state.grindSize,
+    targetEY: state.autoTargetEY,
+  };
+
+  const log = getLog();
+  log.unshift(entry); // newest first
+  saveLog(log);
+  document.getElementById('brewNotes').value = '';
+  renderLogEntries();
+
+  // Flash the button
+  const btn = document.querySelector('.log-btn-save');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = 'var(--gold)'; }, 1500);
+}
+
+function deleteLogEntry(id) {
+  const log = getLog().filter(e => e.id !== id);
+  saveLog(log);
+  renderLogEntries();
+}
+
+function clearLog() {
+  if (!confirm('Clear all brew log entries? This cannot be undone.')) return;
+  localStorage.removeItem('cloudbrew_log');
+  renderLogEntries();
+}
+
+function renderLogEntries() {
+  const log = getLog();
+  const container = document.getElementById('logEntries');
+  const countEl   = document.getElementById('logCount');
+  if (countEl) countEl.textContent = log.length > 0 ? log.length + ' brews logged' : '';
+
+  if (!log.length) {
+    container.innerHTML = '<div class="log-empty">No brews logged yet.<br>Fill in a brew above and tap "Log This Brew".</div>';
+    return;
+  }
+
+  container.innerHTML = log.map((e, idx) => {
+    const dt      = new Date(e.datetime);
+    const dateStr = dt.toLocaleDateString('th-TH', {day:'2-digit',month:'short',year:'numeric'});
+    const timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'});
+    const b       = e.blend;
+    const eeyOk   = b && b.ey < 19;
+    const eeyWarn = b && b.ey >= 19 && b.ey < 21;
+    const eeyBad  = b && b.ey >= 21;
+    const eeyBadge = b ? (
+      eeyBad  ? '<span class="eey-badge" style="background:rgba(248,113,113,.15);color:#f87171">Over EEY</span>' :
+      eeyWarn ? '<span class="eey-badge" style="background:rgba(251,191,36,.15);color:#fbbf24">At EEY</span>' :
+                '<span class="eey-badge" style="background:rgba(74,222,128,.12);color:#4ade80">✓ EEY OK</span>'
+    ) : '';
+
+    const poursHTML = e.pours.map((p, i) => {
+      if (!p.water && !p.yieldOut) return '';
+      const col = POUR_META[i] ? POUR_META[i].color : '#fff';
+      return `<span style="font-family:var(--mono);font-size:9px;margin-right:8px">
+        <span style="color:${col};font-weight:700">P${i+1}</span>
+        <span style="color:var(--muted)">${p.water}g→${p.yieldOut}g</span>
+        <span style="color:var(--text)"> ${p.tds.toFixed(2)}%</span>
+      </span>`;
+    }).join('');
+
+    return `<div class="log-entry">
+      <button class="log-delete" onclick="deleteLogEntry(${e.id})" title="Delete">✕</button>
+      <div class="log-entry-header">
+        <span class="log-entry-id">#${String(log.length - idx).padStart(3,'0')} · ${e.mode === 'auto' ? 'Auto-Est' : 'Manual'} · ${e.grind || 'medium'}</span>
+        <span class="log-entry-date">${dateStr} ${timeStr}</span>
+      </div>
+      <div class="log-entry-meta">
+        <div class="log-meta-cell">
+          <div class="log-meta-val">${e.dose}g</div>
+          <div class="log-meta-lbl">Dose</div>
+        </div>
+        ${b ? `<div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${eeyBad?'#f87171':eeyWarn?'#fbbf24':'#4ade80'}">${b.tds.toFixed(2)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+          <div class="log-meta-lbl">TDS blend</div>
+        </div>
+        <div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${eeyBad?'#f87171':eeyWarn?'#fbbf24':'#4ade80'}">${b.ey.toFixed(1)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+          <div class="log-meta-lbl">EY ${eeyBadge}</div>
+        </div>
+        <div class="log-meta-cell">
+          <div class="log-meta-val">${b.volume.toFixed(0)}<span style="font-size:9px;color:var(--dim)">mL</span></div>
+          <div class="log-meta-lbl">Volume</div>
+        </div>` : ''}
+        ${e.xActual ? `<div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${e.xActual > 1.7 ? '#fbbf24' : 'var(--blue-lt)'}">${e.xActual}</div>
+          <div class="log-meta-lbl">X actual</div>
+        </div>` : ''}
+      </div>
+      <div style="margin:4px 0">${poursHTML}</div>
+      ${e.notes ? `<div class="log-notes">"${e.notes}"</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── CSV Export ─────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const log = getLog();
+  if (!log.length) { alert('No brew log to export.'); return; }
+
+  const headers = [
+    'ID','Date','Time','Dose(g)','Mode','Grind',
+    'P1_water','P1_yield','P1_TDS',
+    'P2_water','P2_yield','P2_TDS',
+    'P3_water','P3_yield','P3_TDS',
+    'P4_water','P4_yield','P4_TDS',
+    'Blend_TDS(%)','Blend_EY(%)','Blend_Volume(mL)',
+    'Tail_TDS(%)','X_actual','Target_EY(%)','Notes'
+  ];
+
+  const rows = log.map((e, idx) => {
+    const dt = new Date(e.datetime);
+    const b  = e.blend || {};
+    const p  = e.pours || [];
+    return [
+      log.length - idx,
+      dt.toLocaleDateString('en-GB'),
+      dt.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}),
+      e.dose, e.mode, e.grind || 'medium',
+      ...[0,1,2,3].flatMap(i => [
+        p[i]?.water  ?? '',
+        p[i]?.yieldOut ?? '',
+        p[i]?.tds    ?? '',
+      ]),
+      b.tds ?? '', b.ey ?? '', b.volume ?? '',
+      e.tailTDS ?? '', e.xActual ?? '', e.targetEY ?? '',
+      `"${(e.notes||'').replace(/"/g,'""')}"`,
+    ].join(',');
+  });
+
+  const csv  = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `cloudbrew_log_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 </script>
 </body>
 </html>
