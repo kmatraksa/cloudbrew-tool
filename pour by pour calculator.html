@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pour-by-Pour Brew Calculator · SCA + Flavor Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0a08;--surface:#151310;--card:#1c1a16;--card2:#231f1a;
+  --border:#28241e;--border2:#353027;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#6b4e1e;
+  --p1:#ef4444;--p2:#f59e0b;--p3:#4ade80;--p4:#60a5fa;
+  --green:#4ade80;--red:#f87171;--blue:#60a5fa;--amber:#fbbf24;
+  --text:#f0ead8;--muted:#7a7068;--dim:#42403a;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--serif);min-height:100vh;padding:20px 14px 60px}
+.wrap{max-width:960px;margin:0 auto}
+
+/* Layout */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.col{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.card-section{margin-bottom:18px}
+.card-section:last-child{margin-bottom:0}
+.section{margin-bottom:28px}
+
+/* Typography */
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+.label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:500}
+h1{font-size:clamp(1.6rem,5vw,2.8rem);font-weight:300;letter-spacing:-.025em;line-height:1.05;margin:8px 0 8px}
+h2{font-family:var(--serif);font-weight:300;font-size:1.35rem;margin-bottom:0}
+.sub{color:var(--muted);font-family:var(--mono);font-size:11px;line-height:1.65;max-width:520px;margin-bottom:22px}
+
+/* Sliders */
+.s-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.s-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.s-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--gold-lt)}
+.s-val span{font-size:10px;color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer;margin-bottom:2px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px rgba(201,148,58,.4);margin-top:-5px;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--border2)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--gold);border:none;cursor:pointer}
+
+/* Number input */
+.num-input{display:flex;align-items:center;gap:4px}
+input[type=number]{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:7px 8px;font-family:var(--mono);font-size:14px;width:78px;outline:none;-moz-appearance:textfield;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input[type=number]:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,148,58,.15)}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+@media(max-width:640px){input[type=number]{font-size:16px;padding:9px 10px;width:82px;border-radius:5px}}
+.num-unit{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* Pour cards */
+.pour-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.pour-card{background:var(--card2);border:1px solid var(--border2);border-radius:6px;padding:14px;position:relative;transition:border-color .2s}
+.pour-card.selected{border-color:var(--gold-dim)}
+.pour-card.selected .pour-check{opacity:1}
+.pour-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.pour-badge{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.15em;padding:2px 7px;border-radius:3px;text-transform:uppercase}
+.pour-check{width:18px;height:18px;border-radius:3px;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.5;transition:all .2s;flex-shrink:0}
+.pour-check.on{border-color:var(--gold);opacity:1;background:rgba(201,148,58,.12)}
+.pour-name{font-family:var(--serif);font-size:14px;color:var(--text);margin-bottom:2px}
+.pour-sub{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.pour-inputs{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pour-row{display:flex;justify-content:space-between;align-items:center}
+.pour-row-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em}
+
+/* Stats row */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:10px}
+.stat-cell{background:var(--surface);padding:8px 10px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:13px;font-weight:700;line-height:1.1}
+.stat-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+
+/* Gauge */
+.gauge-wrap{margin-bottom:10px}
+.gauge-header{display:flex;justify-content:space-between;margin-bottom:4px}
+.gauge-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.gauge-num{font-family:var(--mono);font-size:14px;font-weight:700;transition:color .25s}
+.gauge-num span{font-size:9px;color:var(--dim)}
+.gauge-track{position:relative;height:6px;border-radius:3px;background:var(--surface);border:1px solid var(--border)}
+.gauge-fill{position:absolute;top:0;bottom:0;left:0;border-radius:3px;transition:width .3s,background .3s}
+.gauge-ideal-zone{position:absolute;top:0;bottom:0;background:rgba(74,222,128,.1);border-radius:3px}
+.gauge-mark{position:absolute;top:-2px;bottom:-2px;width:1.5px;background:rgba(74,222,128,.4)}
+.gauge-footer{display:flex;justify-content:space-between;margin-top:3px;font-family:var(--mono);font-size:8px;color:var(--dim)}
+
+/* Blend result */
+.blend-box{padding:14px 16px;border-radius:6px;transition:background .3s,border-color .3s}
+.blend-ideal{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3)}
+.blend-off{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.25)}
+.blend-empty{background:var(--card2);border:1px solid var(--border)}
+.blend-title{font-family:var(--serif);font-size:18px;font-weight:300;margin-bottom:4px}
+.blend-sub{font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.tag{padding:3px 8px;border-radius:3px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.22);color:var(--amber);font-size:10px;font-family:var(--mono)}
+
+/* Dilution */
+.dilution-box{padding:14px 16px;border-radius:5px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2)}
+.dilution-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dilution-label{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.dilution-val{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue)}
+
+/* SVG */
+.chart-svg{width:100%;height:auto;display:block}
+.radar-svg{width:100%;height:auto;display:block}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* Mode toggle */
+.mode-toggle{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:14px}
+.mode-btn{flex:1;padding:6px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .2s}
+.mode-btn.active{background:var(--card2);color:var(--gold-lt)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:4px 0}
+
+/* Tooltip note */
+.note{font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.5;margin-top:6px}
+
+/* Responsive */
+.tail-status{border-radius:6px;padding:14px 16px;margin-bottom:10px;transition:background .3s,border-color .3s}
+.tail-cut-now{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4)}
+.tail-marginal{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.35)}
+.tail-ok{background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.3)}
+.tail-empty{background:var(--card);border:1px solid var(--border)}
+.tail-icon{font-size:18px;margin-right:8px}
+.tail-decision{font-family:var(--serif);font-size:17px;font-weight:300;margin-bottom:4px}
+.tail-reason{font-family:var(--mono);font-size:10px;line-height:1.55;color:var(--muted)}
+.diag-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
+.diag-cell{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:10px;text-align:center}
+.diag-val{font-family:var(--mono);font-size:16px;font-weight:700;line-height:1}
+.diag-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
+.diag-sub{font-family:var(--mono);font-size:8px;margin-top:3px}
+.tds-scale{position:relative;height:24px;border-radius:4px;overflow:hidden;margin:8px 0;background:linear-gradient(to right,rgba(74,222,128,.3) 0%,rgba(74,222,128,.3) 30%,rgba(251,191,36,.3) 30%,rgba(251,191,36,.3) 60%,rgba(248,113,113,.3) 60%,rgba(248,113,113,.3) 100%)}
+.tds-scale-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px}
+.tds-needle{position:absolute;top:0;bottom:0;width:2px;background:white;box-shadow:0 0 4px rgba(255,255,255,.8);transition:left .35s ease}
+/* ── Brew Log ─────────────────────────────────────────────────────────────── */
+.log-entry{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:12px 14px;margin-bottom:8px;position:relative;transition:border-color .2s}
+.log-entry:hover{border-color:var(--border2)}
+.log-entry-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.log-entry-id{font-family:var(--mono);font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.1em}
+.log-entry-date{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.log-entry-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-bottom:6px}
+.log-meta-cell{background:var(--surface);border-radius:3px;padding:5px 8px;text-align:center}
+.log-meta-val{font-family:var(--mono);font-size:12px;font-weight:700;line-height:1}
+.log-meta-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.log-notes{font-family:var(--mono);font-size:9px;color:var(--muted);font-style:italic;margin-top:4px}
+.log-delete{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:3px;transition:color .2s}
+.log-delete:hover{color:var(--red)}
+.log-empty{text-align:center;padding:32px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.log-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.log-btn{font-family:var(--mono);font-size:9px;padding:6px 14px;border-radius:4px;border:none;cursor:pointer;font-weight:600;letter-spacing:.08em;text-transform:uppercase;transition:all .2s}
+.log-btn-save{background:var(--gold);color:#000}
+.log-btn-save:hover{background:var(--gold-lt)}
+.log-btn-csv{background:var(--surface);border:1px solid var(--border2);color:var(--muted)}
+.log-btn-csv:hover{border-color:var(--green);color:var(--green)}
+.log-btn-clear{background:var(--surface);border:1px solid var(--border);color:var(--dim)}
+.log-btn-clear:hover{border-color:var(--red);color:var(--red)}
+.notes-input{background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:7px 10px;font-family:var(--mono);font-size:12px;width:100%;outline:none;resize:none}
+.notes-input:focus{border-color:var(--gold)}
+.eey-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-family:var(--mono);font-size:8px;font-weight:700;margin-left:4px}
+@media(max-width:500px){
+  .pour-cards{grid-template-columns:1fr 1fr}
+  body{padding:14px 10px 50px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<div class="eyebrow" style="margin-bottom:8px">SCA Brewing Chart · Multi-Pour Analyzer</div>
+<h1>Pour-by-Pour <em style="color:var(--gold);font-style:italic">Brew Calculator</em></h1>
+<p class="sub">Input TDS from each pour fraction → see where each stage lands → blend the pours you want → calculate dilution to hit the perfect cup.</p>
+
+<!-- ── RECIPE SETUP ─────────────────────────────────────────────── -->
+<div class="section">
+  <div class="card">
+    <div class="label" style="color:var(--gold);margin-bottom:14px;font-weight:700">① Recipe Setup</div>
+    <div class="s-row"><span class="s-lbl">Coffee Dose</span><span class="s-val" id="doseVal">15.0<span>g</span></span></div>
+    <input type="range" id="doseSlider" min="10" max="30" step="0.5" value="15" oninput="onDoseChange(this.value)">
+    <div class="note">Adjust pour water amounts below to match your actual recipe</div>
+  </div>
+</div>
+
+<!-- ── POUR INPUTS ─────────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">② Pour TDS Input — measure each fraction separately</div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeManual" onclick="setMode('manual')">Manual TDS</button>
+    <button class="mode-btn" id="modeAuto" onclick="setMode('auto')">Auto-Estimate</button>
+  </div>
+
+  <!-- Disclaimer shown in auto mode -->
+  <div id="autoDisclaimer" style="display:none;margin-bottom:12px;padding:11px 14px;border-radius:5px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25)">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:5px">⚠ ESTIMATED VALUES — NOT MEASURED</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.65">
+      TDS calculated from kinetic depletion model (Liang et al. 2021 equilibrium form, UC Davis).
+      K-resistance values [12, 5, 4.5, 4] are empirically calibrated — not from direct literature.
+      <strong style="color:var(--text)">For accurate results: measure TDS with refractometer → switch to Manual TDS mode.</strong>
+    </div>
+    <!-- Auto-estimate controls -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Target EY</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--gold-lt);font-weight:600" id="autoEYVal">19<span style="font-size:9px;color:var(--muted)">%</span></span>
+        </div>
+        <input type="range" min="16" max="23" step="0.5" value="19"
+          oninput="onAutoEY(this.value)"
+          style="width:100%">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px">Happy EEY: 19% · SCA ideal: 18–22%</div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px">Grind Size</div>
+        <div style="display:flex;gap:4px">
+          <button onclick="onGrind('fine')"   id="grindFine"   style="flex:1;padding:5px 0;font-family:var(--mono);font-size:9px;border-radius:3px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Fine</button>
+          <button onclick="onGrind('medium')" id="grindMedium" style="flex:1;padding:5px 0;font-family:var(--mono);font-size:9px;border-radius:3px;border:1px solid var(--gold);background:rgba(201,148,58,.1);color:var(--gold-lt);cursor:pointer">Medium</button>
+          <button onclick="onGrind('coarse')" id="grindCoarse" style="flex:1;padding:5px 0;font-family:var(--mono);font-size:9px;border-radius:3px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer">Coarse</button>
+        </div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px" id="grindNote">k × 1.0 (medium)</div>
+      </div>
+    </div>
+    <!-- Model info -->
+    <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.5">
+      Model: TDS_i = (remaining × w/(w + k_i × dose)) / yield_out · Source: Liang et al. (2021) Sci. Rep.
+    </div>
+  </div>
+
+  <div class="pour-cards" id="pourCards"></div>
+  <div class="note" style="margin-top:8px">
+    💡 <strong style="color:var(--text)">How to measure:</strong> Place a separate small cup under dripper, collect 20-30mL of liquid at each pour stage, measure with refractometer, then combine in your serving vessel.
+  </div>
+</div>
+
+<!-- ── POUR SELECTOR + BLEND ──────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">③ Blend Selector — toggle pours to build your cup</div>
+  <div class="grid2">
+
+    <!-- Left: Blend result + gauges -->
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">Blended Result</div>
+        <div id="blendGauges"></div>
+        <div id="blendStatus"></div>
+      </div>
+
+      <!-- Dilution calculator -->
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">Dilution Calculator</div>
+        <div class="s-row"><span class="s-lbl">Target TDS</span><span class="s-val" id="targetTdsVal">1.40<span>%</span></span></div>
+        <input type="range" id="targetTdsSlider" min="0.80" max="1.80" step="0.01" value="1.40" oninput="onTargetTdsChange(this.value)">
+        <div id="dilutionResult" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <!-- Right: SCA Chart -->
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:10px">SCA Brewing Control Chart</div>
+        <svg id="scaChart" class="chart-svg" viewBox="0 0 420 270"></svg>
+        <div class="legend" id="scaLegend"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FLAVOR MAP (3D) ────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">④ Flavor Map — blend flavor profile (3D → 2D projection)</div>
+  <div class="card">
+    <div class="grid2">
+      <div>
+        <div class="label" style="margin-bottom:8px">Pour contributions</div>
+        <svg id="radarChart" class="radar-svg" viewBox="0 0 300 300"></svg>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:12px">Flavor breakdown</div>
+        <div id="flavorBars"></div>
+        <div class="note" style="margin-top:14px">
+          <strong style="color:var(--text)">Each pour stage:</strong><br>
+          Pour 1 = Volatile acids · floral aromatics<br>
+          Pour 2 = Peak acidity · brightness<br>
+          Pour 3 = Sweetness · sugar hydrolysis<br>
+          Pour 4 = Body · risk of bitterness / astringency
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PER-POUR BREAKDOWN TABLE ───────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">⑤ Extraction Analysis by Pour</div>
+  <div class="card">
+    <div style="overflow-x:auto">
+      <table id="pourTable" style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ── TAIL-CUT DIAGNOSTIC ────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">⑥ Tail-Cut Diagnostic — Batali et al. (2020) + Happy Framework</div>
+  <div class="grid2">
+    <!-- Left: Decision -->
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">Tail Status (Pour 4 TDS)</div>
+        <div id="tailStatus"><div class="tail-status tail-empty" style="text-align:center"><span style="font-family:var(--mono);font-size:11px;color:var(--dim)">Enter Pour 4 TDS to see diagnosis</span></div></div>
+
+        <!-- TDS scale bar -->
+        <div style="margin-top:14px">
+          <div class="label" style="margin-bottom:6px">TDS Threshold Scale</div>
+          <div class="tds-scale" id="tdsScaleBar">
+            <div class="tds-needle" id="tdsNeedle" style="left:0%"></div>
+          </div>
+          <div class="tds-scale-labels">
+            <span style="color:var(--green)">0%</span>
+            <span style="color:var(--green)">0.3%</span>
+            <span style="color:var(--amber)">↑safe</span>
+            <span style="color:var(--amber)">0.6%</span>
+            <span style="color:var(--red)">↑marginal</span>
+            <span style="color:var(--red)">0.8%</span>
+            <span style="color:var(--red)">1.0%</span>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:6px;font-family:var(--mono);font-size:9px">
+            <span><span style="color:var(--green)">■</span> Sweet/floral</span>
+            <span><span style="color:var(--amber)">■</span> Marginal</span>
+            <span><span style="color:var(--red)">■</span> Bitter/astringent</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:8px;line-height:1.6">
+            Source: Batali et al. (2020) — temporal fractionation of drip brew shows TDS and bitterness are positively correlated; high TDS tail = more bitter/astringent.
+          </div>
+        </div>
+      </div>
+
+      <!-- Derived metrics -->
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">Derived Diagnostics</div>
+        <div class="diag-grid" id="diagGrid">
+          <div class="diag-cell"><div class="diag-val" id="diagEYmain" style="color:var(--gold-lt)">—</div><div class="diag-lbl">Pre-Tail EY</div><div class="diag-sub" style="color:var(--dim)">Target &lt; 19%</div></div>
+          <div class="diag-cell"><div class="diag-val" id="diagXactual" style="color:var(--blue)">—</div><div class="diag-lbl">X actual</div><div class="diag-sub" style="color:var(--dim)">Baseline 1.47</div></div>
+          <div class="diag-cell"><div class="diag-val" id="diagEEY" style="color:var(--muted)">—</div><div class="diag-lbl">EEY corrected</div><div class="diag-sub" style="color:var(--dim)">with X actual</div></div>
+        </div>
+        <div style="margin-top:12px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;padding:10px;background:var(--surface);border-radius:4px;border:1px solid var(--border)" id="diagFormulas">
+          <div style="margin-bottom:4px"><span style="color:var(--text)">EY_main</span> = (TDS_blend × Y_total − TDS_tail × Y_tail) / Dose</div>
+          <div style="margin-bottom:4px"><span style="color:var(--text)">X_actual</span> = (Water_in_total − Yield_out_total) / Dose</div>
+          <div><span style="color:var(--text)">EEY_corrected</span> = TDS_target × (Ratio − X_actual)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Action guide -->
+    <div class="col">
+      <div class="card">
+        <div class="label" style="margin-bottom:12px">Action Guide</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:10px 12px;border-radius:5px;background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.25)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--red);font-weight:700;letter-spacing:.1em;margin-bottom:4px">CUT NOW — TDS_tail &gt; 0.8%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Bitter/astringent compound concentration still high. Each additional gram drawn down adds disproportionately more astringency than sweetness. Lift dripper immediately.</div>
+          </div>
+          <div style="padding:10px 12px;border-radius:5px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:4px">MARGINAL — TDS_tail 0.4–0.6%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Bitterness declining, sweetness/floral increasing. Acceptable to include for some brews. For competition: cut at ~0.6% to eliminate astringency risk entirely.</div>
+          </div>
+          <div style="padding:10px 12px;border-radius:5px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.25)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);font-weight:700;letter-spacing:.1em;margin-bottom:4px">SAFE — TDS_tail &lt; 0.3%</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Extract is highly dilute — neither bitter nor sweet compounds in significant quantity. Negligible impact on final cup. Drawdown may complete without quality risk.</div>
+          </div>
+        </div>
+
+        <!-- EEY guide -->
+        <div style="margin-top:12px;padding:10px 12px;border-radius:5px;background:var(--surface);border:1px solid var(--border)">
+          <div class="label" style="margin-bottom:8px">Equivalency EY (EEY) Guide</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8">
+            <div><span style="color:var(--green)">EY_main &lt; 19%</span> — Tail cut is timely, below astringency zone</div>
+            <div><span style="color:var(--amber)">EY_main 19–21%</span> — Equivalency threshold reached, cut earlier next brew</div>
+            <div><span style="color:var(--red)">EY_main &gt; 21%</span> — Over-extracted, high astringency risk</div>
+          </div>
+        </div>
+
+        <!-- X_actual interpretation -->
+        <div style="margin-top:10px;padding:10px 12px;border-radius:5px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2)">
+          <div class="label" style="margin-bottom:6px;color:var(--blue)">X_actual Interpretation</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8">
+            <div><span style="color:var(--blue)">X = 1.47</span> — Standard absorption (moderate ROR roast)</div>
+            <div><span style="color:var(--amber)">X 1.7–2.0</span> — High-ROR light roast, more absorption</div>
+            <div><span style="color:var(--red)">X &gt; 2.0</span> — Very porous roast, recalibrate EEY target</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── BREW LOG ──────────────────────────────────────────────────────────── -->
+<div class="section">
+  <div class="label" style="margin-bottom:12px">⑦ Brew Log — Research Record</div>
+  <div class="card">
+    <!-- Save controls -->
+    <div style="margin-bottom:12px">
+      <div class="label" style="margin-bottom:6px">Session Notes</div>
+      <textarea id="brewNotes" class="notes-input" rows="2"
+        placeholder="e.g. Syrina natural, 3 weeks post-roast, TWW water, competition practice #4..."></textarea>
+    </div>
+    <div class="log-bar">
+      <button class="log-btn log-btn-save" onclick="saveBrewLog()">⊕ Log This Brew</button>
+      <button class="log-btn log-btn-csv"  onclick="exportCSV()">↓ Export CSV</button>
+      <button class="log-btn log-btn-clear" onclick="clearLog()">✕ Clear All</button>
+      <span id="logCount" style="font-family:var(--mono);font-size:10px;color:var(--muted);align-self:center"></span>
+    </div>
+    <!-- Log entries -->
+    <div id="logEntries"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── Constants ────────────────────────────────────────────────────────────────
+const IDEAL  = { eyLo:18, eyHi:22, tdsLo:1.15, tdsHi:1.45 };
+const CHART  = { eyMin:14, eyMax:28, tdsMin:0.80, tdsMax:1.80 };
+const NS     = 'http://www.w3.org/2000/svg';
+
+// Flavor model per pour: [Acidity, Sweetness, Body, Aroma, Bitterness] 0–100
+const FLAVOR_PROFILES = [
+  [85, 35, 12, 90, 6 ],  // Pour 1: bloom+early — high acid, high aroma
+  [65, 72, 38, 68, 18],  // Pour 2: main extraction
+  [40, 90, 62, 52, 32],  // Pour 3: sweet zone
+  [18, 32, 88, 22, 78],  // Pour 4: tail — body + bitter risk
+];
+const FLAVOR_AXES = ['Acidity','Sweetness','Body','Aroma','Bitterness'];
+
+// Pour config
+const POUR_META = [
+  { name:'Pour 1',  sub:'Bloom + first water',  color:'#ef4444', badge:'P1', badgeBg:'rgba(239,68,68,.15)', badgeColor:'#ef4444', defaultWater:45,  defaultTds:1.60, defaultYield:22 },
+  { name:'Pour 2',  sub:'Main extraction',       color:'#f59e0b', badge:'P2', badgeBg:'rgba(245,158,11,.15)', badgeColor:'#f59e0b', defaultWater:80,  defaultTds:1.42, defaultYield:70 },
+  { name:'Pour 3',  sub:'Sweet development',     color:'#4ade80', badge:'P3', badgeBg:'rgba(74,222,128,.15)', badgeColor:'#4ade80', defaultWater:60,  defaultTds:1.28, defaultYield:53 },
+  { name:'Pour 4',  sub:'Finish / tail cut',     color:'#60a5fa', badge:'P4', badgeBg:'rgba(96,165,250,.15)', badgeColor:'#60a5fa', defaultWater:40,  defaultTds:0.92, defaultYield:35 },
+];
+
+// State
+const state = {
+  dose:       15,
+  targetTds:  1.40,
+  mode:       'manual',  // 'manual' | 'auto'
+  autoTargetEY: 19,      // Happy's EEY target (%)
+  grindSize:  'medium',  // 'fine' | 'medium' | 'coarse'
+  pours: POUR_META.map(m => ({
+    water:    m.defaultWater,
+    tds:      m.defaultTds,
+    yieldOut: m.defaultYield,
+    selected: true,
+  })),
+};
+
+// ── Auto-Estimate TDS: kinetic depletion model ────────────────────────────────
+// Responds in real time to dose, water, and yieldOut inputs.
+// Physics: grounds start dry (bloom harder to extract), then wet (easier).
+// Calibrated to Happy's EEY=19% target with typical light-roast Arabica.
+// Results: P1~3.0% | P2~1.95% | P3~1.13% | P4~0.77% | total EY~19.3%
+//
+// TDS_i = (remaining_solubles × water_i/(water_i + k_i×dose)) / yield_out_i
+// k_i = extraction resistance (high=dry bloom, low=wet later pours)
+
+// ── Auto-Estimate model parameters ──────────────────────────────────────────
+// BASE k_resist: higher = slower extraction (bloom dry, later pours wet)
+// Physics basis: Liang et al. (2021) equilibrium desorption model, UC Davis
+// k form: TDS_i = (remaining × w/(w + k×D)) / yield_out
+// k values calibrated to match observed TDS patterns; not directly from literature
+const AUTO_K_BASE = [12, 5, 4.5, 4];
+
+// Grind multiplier: coarser grind → less surface area → slower extraction → higher k
+const GRIND_K_MULT = { fine: 0.70, medium: 1.00, coarse: 1.40 };
+
+function calcAutoTDS(pourIdx, dose, pours) {
+  if (!dose || dose <= 0) return 0;
+  // User-adjustable target EY (default 19% per Happy's EEY framework)
+  const targetEY      = (state.autoTargetEY || 19) / 100;
+  // Fraction extractable = target EY + ~3% headroom (some solubles remain)
+  const solubleFrac   = Math.min(0.30, targetEY + 0.03);
+  const totalSolubles = dose * solubleFrac;
+  const kMult         = GRIND_K_MULT[state.grindSize] || 1.0;
+  let remaining       = totalSolubles;
+
+  for (let i = 0; i <= pourIdx; i++) {
+    const p = pours[i];
+    if (!p || !p.water || !p.yieldOut || p.water <= 0 || p.yieldOut <= 0) {
+      if (i === pourIdx) return 0;
+      continue;
+    }
+    const k = (AUTO_K_BASE[i] !== undefined ? AUTO_K_BASE[i] : 4.0) * kMult;
+    const extractFrac = p.water / (p.water + k * dose);
+    const extracted   = remaining * extractFrac;
+    const tds         = (extracted / p.yieldOut) * 100;
+    if (i === pourIdx) return Math.max(0.05, parseFloat(tds.toFixed(2)));
+    remaining -= extracted;
+  }
+  return 0;
+}
+
+function getLiquidOut(pourIdx) { return state.pours[pourIdx].yieldOut; }
+
+// ── Calculations ────────────────────────────────────────────────────────────
+function calcPour(pourIdx, dose) {
+  const p    = state.pours[pourIdx];
+  const liq  = getLiquidOut(pourIdx);
+  const tds  = state.mode === 'auto' ? calcAutoTDS(pourIdx, state.dose, state.pours) : p.tds;
+  const soli = (tds / 100) * liq;
+  const ey   = (soli / dose) * 100;
+  return { tds, liq, soli, ey };
+}
+
+function calcBlend(selectedIdxs, dose) {
+  if (selectedIdxs.length === 0) return null;
+  let totalLiq = 0, totalSoli = 0;
+  selectedIdxs.forEach(i => {
+    const c = calcPour(i, dose);
+    totalLiq  += c.liq;
+    totalSoli += c.soli;
+  });
+  if (totalLiq === 0) return null;
+  const blendTds = (totalSoli / totalLiq) * 100;
+  const blendEY  = (totalSoli / dose) * 100;
+  return { tds: blendTds, ey: blendEY, volume: totalLiq };
+}
+
+function calcFlavorBlend(selectedIdxs, dose) {
+  const weights = selectedIdxs.map(i => {
+    const c = calcPour(i, dose);
+    return c.soli;
+  });
+  const totalW = weights.reduce((s, w) => s + w, 0);
+  if (totalW === 0) return FLAVOR_AXES.map(() => 0);
+  return FLAVOR_AXES.map((_, axis) => {
+    let sum = 0;
+    selectedIdxs.forEach((pourI, si) => {
+      sum += FLAVOR_PROFILES[pourI][axis] * weights[si];
+    });
+    return sum / totalW;
+  });
+}
+
+function diagnose(ey, tds) {
+  if (!ey || !tds) return null;
+  const eyOk  = ey >= IDEAL.eyLo && ey <= IDEAL.eyHi;
+  const tdsOk = tds >= IDEAL.tdsLo && tds <= IDEAL.tdsHi;
+  if (eyOk && tdsOk) return { type:'ideal' };
+  const parts = [], fixes = [];
+  if (ey  < IDEAL.eyLo)   { parts.push('Under-extracted'); fixes.push('Grind finer','↑ Temp'); }
+  if (ey  > IDEAL.eyHi)   { parts.push('Over-extracted');  fixes.push('Grind coarser','Tail-cut earlier'); }
+  if (tds < IDEAL.tdsLo)  { parts.push('Too weak');        fixes.push('Tighter ratio','↑ Dose'); }
+  if (tds > IDEAL.tdsHi)  { parts.push('Too strong');      fixes.push('Looser ratio','Add water'); }
+  return { type:'off', label:parts.join(' · '), fixes };
+}
+
+// ── SVG helpers ─────────────────────────────────────────────────────────────
+function svgEl(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v));
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function svgText(parent, x, y, text, attrs) {
+  const t = svgEl('text', { x, y, ...attrs }, parent);
+  t.textContent = text;
+  return t;
+}
+function toX(ey, W) { return ((ey - CHART.eyMin) / (CHART.eyMax - CHART.eyMin)) * W; }
+function toY(tds, H) { return H - ((tds - CHART.tdsMin) / (CHART.tdsMax - CHART.tdsMin)) * H; }
+
+// ── Render SCA Chart ─────────────────────────────────────────────────────────
+function renderSCAChart() {
+  const svg = document.getElementById('scaChart');
+  svg.innerHTML = '';
+  const W = 420, H = 270;
+  const PAD = { l:44, r:14, t:14, b:34 };
+  const cW = W - PAD.l - PAD.r, cH = H - PAD.t - PAD.b;
+
+  const defs = svgEl('defs', {}, svg);
+  const clip = svgEl('clipPath', { id:'sca_clip' }, defs);
+  svgEl('rect', { x:PAD.l, y:PAD.t, width:cW, height:cH }, clip);
+
+  svgEl('rect', { x:PAD.l, y:PAD.t, width:cW, height:cH, fill:'#151310', stroke:'#28241e', 'stroke-width':1, rx:2 }, svg);
+  const g = svgEl('g', { 'clip-path':'url(#sca_clip)' }, svg);
+
+  // Grid
+  [14,16,18,20,22,24,26,28].forEach(v => svgEl('line',{x1:PAD.l+toX(v,cW),y1:PAD.t,x2:PAD.l+toX(v,cW),y2:PAD.t+cH,stroke:'#28241e','stroke-width':1},g));
+  [0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8].forEach(v => svgEl('line',{x1:PAD.l,y1:PAD.t+toY(v,cH),x2:PAD.l+cW,y2:PAD.t+toY(v,cH),stroke:'#28241e','stroke-width':1},g));
+
+  // Zone shading
+  svgEl('rect',{x:PAD.l,y:PAD.t,width:toX(IDEAL.eyLo,cW),height:cH,fill:'rgba(248,113,113,.05)'},g);
+  svgEl('rect',{x:PAD.l+toX(IDEAL.eyHi,cW),y:PAD.t,width:cW-toX(IDEAL.eyHi,cW),height:cH,fill:'rgba(248,113,113,.05)'},g);
+  // Equivalency astringency zone: EY 19–22% amber shading
+  svgEl('rect',{x:PAD.l+toX(19,cW),y:PAD.t,width:toX(22,cW)-toX(19,cW),height:cH,fill:'rgba(251,191,36,.06)'},g);
+  // EEY threshold line at EY=19%
+  svgEl('line',{x1:PAD.l+toX(19,cW),y1:PAD.t,x2:PAD.l+toX(19,cW),y2:PAD.t+cH,stroke:'rgba(251,191,36,.5)','stroke-width':1.5,'stroke-dasharray':'4,3'},g);
+  svgText(g, PAD.l+toX(19,cW)+3, PAD.t+12, 'EEY', {'text-anchor':'start',fill:'rgba(251,191,36,.65)','font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1});
+
+  // Ideal zone
+  const ix1=toX(IDEAL.eyLo,cW), ix2=toX(IDEAL.eyHi,cW);
+  const iy1=toY(IDEAL.tdsHi,cH), iy2=toY(IDEAL.tdsLo,cH);
+  svgEl('rect',{x:PAD.l+ix1,y:PAD.t+iy1,width:ix2-ix1,height:iy2-iy1,fill:'rgba(74,222,128,.08)',stroke:'rgba(74,222,128,.38)','stroke-width':1.5,'stroke-dasharray':'4,3',rx:2},g);
+  svgText(g, PAD.l+(ix1+ix2)/2, PAD.t+iy1+12, 'SCA IDEAL', {'text-anchor':'middle',fill:'rgba(74,222,128,.6)','font-family':'JetBrains Mono,monospace','font-size':7,'letter-spacing':2,'font-weight':700});
+
+  // Pour dots
+  const selectedIdxs = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+
+  POUR_META.forEach((meta, i) => {
+    const c    = calcPour(i, state.dose);
+    const tds  = state.mode === 'auto' ? calcAutoTDS(i, state.dose, state.pours) : state.pours[i].tds;
+    const ey   = c.ey;
+    if (isNaN(ey) || isNaN(tds)) return;
+    if (tds < CHART.tdsMin || tds > CHART.tdsMax || ey < CHART.eyMin || ey > CHART.eyMax) return;
+
+    const dx = PAD.l + toX(ey, cW);
+    const dy = PAD.t + toY(tds, cH);
+    const dim = !state.pours[i].selected;
+
+    // Label
+    svgText(g, dx, dy-12, meta.badge, {'text-anchor':'middle',fill:dim?'rgba(120,112,104,.4)':meta.color,'font-family':'JetBrains Mono,monospace','font-size':8,'font-weight':700,'letter-spacing':1});
+
+    svgEl('circle',{cx:dx,cy:dy,r:6,fill:dim?'rgba(28,26,22,.9)':meta.color,stroke:dim?'rgba(80,70,60,.4)':meta.color,'stroke-width':dim?1:0,'fill-opacity':dim?0.3:0.85},g);
+  });
+
+  // Blend dot
+  const blend = calcBlend(selectedIdxs, state.dose);
+  if (blend && blend.tds >= CHART.tdsMin && blend.tds <= CHART.tdsMax && blend.ey >= CHART.eyMin && blend.ey <= CHART.eyMax) {
+    const bx = PAD.l + toX(blend.ey, cW);
+    const by = PAD.t + toY(blend.tds, cH);
+
+    // Glow
+    const rg = svgEl('radialGradient',{id:'blend_glow',cx:'50%',cy:'50%',r:'50%'},defs);
+    const s1 = svgEl('stop',{offset:'0%'},rg); s1.style.stopColor='#c9943a'; s1.style.stopOpacity='0.5';
+    const s2 = svgEl('stop',{offset:'100%'},rg); s2.style.stopColor='#c9943a'; s2.style.stopOpacity='0';
+    svgEl('circle',{cx:bx,cy:by,r:14,fill:'url(#blend_glow)'},g);
+
+    // Crosshairs
+    svgEl('line',{x1:PAD.l,y1:by,x2:bx-9,y2:by,stroke:'#c9943a','stroke-width':0.8,'stroke-opacity':0.35,'stroke-dasharray':'3,3'},g);
+    svgEl('line',{x1:bx+9,y1:by,x2:PAD.l+cW,y2:by,stroke:'#c9943a','stroke-width':0.8,'stroke-opacity':0.35,'stroke-dasharray':'3,3'},g);
+    svgEl('line',{x1:bx,y1:PAD.t,x2:bx,y2:by-9,stroke:'#c9943a','stroke-width':0.8,'stroke-opacity':0.35,'stroke-dasharray':'3,3'},g);
+    svgEl('line',{x1:bx,y1:by+9,x2:bx,y2:PAD.t+cH,stroke:'#c9943a','stroke-width':0.8,'stroke-opacity':0.35,'stroke-dasharray':'3,3'},g);
+
+    svgEl('circle',{cx:bx,cy:by,r:8,fill:'#1c1a16',stroke:'#c9943a','stroke-width':2.5},g);
+    svgEl('circle',{cx:bx,cy:by,r:3.5,fill:'#c9943a'},g);
+    svgText(g, bx, by-15, 'BLEND', {'text-anchor':'middle',fill:'#e8be78','font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1.5});
+  }
+
+  // Axis ticks
+  [14,16,18,20,22,24,26,28].forEach(v => svgText(svg,PAD.l+toX(v,cW),H-10,v+'%',{'text-anchor':'middle',fill:'#7a7068','font-family':'JetBrains Mono,monospace','font-size':9}));
+  [0.8,1.0,1.2,1.4,1.6,1.8].forEach(v => svgText(svg,PAD.l-6,PAD.t+toY(v,cH)+3,v.toFixed(1),{'text-anchor':'end',fill:'#7a7068','font-family':'JetBrains Mono,monospace','font-size':9}));
+  svgText(svg,PAD.l+cW/2,H-1,'EXTRACTION YIELD (%)',{'text-anchor':'middle',fill:'#42403a','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1});
+  svgText(svg,8,PAD.t+cH/2,'TDS (%)',{'text-anchor':'middle',fill:'#42403a','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1,transform:`rotate(-90,8,${PAD.t+cH/2})`});
+
+  // Legend
+  const legend = document.getElementById('scaLegend');
+  legend.innerHTML = POUR_META.map((m,i) => `
+    <span class="legend-item">
+      <span class="legend-dot" style="background:${m.color};opacity:${state.pours[i].selected?1:0.3}"></span>
+      <span style="opacity:${state.pours[i].selected?1:0.4}">${m.name}</span>
+    </span>
+  `).join('') + `
+    <span class="legend-item">
+      <span class="legend-dot" style="background:var(--gold)"></span>
+      <span>Blend</span>
+    </span>
+    <span class="legend-item">
+      <span style="display:inline-block;width:10px;height:8px;background:rgba(251,191,36,.2);border-left:2px solid rgba(251,191,36,.6);margin-right:4px"></span>
+      <span>EEY zone 19–22%</span>
+    </span>`;
+}
+
+// ── Render Radar Chart ───────────────────────────────────────────────────────
+function renderRadar() {
+  const svg   = document.getElementById('radarChart');
+  svg.innerHTML = '';
+  const W = 300, H = 300;
+  const cx = 150, cy = 155, R = 105;
+  const N = 5;
+
+  // Background
+  svgEl('rect',{x:0,y:0,width:W,height:H,fill:'transparent'},svg);
+
+  // Grid rings
+  [0.25,0.5,0.75,1.0].forEach(f => {
+    const r = R * f;
+    const pts = Array.from({length:N},(_,i)=>{
+      const a = (i/N)*Math.PI*2 - Math.PI/2;
+      return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;
+    }).join(' ');
+    svgEl('polygon',{points:pts,fill:'none',stroke:'#28241e','stroke-width':1},svg);
+  });
+
+  // Axis lines + labels
+  FLAVOR_AXES.forEach((name, i) => {
+    const a = (i/N)*Math.PI*2 - Math.PI/2;
+    svgEl('line',{x1:cx,y1:cy,x2:cx+Math.cos(a)*R,y2:cy+Math.sin(a)*R,stroke:'#353027','stroke-width':1},svg);
+    const lx = cx + Math.cos(a)*(R+18);
+    const ly = cy + Math.sin(a)*(R+18);
+    const t = svgText(svg, lx, ly+3, name, {
+      'text-anchor': Math.abs(Math.cos(a)) < 0.2 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end',
+      fill:'#7a7068', 'font-family':'JetBrains Mono,monospace', 'font-size':9, 'letter-spacing':0.5
+    });
+  });
+
+  // Per-pour polygons (dim if not selected)
+  const selectedIdxs = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+
+  POUR_META.forEach((meta, pi) => {
+    if (!state.pours[pi].selected) return;
+    const profile = FLAVOR_PROFILES[pi];
+    const pts = profile.map((v,i) => {
+      const a = (i/N)*Math.PI*2 - Math.PI/2;
+      const r = (v/100)*R;
+      return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;
+    }).join(' ');
+    svgEl('polygon',{points:pts,fill:meta.color,'fill-opacity':0.06,stroke:meta.color,'stroke-width':1.2,'stroke-opacity':0.5},svg);
+  });
+
+  // Blend polygon (bold)
+  const flavor = calcFlavorBlend(selectedIdxs, state.dose);
+  const blendPts = flavor.map((v,i) => {
+    const a = (i/N)*Math.PI*2 - Math.PI/2;
+    const r = (v/100)*R;
+    return `${cx+Math.cos(a)*r},${cy+Math.sin(a)*r}`;
+  }).join(' ');
+  svgEl('polygon',{points:blendPts,fill:'rgba(201,148,58,.15)',stroke:'#c9943a','stroke-width':2},svg);
+
+  // Blend dots on axes
+  flavor.forEach((v,i) => {
+    const a = (i/N)*Math.PI*2 - Math.PI/2;
+    const r = (v/100)*R;
+    svgEl('circle',{cx:cx+Math.cos(a)*r,cy:cy+Math.sin(a)*r,r:3.5,fill:'#c9943a'},svg);
+  });
+
+  // Center label
+  svgText(svg,cx,cy-3,'BLEND',{'text-anchor':'middle',fill:'rgba(201,148,58,.5)','font-family':'JetBrains Mono,monospace','font-size':8,'font-weight':700,'letter-spacing':2});
+
+  // Render flavor bars
+  renderFlavorBars(flavor);
+}
+
+function renderFlavorBars(flavor) {
+  const container = document.getElementById('flavorBars');
+  const colors = ['#ef4444','#4ade80','#60a5fa','#a78bfa','#f87171'];
+  container.innerHTML = FLAVOR_AXES.map((name,i) => {
+    const v = flavor[i];
+    const col = colors[i];
+    const tag = v > 75 ? ' ▲ HIGH' : v < 30 ? ' ▼ LOW' : '';
+    return `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em">${name}</span>
+          <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${col}">${v.toFixed(0)}<span style="font-size:8px;color:var(--dim)">%${tag}</span></span>
+        </div>
+        <div style="position:relative;height:5px;border-radius:3px;background:var(--surface);border:1px solid var(--border)">
+          <div style="position:absolute;top:0;bottom:0;left:0;width:${v}%;background:${col};border-radius:3px;transition:width .3s"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Render Gauges ────────────────────────────────────────────────────────────
+function renderGauge(label, value, lo, hi, unit, idealLo, idealHi, decimals, showEEY) {
+  const pct  = Math.max(0, Math.min(100, ((value-lo)/(hi-lo))*100));
+  const iLo  = Math.max(0, ((idealLo-lo)/(hi-lo))*100);
+  const iHi  = Math.max(0, Math.min(100, ((idealHi-lo)/(hi-lo))*100));
+  const ok   = value >= idealLo && value <= idealHi;
+  // EEY zone markers (only for EY gauge)
+  const eeyLoPct = Math.max(0, ((19-lo)/(hi-lo))*100);
+  const eeyHiPct = Math.max(0, Math.min(100, ((22-lo)/(hi-lo))*100));
+  const eeyZoneHTML = showEEY
+    ? `<div style="position:absolute;top:0;bottom:0;left:${eeyLoPct}%;width:${eeyHiPct-eeyLoPct}%;background:rgba(251,191,36,.15);border-radius:3px"></div>
+       <div style="position:absolute;top:-3px;bottom:-3px;left:${eeyLoPct}%;width:1.5px;background:rgba(251,191,36,.6)"></div>`
+    : '';
+  // EEY-aware colour: ≥21% red, 19-21% amber, else normal
+  let col;
+  if (showEEY && value >= 21)      col = '#f87171';
+  else if (showEEY && value >= 19) col = '#fbbf24';
+  else col = ok ? '#4ade80' : value < idealLo ? '#fbbf24' : '#f87171';
+  // Warning badge
+  let warn = '';
+  if (showEEY && value >= 21)      warn = ' <span style="font-family:var(--mono);font-size:8px;color:#f87171">⚠ Over EEY</span>';
+  else if (showEEY && value >= 19) warn = ' <span style="font-family:var(--mono);font-size:8px;color:#fbbf24">⚠ At EEY</span>';
+  return `
+    <div class="gauge-wrap">
+      <div class="gauge-header">
+        <span class="gauge-lbl">${label}${warn}</span>
+        <span class="gauge-num" style="color:${col}">${value.toFixed(decimals)}<span>${unit}</span></span>
+      </div>
+      <div class="gauge-track">
+        <div class="gauge-ideal-zone" style="left:${iLo}%;width:${iHi-iLo}%"></div>
+        ${eeyZoneHTML}
+        <div class="gauge-fill" style="width:${pct}%;background:${col}"></div>
+        <div class="gauge-mark" style="left:${iLo}%"></div>
+        <div class="gauge-mark" style="left:${iHi}%"></div>
+      </div>
+      <div class="gauge-footer">
+        <span>${lo}${unit}</span>
+        <span style="color:rgba(74,222,128,.5)">Ideal ${idealLo}–${idealHi}${unit}</span>
+        <span>${hi}${unit}</span>
+      </div>
+    </div>`;
+}
+
+function renderBlend() {
+  const selectedIdxs = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+  const blend = calcBlend(selectedIdxs, state.dose);
+
+  const gaugesEl = document.getElementById('blendGauges');
+  const statusEl = document.getElementById('blendStatus');
+
+  if (!blend) {
+    gaugesEl.innerHTML = '';
+    statusEl.innerHTML = '<div class="blend-box blend-empty" style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--dim)">Select at least one pour</div>';
+    return;
+  }
+
+  const diag = diagnose(blend.ey, blend.tds);
+  gaugesEl.innerHTML =
+    renderGauge('TDS (blend)', blend.tds, 0.80, 1.80, '%', 1.15, 1.45, 2, false) +
+    renderGauge('Extraction Yield (blend)', blend.ey, 14, 28, '%', 18, 22, 1, true);
+
+  // Hidden formula + X=1.47 note
+  if (blend) {
+    const ratio = blend.volume > 0 ? (blend.volume / state.dose).toFixed(1) : '—';
+    const xDefault = 1.47;
+    const expectedTDS = blend.ey > 0 ? (blend.ey / (parseFloat(ratio) - xDefault)).toFixed(2) : '—';
+    gaugesEl.innerHTML += `<div style="margin:8px 0;padding:9px 12px;border-radius:4px;background:rgba(201,148,58,.06);border:1px solid rgba(201,148,58,.2);font-family:var(--mono);font-size:10px;line-height:1.8;color:var(--muted)">
+      <span style="color:var(--gold-lt)">Hidden Golden Cup formula:</span> TDS = EY / (R − X)<br>
+      = ${blend.ey.toFixed(1)}% / (${ratio} − 1.47) = <span style="color:var(--gold-lt)">${expectedTDS}%</span>
+      <span style="font-size:9px;color:var(--dim);margin-left:4px">(X = 1.47 g/g, Happy 2025)</span>
+    </div>`;
+  }
+  // Volume stat
+  gaugesEl.innerHTML += `
+    <div style="display:flex;gap:1px;margin-top:4px">
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:7px 10px;text-align:center">
+        <div style="font-family:var(--mono);font-size:14px;font-weight:700">${blend.volume.toFixed(0)}<span style="font-size:9px;color:var(--dim)">mL</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px">Volume</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:7px 10px;text-align:center">
+        <div style="font-family:var(--mono);font-size:14px;font-weight:700">${selectedIdxs.length}<span style="font-size:9px;color:var(--dim)">/4</span></div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px">Pours included</div>
+      </div>
+    </div>`;
+
+  if (!diag) {
+    statusEl.innerHTML = '';
+  } else if (diag.type === 'ideal') {
+    statusEl.innerHTML = `<div class="blend-box blend-ideal" style="margin-top:10px"><div class="blend-title">✓ SCA Ideal Cup</div><div class="blend-sub">EY 18–22% · TDS 1.15–1.45%</div></div>`;
+  } else {
+    statusEl.innerHTML = `<div class="blend-box blend-off" style="margin-top:10px"><div class="blend-title">${diag.label}</div><div class="tags">${diag.fixes.map(f=>`<span class="tag">${f}</span>`).join('')}</div></div>`;
+  }
+}
+
+function renderDilution() {
+  const selectedIdxs = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+  const blend = calcBlend(selectedIdxs, state.dose);
+  const el    = document.getElementById('dilutionResult');
+
+  if (!blend) { el.innerHTML = ''; return; }
+
+  const target  = state.targetTds;
+  const current = blend.tds;
+  const vol     = blend.volume;
+
+  if (current <= target) {
+    el.innerHTML = `
+      <div class="dilution-box" style="background:rgba(74,222,128,.05);border-color:rgba(74,222,128,.2)">
+        <div style="font-family:var(--mono);font-size:10px;color:rgba(74,222,128,.6);margin-bottom:5px">ALREADY AT OR BELOW TARGET</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Blend TDS (${current.toFixed(2)}%) ≤ target (${target.toFixed(2)}%). No dilution needed — or use a tighter ratio on the next brew.</div>
+      </div>`;
+    return;
+  }
+
+  const newVol     = current / target * vol;
+  const waterToAdd = newVol - vol;
+  const newRatio   = (waterToAdd / state.dose).toFixed(1);
+
+  el.innerHTML = `
+    <div class="dilution-box">
+      <div class="dilution-row">
+        <span class="dilution-label">Water to add</span>
+        <span class="dilution-val">${waterToAdd.toFixed(0)}<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">g</span></span>
+      </div>
+      <div style="height:1px;background:rgba(96,165,250,.15);margin:6px 0"></div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.7">
+        <div>${current.toFixed(2)}% → ${target.toFixed(2)}% TDS</div>
+        <div>Final volume: ${newVol.toFixed(0)}g</div>
+        <div>Equivalent ratio: 1:${newRatio}</div>
+      </div>
+    </div>`;
+}
+
+// ── Render Pour Table ────────────────────────────────────────────────────────
+function renderTable() {
+  const table = document.getElementById('pourTable');
+  const headers = ['Pour','Water in','Yield out','Retained','Yield%','TDS','EY / Pour','Cum. EY','Solubles','Flavor Character'];
+  let cumEY = 0;
+
+  const rowBg = ['rgba(239,68,68,.08)','rgba(245,158,11,.08)','rgba(74,222,128,.08)','rgba(96,165,250,.08)'];
+  const chars = ['High acid · floral aroma','Main extraction · brightness','Sweetness · sugar hydrolysis','Body · bitter risk'];
+  const TH = `text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap`;
+
+  let html = `<tr>${headers.map(h=>`<th style="${TH}">${h}</th>`).join('')}</tr>`;
+
+  POUR_META.forEach((meta, i) => {
+    const c       = calcPour(i, state.dose);
+    const tds     = state.mode === 'auto' ? calcAutoTDS(i, state.dose, state.pours) : state.pours[i].tds;
+    const water   = state.pours[i].water;
+    const yOut    = state.pours[i].yieldOut;
+    const retain  = water - yOut;
+    const yieldPct = ((yOut / water) * 100).toFixed(0);
+    const retainCol = retain > water * 0.25 ? '#fbbf24' : 'var(--text)';
+    cumEY += c.ey;
+    const sel  = state.pours[i].selected;
+    const TD = `padding:7px 10px;font-family:var(--mono);font-size:11px`;
+    html += `<tr style="background:${sel?rowBg[i]:'transparent'};opacity:${sel?1:0.4}">
+      <td style="${TD};color:${meta.color};font-weight:700">${meta.name}</td>
+      <td style="${TD}">${water}g</td>
+      <td style="${TD};color:var(--gold-lt);font-weight:600">${yOut.toFixed(0)}g</td>
+      <td style="${TD};color:${retainCol}">${retain.toFixed(0)}g</td>
+      <td style="${TD};color:var(--muted)">${yieldPct}%</td>
+      <td style="${TD};font-weight:600;color:${tds>=1.15&&tds<=1.45?'#4ade80':tds<0.90?'#f87171':'#f0ead8'}">${tds.toFixed(2)}%</td>
+      <td style="${TD}">${c.ey.toFixed(1)}%</td>
+      <td style="${TD};color:var(--gold-lt)">${cumEY.toFixed(1)}%</td>
+      <td style="${TD}">${c.soli.toFixed(2)}g</td>
+      <td style="${TD};font-size:10px;color:var(--muted)">${chars[i]}</td>
+    </tr>`;
+  });
+
+  // Total row
+  const allIdxs = [0,1,2,3];
+  const total = calcBlend(allIdxs, state.dose);
+  const totalWater  = state.pours.reduce((s,p) => s+p.water, 0);
+  const totalYield  = state.pours.reduce((s,p) => s+p.yieldOut, 0);
+  const totalRetain = totalWater - totalYield;
+  const totalYPct   = ((totalYield/totalWater)*100).toFixed(0);
+  const TD = `padding:7px 10px;font-family:var(--mono);font-size:11px`;
+  if (total) {
+    html += `<tr style="border-top:2px solid var(--border2)">
+      <td style="${TD};font-weight:700;color:var(--gold-lt)">TOTAL</td>
+      <td style="${TD}">${totalWater}g</td>
+      <td style="${TD};color:var(--gold-lt);font-weight:700">${totalYield.toFixed(0)}g</td>
+      <td style="${TD}">${totalRetain.toFixed(0)}g</td>
+      <td style="${TD};color:var(--muted)">${totalYPct}%</td>
+      <td style="${TD};color:var(--gold-lt);font-weight:700">${total.tds.toFixed(2)}%</td>
+      <td colspan="2" style="${TD};color:var(--gold-lt)">${total.ey.toFixed(1)}% EY</td>
+      <td colspan="2" style="${TD};color:var(--muted);font-size:10px">Ratio 1:${(totalYield/state.dose).toFixed(1)}</td>
+    </tr>`;
+  }
+
+  table.innerHTML = html;
+}
+
+// ── Render Pour Cards ────────────────────────────────────────────────────────
+// Helper — avoids nested template literal quoting issues
+function retentionNote(water, yieldOut) {
+  if (!water || !yieldOut || water <= 0) return '';
+  if (yieldOut >= water) {
+    return '<div style="font-family:var(--mono);font-size:8px;margin-top:2px;color:#f87171">⚠ Yield cannot exceed water in</div>';
+  }
+  const retained = (water - yieldOut).toFixed(0);
+  const pct      = ((1 - yieldOut / water) * 100).toFixed(0);
+  return '<div style="font-family:var(--mono);font-size:8px;margin-top:2px;color:var(--dim)">Retained: ' + retained + 'g (' + pct + '% absorbed)</div>';
+}
+
+function renderPourCards() {
+  const container = document.getElementById('pourCards');
+  // Update auto params display if in auto mode
+  if (state.mode === 'auto') {
+    const el = document.getElementById('autoEYVal');
+    if (el) el.innerHTML = (state.autoTargetEY || 19).toFixed(1) + '<span style="font-size:9px;color:var(--muted)">%</span>';
+  }
+  container.innerHTML = POUR_META.map((meta, i) => {
+    const c    = calcPour(i, state.dose);
+    const tds  = state.mode === 'auto' ? calcAutoTDS(i, state.dose, state.pours) : state.pours[i].tds;
+    // Context-aware stage diagnosis — NOT ideal-cup TDS comparison
+    const ret_i   = state.pours[i].water - state.pours[i].yieldOut;
+    const retPct_i = state.pours[i].water > 0 ? ret_i / state.pours[i].water : 0;
+    const impossible = state.pours[i].water > 0 && state.pours[i].yieldOut >= state.pours[i].water;
+    let diag, diagCol;
+    if (impossible) {
+      diag = 'Check yield'; diagCol = '#f87171';
+    } else if (!tds || !state.pours[i].yieldOut) {
+      diag = '—'; diagCol = 'var(--dim)';
+    } else if (state.mode === 'auto') {
+      diag    = retPct_i > 0.5 ? 'High retain' : retPct_i > 0.15 ? 'Normal' : 'Low retain';
+      diagCol = retPct_i > 0.5 ? '#fbbf24' : '#4ade80';
+    } else {
+      // Manual: TDS stage context (early pours naturally high — not a problem)
+      diag    = tds < 0.7 ? 'Near tail' : tds < 1.1 ? 'Late stage' : tds < 2.0 ? 'Good' : 'Early stage';
+      diagCol = tds < 0.7 ? '#fbbf24' : '#4ade80';
+    }
+    const sel = state.pours[i].selected;
+
+    const tdsInput = state.mode === 'manual' ? `
+      <div class="pour-row">
+        <span class="pour-row-lbl">TDS reading</span>
+        <div class="num-input">
+          <input type="number" min="0.5" max="2.0" step="0.01" value="${tds.toFixed(2)}"
+            onchange="onTdsChange(${i}, this.value)" inputmode="decimal" autocomplete="off">
+          <span class="num-unit">%</span>
+        </div>
+      </div>` : `
+      <div class="pour-row">
+        <span class="pour-row-lbl">TDS (estimated)</span>
+        <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${tds.toFixed(2)}%</span>
+      </div>`;
+
+    return `
+      <div class="pour-card ${sel?'selected':''}" id="pourCard${i}">
+        <div class="pour-card-header">
+          <div>
+            <span class="pour-badge" style="background:${meta.badgeBg};color:${meta.badgeColor}">${meta.badge}</span>
+          </div>
+          <div class="pour-check ${sel?'on':''}" id="pourCheck${i}" onclick="togglePour(${i})" title="Include in blend">
+            ${sel?'<svg width="10" height="10" viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2" stroke="#c9943a" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}
+          </div>
+        </div>
+        <div class="pour-name">${meta.name}</div>
+        <div class="pour-sub">${meta.sub}</div>
+        <div class="pour-inputs">
+          <div class="pour-row">
+            <span class="pour-row-lbl">Water in</span>
+            <div class="num-input">
+              <input type="number" min="10" max="200" step="5" value="${state.pours[i].water}"
+                onchange="onWaterChange(${i}, this.value)" inputmode="decimal" autocomplete="off">
+              <span class="num-unit">g</span>
+            </div>
+          </div>
+          <div class="pour-row">
+            <span class="pour-row-lbl" style="color:var(--gold-lt)">Yield out</span>
+            <div class="num-input">
+              <input type="number" min="0" max="${state.pours[i].water||200}" step="1"
+                value="${Math.min(state.pours[i].yieldOut, state.pours[i].water||200)}"
+                onchange="onYieldChange(${i}, this.value)"
+                style="border-color:${state.pours[i].water>0&&state.pours[i].yieldOut>=state.pours[i].water?'rgba(248,113,113,.6)':'rgba(201,148,58,.35)'}" inputmode="decimal" autocomplete="off">
+              <span class="num-unit" style="color:var(--gold-lt)">g</span>
+            </div>
+          </div>
+          ${retentionNote(state.pours[i].water, state.pours[i].yieldOut)}
+          ${tdsInput}
+        </div>
+        <div class="stat-grid" style="margin-top:10px;grid-template-columns:repeat(4,1fr)">
+          <div class="stat-cell">
+            <div class="stat-val" style="color:${meta.color}">${tds.toFixed(2)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+            <div class="stat-lbl">TDS</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-val">${c.ey.toFixed(1)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+            <div class="stat-lbl">EY</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-val" style="color:var(--gold-lt)">${c.liq.toFixed(0)}<span style="font-size:9px;color:var(--dim)">g</span></div>
+            <div class="stat-lbl">Yield</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-val" style="color:${diagCol};font-size:9px">${diag}</div>
+            <div class="stat-lbl">Status</div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Event handlers ───────────────────────────────────────────────────────────
+function onDoseChange(v) {
+  state.dose = parseFloat(v);
+  document.getElementById('doseVal').innerHTML = `${parseFloat(v).toFixed(1)}<span>g</span>`;
+  renderAll();
+}
+
+function onTargetTdsChange(v) {
+  state.targetTds = parseFloat(v);
+  document.getElementById('targetTdsVal').innerHTML = `${parseFloat(v).toFixed(2)}<span>%</span>`;
+  renderDilution();
+}
+
+function onTdsChange(idx, v) {
+  const val = parseFloat(v);
+  if (!isNaN(val) && val >= 0) state.pours[idx].tds = val;
+  updatePourStat(idx);
+  renderCharts();
+}
+
+function onWaterChange(idx, v) {
+  const val = parseInt(v);
+  if (!isNaN(val) && val >= 0) state.pours[idx].water = val;
+  updatePourStat(idx);
+  renderCharts();
+}
+
+function onYieldChange(idx, v) {
+  let val = parseFloat(v);
+  if (isNaN(val) || val < 0) return;
+  // Physical constraint: yield out CANNOT exceed water in
+  const waterIn = state.pours[idx].water || 0;
+  if (waterIn > 0 && val > waterIn) {
+    val = waterIn;
+    // Update the input field to show clamped value
+    const card = document.getElementById('pourCard' + idx);
+    if (card) {
+      const inputs = card.querySelectorAll('input[type=number]');
+      // yield input is the 2nd number input in the card
+      if (inputs[1]) inputs[1].value = val.toFixed(0);
+    }
+  }
+  state.pours[idx].yieldOut = val;
+  updatePourStat(idx);
+  renderCharts();
+}
+
+// Update only the stat cells of one pour card — avoids full DOM rebuild
+function updatePourStat(idx) {
+  const card = document.getElementById('pourCard' + idx);
+  if (!card) return;
+  const p    = state.pours[idx];
+  const tds  = state.mode === 'auto' ? calcAutoTDS(idx, state.dose, state.pours) : p.tds;
+  const meta = POUR_META[idx];
+  const c    = calcPour(idx, state.dose);
+  const tdsCol  = tds > 0 && tds <= 3.5 ? '#e8f0f8' : '#f87171'; // just show value, no misleading colour
+  const p2 = state.pours[idx];
+  const ret2 = p2.water - p2.yieldOut;
+  const retPct2 = p2.water > 0 ? ret2 / p2.water : 0;
+  let diagStr, diagCol;
+  if (p2.water > 0 && p2.yieldOut >= p2.water) {
+    diagStr = 'Check yield'; diagCol = '#f87171';
+  } else if (!tds || p2.yieldOut <= 0) {
+    diagStr = '—'; diagCol = 'var(--dim)';
+  } else if (state.mode === 'auto') {
+    diagStr = retPct2 > 0.5 ? 'High retain' : retPct2 > 0.15 ? 'Normal' : 'Low retain';
+    diagCol = retPct2 > 0.5 ? '#fbbf24' : '#4ade80';
+  } else {
+    diagStr = tds < 0.7 ? 'Near tail' : tds < 1.1 ? 'Late stage' : tds < 2.0 ? 'Good' : 'Early stage';
+    diagCol = tds < 0.7 ? '#fbbf24' : '#4ade80';
+  }
+  const cells   = card.querySelectorAll('.stat-cell .stat-val');
+  if (cells.length >= 4) {
+    cells[0].innerHTML = `${tds.toFixed(2)}<span style="font-size:9px;color:var(--dim)">%</span>`;
+    cells[0].style.color = tdsCol;
+    cells[1].innerHTML = `${c.ey.toFixed(1)}<span style="font-size:9px;color:var(--dim)">%</span>`;
+    cells[2].innerHTML = `${p.yieldOut.toFixed(0)}<span style="font-size:9px;color:var(--dim)">g</span>`;
+    cells[3].textContent = diagStr;
+    cells[3].style.color = diagCol;
+  }
+}
+
+// Render everything EXCEPT pour cards (they stay in DOM to preserve focus)
+function renderCharts() {
+  renderSCAChart();
+  renderRadar();
+  renderBlend();
+  renderDilution();
+  renderTable();
+  renderTailDiagnostic();
+}
+
+function togglePour(idx) {
+  state.pours[idx].selected = !state.pours[idx].selected;
+  renderAll();
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.getElementById('modeManual').classList.toggle('active', mode === 'manual');
+  document.getElementById('modeAuto').classList.toggle('active', mode === 'auto');
+  document.getElementById('autoDisclaimer').style.display = mode === 'auto' ? 'block' : 'none';
+  renderAll();
+}
+
+function onAutoEY(v) {
+  state.autoTargetEY = parseFloat(v);
+  document.getElementById('autoEYVal').innerHTML = parseFloat(v).toFixed(1) + '<span style="font-size:9px;color:var(--muted)">%</span>';
+  renderAll();
+}
+
+function onGrind(size) {
+  state.grindSize = size;
+  const mult = { fine: 0.70, medium: 1.00, coarse: 1.40 };
+  const label = { fine: 'k × 0.7 (fine — faster extraction)', medium: 'k × 1.0 (medium)', coarse: 'k × 1.4 (coarse — slower extraction)' };
+  document.getElementById('grindNote').textContent = label[size];
+  // Update button styles
+  ['fine','medium','coarse'].forEach(s => {
+    const btn = document.getElementById('grind' + s.charAt(0).toUpperCase() + s.slice(1));
+    if (s === size) {
+      btn.style.borderColor = 'var(--gold)';
+      btn.style.background  = 'rgba(201,148,58,.1)';
+      btn.style.color       = 'var(--gold-lt)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background  = 'var(--surface)';
+      btn.style.color       = 'var(--muted)';
+    }
+  });
+  renderAll();
+}
+
+// ── Tail-Cut Diagnostic ───────────────────────────────────────────────────────
+function renderTailDiagnostic() {
+  const dose    = state.dose;
+  const tailIdx = 3; // Pour 4 is the tail
+  const tail    = state.pours[tailIdx];
+  const tailTDS = state.mode === 'auto' ? calcAutoTDS(tailIdx, state.dose, state.pours) : tail.tds;
+  const tailYield = tail.yieldOut;
+
+  // Tail status decision
+  const statusEl = document.getElementById('tailStatus');
+  let statusClass, icon, decision, reason;
+  if (tailTDS <= 0) {
+    statusEl.innerHTML = '<div class="tail-status tail-empty" style="text-align:center"><span style="font-family:var(--mono);font-size:11px;color:var(--dim)">Enter Pour 4 TDS to see diagnosis</span></div>';
+  } else if (tailTDS > 0.8) {
+    statusClass='tail-cut-now'; icon='✂️';
+    decision='Cut Now';
+    reason=`TDS_tail = ${tailTDS.toFixed(2)}% (> 0.8%) — High bitter/astringent concentration. Lift dripper immediately. (Batali et al., 2020)`;
+  } else if (tailTDS >= 0.4) {
+    statusClass='tail-marginal'; icon='⚠️';
+    decision='Marginal Zone';
+    reason=`TDS_tail = ${tailTDS.toFixed(2)}% (0.4–0.8%) — Bitterness declining, sweetness increasing. For competition: cut at ≈ 0.6% to eliminate astringency risk.`;
+  } else {
+    statusClass='tail-ok'; icon='✓';
+    decision='Safe — Negligible Impact';
+    reason=`TDS_tail = ${tailTDS.toFixed(2)}% (< 0.3%) — Highly dilute, neither bitter nor sweet in significant quantity. Can let drawdown complete.`;
+  }
+
+  if (tailTDS > 0) {
+    statusEl.innerHTML = `
+      <div class="tail-status ${statusClass}">
+        <div class="tail-decision"><span class="tail-icon">${icon}</span>${decision}</div>
+        <div class="tail-reason" style="color:var(--muted)">${reason}</div>
+      </div>`;
+  }
+
+  // TDS scale needle — map 0–1.0% to 0–100%
+  const needle = document.getElementById('tdsNeedle');
+  const needlePct = Math.min(100, (tailTDS / 1.0) * 100);
+  if (needle) needle.style.left = needlePct + '%';
+
+  // ── Derived metrics ──────────────────────────────────────────────────────────
+  // EY_main = (TDS_blend × Y_total − TDS_tail × Y_tail) / dose
+  const selectedIdxs = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+  const blend = calcBlend(selectedIdxs, dose);
+
+  const eyMainEl  = document.getElementById('diagEYmain');
+  const xActualEl = document.getElementById('diagXactual');
+  const eeyEl     = document.getElementById('diagEEY');
+
+  if (blend && tailTDS > 0 && tailYield > 0) {
+    const yTotal  = blend.volume;
+    const tdsBlend = blend.tds / 100; // fractional
+    const tdsTail  = tailTDS / 100;
+
+    const eyMain = ((tdsBlend * yTotal) - (tdsTail * tailYield)) / dose * 100;
+    const eyCol  = eyMain < 19 ? 'var(--green)' : eyMain < 21 ? 'var(--amber)' : 'var(--red)';
+
+    eyMainEl.textContent  = eyMain.toFixed(1) + '%';
+    eyMainEl.style.color  = eyCol;
+
+    // X_actual = (Water_in_total - Yield_out_total) / dose
+    const waterIn    = state.pours.reduce((s,p) => s + p.water, 0);
+    const yieldTotal = state.pours.reduce((s,p) => s + p.yieldOut, 0);
+    const xActual    = (waterIn - yieldTotal) / dose;
+    const xCol = xActual < 1.7 ? 'var(--blue)' : xActual < 2.0 ? 'var(--amber)' : 'var(--red)';
+
+    xActualEl.textContent = xActual.toFixed(2);
+    xActualEl.style.color = xCol;
+
+    // EEY_corrected = TDS_target × (Ratio − X_actual)
+    const targetTds = state.targetTds; // %
+    const ratio = yieldTotal > 0 ? (waterIn / dose) : 15;
+    const eeyCorrected = targetTds * (ratio - xActual);
+    const eeyCol = eeyCorrected > 0 ? 'var(--gold-lt)' : 'var(--red)';
+
+    eeyEl.textContent = eeyCorrected > 0 ? eeyCorrected.toFixed(1) + '%' : 'N/A';
+    eeyEl.style.color = eeyCol;
+  } else {
+    [eyMainEl, xActualEl, eeyEl].forEach(el => {
+      if (el) { el.textContent = '—'; el.style.color = 'var(--muted)'; }
+    });
+  }
+}
+
+function renderAll() {
+  renderPourCards();
+  renderSCAChart();
+  renderRadar();
+  renderBlend();
+  renderDilution();
+  renderTable();
+  renderTailDiagnostic();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+renderAll();
+renderTailDiagnostic();
+renderLogEntries();
+
+// ── Brew Log ──────────────────────────────────────────────────────────────────
+function getLog() {
+  try { return JSON.parse(localStorage.getItem('cloudbrew_log') || '[]'); }
+  catch(e) { return []; }
+}
+function saveLog(entries) {
+  localStorage.setItem('cloudbrew_log', JSON.stringify(entries));
+}
+
+function saveBrewLog() {
+  const sel    = state.pours.map((p,i) => p.selected ? i : -1).filter(i => i >= 0);
+  const blend  = calcBlend(sel, state.dose);
+  const waterTotal = state.pours.reduce((s,p) => s + p.water, 0);
+  const yieldTotal = state.pours.reduce((s,p) => s + p.yieldOut, 0);
+  const xActual    = waterTotal > 0 && yieldTotal < waterTotal
+    ? ((waterTotal - yieldTotal) / state.dose).toFixed(2) : null;
+
+  const entry = {
+    id:        Date.now(),
+    datetime:  new Date().toISOString(),
+    dose:      state.dose,
+    mode:      state.mode,
+    notes:     document.getElementById('brewNotes').value.trim(),
+    pours: state.pours.map((p, i) => ({
+      water:    p.water,
+      yieldOut: p.yieldOut,
+      tds:      state.mode === 'auto'
+                  ? parseFloat(calcAutoTDS(i, state.dose, state.pours).toFixed(2))
+                  : p.tds,
+      selected: p.selected,
+    })),
+    blend: blend ? {
+      tds:    parseFloat(blend.tds.toFixed(2)),
+      ey:     parseFloat(blend.ey.toFixed(1)),
+      volume: parseFloat(blend.volume.toFixed(0)),
+    } : null,
+    tailTDS:  state.pours[3].tds || null,
+    xActual:  xActual ? parseFloat(xActual) : null,
+    grind:    state.grindSize,
+    targetEY: state.autoTargetEY,
+  };
+
+  const log = getLog();
+  log.unshift(entry); // newest first
+  saveLog(log);
+  document.getElementById('brewNotes').value = '';
+  renderLogEntries();
+
+  // Flash the button
+  const btn = document.querySelector('.log-btn-save');
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  btn.style.background = 'var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = 'var(--gold)'; }, 1500);
+}
+
+function deleteLogEntry(id) {
+  const log = getLog().filter(e => e.id !== id);
+  saveLog(log);
+  renderLogEntries();
+}
+
+function clearLog() {
+  if (!confirm('Clear all brew log entries? This cannot be undone.')) return;
+  localStorage.removeItem('cloudbrew_log');
+  renderLogEntries();
+}
+
+function renderLogEntries() {
+  const log = getLog();
+  const container = document.getElementById('logEntries');
+  const countEl   = document.getElementById('logCount');
+  if (countEl) countEl.textContent = log.length > 0 ? log.length + ' brews logged' : '';
+
+  if (!log.length) {
+    container.innerHTML = '<div class="log-empty">No brews logged yet.<br>Fill in a brew above and tap "Log This Brew".</div>';
+    return;
+  }
+
+  container.innerHTML = log.map((e, idx) => {
+    const dt      = new Date(e.datetime);
+    const dateStr = dt.toLocaleDateString('th-TH', {day:'2-digit',month:'short',year:'numeric'});
+    const timeStr = dt.toLocaleTimeString('th-TH', {hour:'2-digit',minute:'2-digit'});
+    const b       = e.blend;
+    const eeyOk   = b && b.ey < 19;
+    const eeyWarn = b && b.ey >= 19 && b.ey < 21;
+    const eeyBad  = b && b.ey >= 21;
+    const eeyBadge = b ? (
+      eeyBad  ? '<span class="eey-badge" style="background:rgba(248,113,113,.15);color:#f87171">Over EEY</span>' :
+      eeyWarn ? '<span class="eey-badge" style="background:rgba(251,191,36,.15);color:#fbbf24">At EEY</span>' :
+                '<span class="eey-badge" style="background:rgba(74,222,128,.12);color:#4ade80">✓ EEY OK</span>'
+    ) : '';
+
+    const poursHTML = e.pours.map((p, i) => {
+      if (!p.water && !p.yieldOut) return '';
+      const col = POUR_META[i] ? POUR_META[i].color : '#fff';
+      return `<span style="font-family:var(--mono);font-size:9px;margin-right:8px">
+        <span style="color:${col};font-weight:700">P${i+1}</span>
+        <span style="color:var(--muted)">${p.water}g→${p.yieldOut}g</span>
+        <span style="color:var(--text)"> ${p.tds.toFixed(2)}%</span>
+      </span>`;
+    }).join('');
+
+    return `<div class="log-entry">
+      <button class="log-delete" onclick="deleteLogEntry(${e.id})" title="Delete">✕</button>
+      <div class="log-entry-header">
+        <span class="log-entry-id">#${String(log.length - idx).padStart(3,'0')} · ${e.mode === 'auto' ? 'Auto-Est' : 'Manual'} · ${e.grind || 'medium'}</span>
+        <span class="log-entry-date">${dateStr} ${timeStr}</span>
+      </div>
+      <div class="log-entry-meta">
+        <div class="log-meta-cell">
+          <div class="log-meta-val">${e.dose}g</div>
+          <div class="log-meta-lbl">Dose</div>
+        </div>
+        ${b ? `<div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${eeyBad?'#f87171':eeyWarn?'#fbbf24':'#4ade80'}">${b.tds.toFixed(2)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+          <div class="log-meta-lbl">TDS blend</div>
+        </div>
+        <div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${eeyBad?'#f87171':eeyWarn?'#fbbf24':'#4ade80'}">${b.ey.toFixed(1)}<span style="font-size:9px;color:var(--dim)">%</span></div>
+          <div class="log-meta-lbl">EY ${eeyBadge}</div>
+        </div>
+        <div class="log-meta-cell">
+          <div class="log-meta-val">${b.volume.toFixed(0)}<span style="font-size:9px;color:var(--dim)">mL</span></div>
+          <div class="log-meta-lbl">Volume</div>
+        </div>` : ''}
+        ${e.xActual ? `<div class="log-meta-cell">
+          <div class="log-meta-val" style="color:${e.xActual > 1.7 ? '#fbbf24' : 'var(--blue-lt)'}">${e.xActual}</div>
+          <div class="log-meta-lbl">X actual</div>
+        </div>` : ''}
+      </div>
+      <div style="margin:4px 0">${poursHTML}</div>
+      ${e.notes ? `<div class="log-notes">"${e.notes}"</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── CSV Export ─────────────────────────────────────────────────────────────────
+function exportCSV() {
+  const log = getLog();
+  if (!log.length) { alert('No brew log to export.'); return; }
+
+  const headers = [
+    'ID','Date','Time','Dose(g)','Mode','Grind',
+    'P1_water','P1_yield','P1_TDS',
+    'P2_water','P2_yield','P2_TDS',
+    'P3_water','P3_yield','P3_TDS',
+    'P4_water','P4_yield','P4_TDS',
+    'Blend_TDS(%)','Blend_EY(%)','Blend_Volume(mL)',
+    'Tail_TDS(%)','X_actual','Target_EY(%)','Notes'
+  ];
+
+  const rows = log.map((e, idx) => {
+    const dt = new Date(e.datetime);
+    const b  = e.blend || {};
+    const p  = e.pours || [];
+    return [
+      log.length - idx,
+      dt.toLocaleDateString('en-GB'),
+      dt.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'}),
+      e.dose, e.mode, e.grind || 'medium',
+      ...[0,1,2,3].flatMap(i => [
+        p[i]?.water  ?? '',
+        p[i]?.yieldOut ?? '',
+        p[i]?.tds    ?? '',
+      ]),
+      b.tds ?? '', b.ey ?? '', b.volume ?? '',
+      e.tailTDS ?? '', e.xActual ?? '', e.targetEY ?? '',
+      `"${(e.notes||'').replace(/"/g,'""')}"`,
+    ].join(',');
+  });
+
+  const csv  = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `cloudbrew_log_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
