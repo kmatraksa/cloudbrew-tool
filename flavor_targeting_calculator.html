@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600&family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#07080f;--s1:#0c0e18;--s2:#11141f;--s3:#161a28;
@@ -23,743 +24,553 @@ html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;line-height:1.5}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,255,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 .wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:20px 14px 60px}
-
-/* ── Typography ── */
-.label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 .label-gold{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700}
 .eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--serif);font-weight:200;font-size:clamp(2rem,6vw,3.5rem);letter-spacing:-.03em;line-height:.95}
 h1 em{font-style:italic;font-weight:300;color:var(--gold)}
-
-/* ── Layout ── */
 .section{margin-bottom:24px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .col{display:flex;flex-direction:column;gap:12px}
 .card{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:15px 17px;position:relative}
-.card.gold{border-color:var(--gold-dim);background:linear-gradient(135deg,var(--s2),rgba(201,148,58,.04))}
-.card.exact{border-color:rgba(46,204,143,.3);background:linear-gradient(135deg,var(--s2),rgba(46,204,143,.03))}
-.card.estimate{border-color:rgba(245,166,35,.25)}
+.card.gold{border-color:var(--gold-dim)}
+.card.exact{border-color:rgba(46,204,143,.3)}
+.card.est{border-color:rgba(245,166,35,.2)}
 .card-accent{position:absolute;top:0;left:0;right:0;height:2px;border-radius:7px 7px 0 0}
-
-/* ── Inputs ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:3px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.08em}
+.badge-exact{background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.25);color:var(--green)}
+.badge-est{background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.25);color:var(--amber)}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--border2);border-radius:2px;outline:none;cursor:pointer}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 5px rgba(201,148,58,.4);margin-top:-5.5px;cursor:pointer}
-input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:2px;background:var(--border2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);margin-top:-5.5px;cursor:pointer}
 input[type=number]{background:var(--s1);border:1px solid var(--border2);color:var(--text);border-radius:4px;padding:7px 9px;font-family:var(--mono);font-size:14px;width:78px;outline:none;-moz-appearance:textfield;touch-action:manipulation}
 input[type=number]:focus{border-color:var(--gold)}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
 @media(max-width:640px){input[type=number]{font-size:16px;padding:9px 10px;width:84px}}
-
 .s-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
 .s-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .s-val{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--gold-lt)}
 .s-val span{font-size:9px;color:var(--muted)}
-.s-hint{font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:3px;line-height:1.4}
-
-/* ── SCA Chart ── */
 .chart-svg{width:100%;height:auto;display:block;cursor:crosshair}
-.chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--muted)}
-
-/* ── Flavor Direction ── */
 .flavor-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0}
-.flavor-btn{padding:8px 4px;border-radius:5px;border:1px solid var(--border);background:var(--s1);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--muted)}
-.flavor-btn.active{background:var(--s3);border-color:var(--border2);color:var(--text)}
-.flavor-btn .flavor-icon{font-size:16px;display:block;margin-bottom:3px}
-
-/* ── Recipe output ── */
-.output-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
-.out-cell{background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:9px 10px;text-align:center}
-.out-val{font-family:var(--mono);font-size:16px;font-weight:700;line-height:1}
-.out-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
-.out-sub{font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px}
-
-/* ── Pour bar ── */
-.pour-bars{display:flex;flex-direction:column;gap:7px;margin-top:10px}
-.pour-bar-row{display:flex;align-items:center;gap:8px}
-.pour-bar-label{font-family:var(--mono);font-size:9px;min-width:52px;color:var(--muted)}
-.pour-bar-track{flex:1;height:22px;background:var(--s1);border-radius:3px;overflow:hidden;border:1px solid var(--border);position:relative}
-.pour-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding:0 8px;font-family:var(--mono);font-size:9px;font-weight:700;color:rgba(255,255,255,.85);transition:width .4s ease}
-.pour-bar-tds{font-family:var(--mono);font-size:9px;min-width:46px;text-align:right}
-.pour-bar-badge{font-family:var(--mono);font-size:8px;padding:1px 5px;border-radius:3px;min-width:52px;text-align:center}
-
-/* ── Flavor bars ── */
-.flavor-bar-row{margin-bottom:8px}
-.flavor-bar-header{display:flex;justify-content:space-between;margin-bottom:3px;font-family:var(--mono);font-size:10px}
-.flavor-bar-name{color:var(--muted)}
-.flavor-bar-val{font-weight:700}
-.flavor-bar-track{height:5px;border-radius:3px;background:var(--border);position:relative}
-.flavor-bar-fill{height:100%;border-radius:3px;transition:width .4s}
-.flavor-bar-before{position:absolute;top:0;height:100%;border-radius:3px;opacity:.3}
-
-/* ── Disclaimer badge ── */
-.est-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);font-family:var(--mono);font-size:8px;color:var(--amber);letter-spacing:.08em}
-.exact-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:3px;background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.2);font-family:var(--mono);font-size:8px;color:var(--green)}
-
-/* ── Grind selector ── */
+.flavor-btn{padding:8px 4px;border-radius:5px;border:1px solid var(--border);background:var(--s1);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--mono);font-size:9px;color:var(--muted);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.flavor-btn:active{opacity:.7}
+.flavor-btn.active{background:rgba(201,148,58,.1);border-color:var(--gold);color:var(--gold-lt)}
+.flavor-btn .fi{font-size:16px;display:block;margin-bottom:3px}
 .grind-row{display:flex;gap:5px}
-.grind-btn{flex:1;padding:6px;border-radius:4px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:var(--mono);font-size:9px;cursor:pointer;text-align:center;transition:all .2s}
+.grind-btn{flex:1;padding:7px 4px;border-radius:4px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:var(--mono);font-size:8px;cursor:pointer;text-align:center;line-height:1.4;transition:all .2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.grind-btn:active{opacity:.7}
 .grind-btn.active{border-color:var(--gold);background:rgba(201,148,58,.1);color:var(--gold-lt)}
+.out-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-top:10px}
+.out-cell{background:var(--s1);border:1px solid var(--border);border-radius:5px;padding:9px;text-align:center}
+.out-val{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1}
+.out-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+.pbr-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.pbr-lbl{font-family:var(--mono);font-size:9px;min-width:52px;color:var(--muted)}
+.pbr-track{flex:1;height:20px;background:var(--s1);border-radius:3px;overflow:hidden;border:1px solid var(--border)}
+.pbr-fill{height:100%;display:flex;align-items:center;padding:0 7px;font-family:var(--mono);font-size:9px;font-weight:700;white-space:nowrap;transition:width .35s ease}
+.pbr-right{font-family:var(--mono);font-size:9px;min-width:120px;text-align:right}
+.temp-strip{display:flex;gap:6px;margin:8px 0}
+.temp-stage{padding:10px 8px;border-radius:5px;text-align:center;flex:1}
+.fd-attr{margin-bottom:10px}
+.fd-bar-header{display:flex;justify-content:space-between;margin-bottom:3px;font-family:var(--mono);font-size:10px}
+.fd-bar-track{height:6px;border-radius:3px;background:var(--border);position:relative;overflow:hidden}
+.fd-bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.c40-card{padding:12px 14px;border-radius:6px;background:rgba(201,148,58,.07);border:1px solid rgba(201,148,58,.25)}
+.c40-num{font-family:var(--serif);font-weight:200;font-size:3rem;color:var(--gold-lt);line-height:1}
+.rn{padding:8px 12px;border-radius:4px;background:rgba(77,124,255,.06);border:1px solid rgba(77,124,255,.15);font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.65;margin-top:8px}
+.ct-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+.ct-cell{padding:8px;border-radius:5px;border:1px solid var(--border);background:var(--s1)}
+.ct-stage{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.ct-tag{display:inline-block;padding:1px 5px;border-radius:2px;font-family:var(--mono);font-size:8px;margin:1px}
+.dil-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px}
+.back-link{font-family:var(--mono);font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:5px;margin-bottom:16px}
+@media(max-width:620px){.grid2{grid-template-columns:1fr}.ct-grid{grid-template-columns:1fr 1fr}.flavor-btn{font-size:7px;padding:6px 2px}}
 
-/* ── Tail cut callout ── */
-.tail-callout{padding:10px 14px;border-radius:5px;margin-top:10px}
-.tail-cut-now{background:rgba(232,83,74,.07);border:1px solid rgba(232,83,74,.3)}
-.tail-safe{background:rgba(46,204,143,.06);border:1px solid rgba(46,204,143,.25)}
-.tail-marginal{background:rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.25)}
-
-/* ── Temp recommendations ── */
-.temp-strip{display:flex;gap:5px;margin-top:8px}
-.temp-stage{flex:1;padding:8px 5px;border-radius:4px;text-align:center;font-family:var(--mono);font-size:10px}
-
-/* ── Radar SVG ── */
-.radar-svg{width:100%;max-width:240px;height:auto;display:block;margin:0 auto}
-
-/* ── Formula inline ── */
-.formula-inline{font-family:'Cambria Math','Times New Roman',serif;font-style:italic;font-size:12px;color:var(--text)}
-
-/* ── Back link ── */
-.back-link{font-family:var(--mono);font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;align-items:center;gap:5px;margin-bottom:16px;transition:color .2s}
-.back-link:hover{color:var(--text)}
-
-@media(max-width:620px){
-  .grid2,.grid3{grid-template-columns:1fr}
-  .flavor-strip{grid-template-columns:repeat(5,1fr)}
-  .flavor-btn{padding:6px 2px;font-size:8px}
-}
 </style>
 </head>
 <body>
+
 <div class="wrap">
-
-<!-- Header -->
-<a href="index.html" class="back-link">← Back to Cloudbrew Tools</a>
-<div class="eyebrow" style="margin-bottom:10px">Cloudbrew Pour Over Lab · Recipe Design</div>
+<a href="index.html" class="back-link">← Back</a>
+<div class="eyebrow" style="margin-bottom:10px">Cloudbrew · Recipe Design</div>
 <h1>Flavor Targeting<br><em>Calculator</em></h1>
-<p style="font-family:var(--mono);font-size:11px;color:var(--muted);max-width:540px;line-height:1.65;margin:10px 0 24px">
-  เลือกเป้าหมายบน SCA chart → เลือก flavor direction → ได้ recipe ครบทันที
-  <span class="exact-badge" style="margin-left:6px">EXACT</span> = คณิตศาสตร์แม่นยำ &nbsp;
-  <span class="est-badge">ESTIMATE</span> = kinetic model
-</p>
+<p style="font-family:var(--mono);font-size:11px;color:var(--muted);max-width:540px;line-height:1.7;margin:10px 0 6px">เลือกเป้าหมายบน SCA chart → ได้ recipe ครบ · pour schedule · temperature approach · C40 clicks</p>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px">
+  <span class="badge badge-exact">EXACT — math แม่นยำ</span>
+  <span class="badge badge-est">ESTIMATE — kinetic model</span>
+  <span class="badge" style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171">NOT MEASURED — ต้องชิม verify</span>
+</div>
 
-<!-- ══ ROW 1: CHART + CONTROLS ══════════════════════════════════ -->
 <div class="section grid2">
-
-  <!-- LEFT: SCA Chart -->
   <div class="card">
     <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--blue),transparent)"></div>
-    <div class="label" style="margin-bottom:10px">① เลือกเป้าหมายบน SCA Chart</div>
-    <p style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:8px">แตะบน chart เพื่อเลือก target · หรือปรับ slider ด้านล่าง</p>
-    <svg id="scaChart" class="chart-svg" viewBox="0 0 420 270"></svg>
-    <div class="chart-legend" id="chartLegend"></div>
-    <!-- TDS + EY sliders -->
+    <div class="label" style="margin-bottom:8px">① Target — แตะบน chart หรือปรับ slider</div>
+    <svg id="scaChart" class="chart-svg" viewBox="0 0 420 265"></svg>
+    <div id="chartLegend" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:7px;font-family:var(--mono);font-size:9px;color:var(--muted)"></div>
     <div style="margin-top:12px">
-      <div class="s-row"><span class="s-lbl">Target TDS</span><span class="s-val" id="tdsValDisplay">1.40<span>%</span></span></div>
-      <input type="range" id="tdsSlider" min="0.80" max="1.80" step="0.01" value="1.40" oninput="onTDSSlider(this.value)">
-      <div class="s-row" style="margin-top:10px"><span class="s-lbl">Target EY</span><span class="s-val" id="eyValDisplay">19.0<span>%</span></span></div>
-      <input type="range" id="eySlider" min="14" max="24" step="0.5" value="19" oninput="onEYSlider(this.value)">
+      <div class="s-row"><span class="s-lbl">Target TDS</span><span class="s-val" id="tdsDisplay">1.40<span>%</span></span></div>
+      <input type="range" id="tdsSlider" min="0.80" max="1.80" step="0.01" value="1.40" oninput="onSlider('tds',this.value)">
+      <div class="s-row" style="margin-top:10px"><span class="s-lbl">Target EY</span><span class="s-val" id="eyDisplay">19.0<span>%</span></span></div>
+      <input type="range" id="eySlider" min="14" max="24" step="0.5" value="19" oninput="onSlider('ey',this.value)">
     </div>
   </div>
-
-  <!-- RIGHT: Controls -->
   <div class="col">
     <div class="card gold">
       <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--gold),transparent)"></div>
-      <div class="label-gold" style="margin-bottom:12px">② Flavor Direction</div>
+      <div class="label-gold" style="margin-bottom:10px">② Flavor Direction</div>
       <div class="flavor-strip" id="flavorStrip"></div>
-      <div id="flavorDesc" style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6;margin-top:4px;min-height:36px"></div>
+      <div id="flavorDesc" style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.65;min-height:40px"></div>
     </div>
-
     <div class="card">
-      <div class="label" style="margin-bottom:12px">③ Recipe Parameters</div>
+      <div class="label" style="margin-bottom:12px">③ Parameters</div>
       <div style="margin-bottom:12px">
-        <div class="s-row"><span class="s-lbl">Coffee Dose</span><span class="s-val" id="doseValDisplay">15.0<span>g</span></span></div>
-        <input type="range" id="doseSlider" min="10" max="25" step="0.5" value="15" oninput="onDoseSlider(this.value)">
+        <div class="s-row"><span class="s-lbl">Dose</span><span class="s-val" id="doseDisplay">15.0<span>g</span></span></div>
+        <input type="range" id="doseSlider" min="10" max="25" step="0.5" value="15" oninput="onSlider('dose',this.value)">
       </div>
       <div style="margin-bottom:10px">
-        <div class="label" style="margin-bottom:6px">Grind Size</div>
+        <div class="label" style="margin-bottom:6px">Grind Size — C40 MK4</div>
         <div class="grind-row" id="grindRow"></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px" id="grindNote">k × 1.0 · medium extraction speed</div>
+        <div id="grindNote" style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px"></div>
       </div>
       <div>
         <div class="label" style="margin-bottom:4px">Water Absorption X</div>
         <div style="display:flex;align-items:center;gap:8px">
-          <input type="number" id="xInput" min="1.0" max="2.5" step="0.01" value="1.47" onchange="onX(this.value)" style="width:70px">
-          <span style="font-family:var(--mono);font-size:9px;color:var(--dim)">g/g · default 1.47 (Lockhart 1957)</span>
+          <input type="number" id="xInput" min="1.0" max="2.5" step="0.01" value="1.47" onchange="onX(this.value)">
+          <span style="font-family:var(--mono);font-size:9px;color:var(--dim)">g/g · 1.47 default (Lockhart 1957)</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ ROW 2: RECIPE OUTPUT (EXACT) ═══════════════════════════════ -->
 <div class="section">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-    <div class="label">④ Recipe</div>
-    <span class="exact-badge">EXACT MATH</span>
-  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div class="label">④ Recipe</div><span class="badge badge-exact">EXACT MATH</span></div>
   <div class="card exact">
     <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--green),transparent)"></div>
-    <div class="output-grid" id="recipeOutput"></div>
-    <div style="margin-top:10px;padding:8px 12px;background:var(--s1);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.9" id="formulaDisplay"></div>
+    <div class="out-grid" id="recipeOut"></div>
+    <div id="formulaLine" style="margin-top:10px;padding:8px 12px;background:var(--s1);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.9"></div>
   </div>
 </div>
 
-<!-- ══ ROW 3: POUR SCHEDULE ════════════════════════════════════════ -->
 <div class="section">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-    <div class="label">⑤ Pour Schedule</div>
-    <span class="est-badge">ESTIMATE — kinetic model</span>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><div class="label">⑤ Pour Schedule</div><span class="badge badge-est">ESTIMATE — kinetic model</span></div>
+  <div class="card est">
+    <div id="pourBars"></div>
+    <div id="cumEYRow" style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"></div>
+    <div id="tailCallout" style="margin-top:8px"></div>
   </div>
+</div>
+
+<div class="section">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div class="label">⑥ Temperature Approach</div></div>
   <div class="grid2">
     <div class="card">
-      <div class="label" style="margin-bottom:10px">Pour Breakdown</div>
-      <div class="pour-bars" id="pourBars"></div>
-      <div id="tailCallout"></div>
+      <div class="label" style="margin-bottom:10px">Recommended Profile</div>
+      <div id="tempProfile"></div>
+      <div class="rn" style="margin-top:10px">
+        <strong style="color:var(--text)">📖 Batali et al. (2020) · UC Davis:</strong><br>
+        ที่ TDS และ EY เท่ากัน อุณหภูมิ 87–93°C มีผลต่อ sensory น้อยมาก · สิ่งที่ส่งผลจริงคือ <strong style="color:var(--gold-lt)">staged vs constant profile</strong> ไม่ใช่ตัวเลข degree · ใช้ grind เพื่อ hit EY target ไม่ใช่เพื่อ override temperature
+      </div>
     </div>
     <div class="card">
-      <div class="label" style="margin-bottom:8px">Temperature Strategy</div>
-      <div id="tempStrategy"></div>
-      <div style="margin-top:12px">
-        <div class="label" style="margin-bottom:6px">Grind Recommendation</div>
-        <div id="grindRec" style="font-size:12px;color:var(--muted);line-height:1.6"></div>
+      <div class="label" style="margin-bottom:8px">Grind & C40 MK4</div>
+      <div class="c40-card">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.18em;margin-bottom:6px">COMANDANTE C40 MK4</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+          <span class="c40-num" id="c40Num">—</span>
+          <div><div style="font-family:var(--mono);font-size:10px;color:var(--gold-lt)">clicks</div><div id="c40Range" style="font-family:var(--mono);font-size:9px;color:var(--muted)"></div></div>
+        </div>
+        <div id="c40Detail" style="font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.7"></div>
+        <div style="margin-top:8px;position:relative;height:7px;border-radius:3px;background:var(--s1);border:1px solid var(--border)">
+          <div style="position:absolute;top:0;bottom:0;left:18%;width:40%;background:linear-gradient(to right,rgba(46,204,143,.15),rgba(201,148,58,.12),rgba(77,124,255,.15));border-radius:3px"></div>
+          <div id="c40Marker" style="position:absolute;top:-3px;bottom:-3px;width:3px;border-radius:2px;background:var(--gold);transition:left .35s;left:50%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:3px"><span>14←fine</span><span>30</span><span>coarse→45</span></div>
+      </div>
+      <div class="rn" style="margin-top:8px">
+        <strong style="color:var(--text)">Grind คืออะไร:</strong> ปรับ extraction rate (Wang et al. 2021) · ใช้ grind เพื่อ hit EY target · temperature กับ grind มีผลคล้ายกัน ถ้า EY เท่ากัน sensory ใกล้เคียงกัน
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ ROW 4: FLAVOR PROFILE + DILUTION ═══════════════════════════ -->
 <div class="section">
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-    <div class="label">⑥ Flavor Profile & Dilution</div>
-    <span class="est-badge">ESTIMATE — approximate model</span>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <div class="label">⑦ Compound Extraction Timeline</div>
+    <span class="badge" style="background:rgba(77,124,255,.08);border:1px solid rgba(77,124,255,.2);color:var(--blue-lt)">Batali 2020 · Farah 2005</span>
+  </div>
+  <div class="card">
+    <p style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.65;margin-bottom:10px">Early fractions → TDS สูง → bitter/sour กว่า · Late fractions → sweetness/floral มากขึ้น relative <strong style="color:var(--gold-lt)">(Batali 2020)</strong> · CGA lactonization &gt; 90s ที่ T &gt; 90°C <strong style="color:var(--gold-lt)">(Farah 2005)</strong></p>
+    <div class="ct-grid">
+      <div class="ct-cell" style="border-color:rgba(232,83,74,.3)">
+        <div class="ct-stage" style="color:#e8534a">Bloom (P1)</div>
+        <span class="ct-tag" style="background:rgba(232,83,74,.15);color:#e8534a">CO₂ release</span>
+        <span class="ct-tag" style="background:rgba(232,83,74,.12);color:#e8534a">Volatile aroma</span>
+        <span class="ct-tag" style="background:rgba(245,166,35,.12);color:#f5a623">Acetic acid</span>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:5px">Low Eₐ · fast · confirmed</div>
+      </div>
+      <div class="ct-cell" style="border-color:rgba(245,166,35,.3)">
+        <div class="ct-stage" style="color:#f5a623">P2 — Main</div>
+        <span class="ct-tag" style="background:rgba(232,83,74,.12);color:#e8534a">Citric/Malic acid</span>
+        <span class="ct-tag" style="background:rgba(46,204,143,.12);color:var(--green)">Sucrose</span>
+        <span class="ct-tag" style="background:rgba(245,166,35,.12);color:#f5a623">Caffeine</span>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:5px">Mid Eₐ · bulk extraction</div>
+      </div>
+      <div class="ct-cell" style="border-color:rgba(46,204,143,.3)">
+        <div class="ct-stage" style="color:var(--green)">P3 — Sweet</div>
+        <span class="ct-tag" style="background:rgba(46,204,143,.12);color:var(--green)">Maillard products</span>
+        <span class="ct-tag" style="background:rgba(46,204,143,.12);color:var(--green)">Sugar hydrolysis</span>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:5px">Sweetness peak confirmed</div>
+      </div>
+      <div class="ct-cell" style="border-color:rgba(77,124,255,.3)">
+        <div class="ct-stage" style="color:var(--blue-lt)">P4 — Tail ⚠</div>
+        <span class="ct-tag" style="background:rgba(248,113,113,.15);color:#f87171">CGA lactones</span>
+        <span class="ct-tag" style="background:rgba(248,113,113,.12);color:#f87171">Polyphenols</span>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--red);margin-top:5px">High Eₐ · cut TDS &gt; 0.8%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <div class="label">⑧ Flavor Profile & Dilution</div>
+    <span class="badge" style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:#f87171">NOT MEASURED — ต้องชิม verify</span>
   </div>
   <div class="grid2">
-
-    <!-- Flavor bars -->
     <div class="card">
-      <div class="label" style="margin-bottom:10px">Estimated Cup Profile</div>
+      <div class="label" style="margin-bottom:10px">Relative Cup Profile</div>
       <div id="flavorBars"></div>
-      <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.55;margin-top:10px">
-        การ estimate นี้ base จาก Batali et al. (2020) — compound distribution model<br>
-        <strong style="color:var(--muted)">ต้องชิมจริงเสมอ</strong>
-      </div>
+      <div class="rn" style="margin-top:8px">ค่าเป็น relative estimate จาก pour fraction distribution · ไม่ผ่าน sensory panel · ใช้เป็น direction เท่านั้น · <strong style="color:var(--gold-lt)">ต้องชิมจริงเสมอ</strong></div>
     </div>
-
-    <!-- Dilution -->
     <div class="card">
       <div class="label" style="margin-bottom:10px">Dilution Calculator</div>
-      <div class="s-row"><span class="s-lbl">เติมน้ำ</span><span class="s-val" id="dilValDisplay">0<span>g</span></span></div>
+      <div class="s-row"><span class="s-lbl">เติมน้ำ</span><span class="s-val" id="dilDisplay">0<span>g</span></span></div>
       <input type="range" id="dilSlider" min="0" max="100" step="5" value="0" oninput="onDilution(this.value)">
       <div id="dilResult" style="margin-top:10px"></div>
-      <div style="margin-top:10px">
-        <div class="label" style="margin-bottom:8px">Flavor Change After Dilution</div>
-        <div id="dilFlavors"></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:8px;line-height:1.5">
-          เปรี้ยวลดเร็วกว่าหวาน (1.2× vs 0.8×) → dilute = หวานขึ้น relative
-        </div>
-      </div>
+      <div id="dilFlavors" style="margin-top:8px"></div>
+      <div class="rn" style="margin-top:8px"><strong style="color:var(--text)">Dilution asymmetry:</strong> Acidity ลด 1.2× · Sweetness ลด 0.8× · Bitterness 1.0× → dilute = perceived sweetness เพิ่ม relative <span style="color:var(--dim)">(Stevens' power law)</span></div>
     </div>
   </div>
 </div>
 
-<!-- ══ ROW 5: COOLDOWN EXPERIENCE ══════════════════════════════════ -->
 <div class="section">
-  <div class="label" style="margin-bottom:12px">⑦ Cooldown Experience — Peng Framework</div>
+  <div class="label" style="margin-bottom:10px">⑨ Cooldown Experience — Peng (2025)</div>
   <div class="card">
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
       <div style="padding:12px;border-radius:5px;border:1px solid rgba(232,83,74,.3);background:rgba(232,83,74,.05);text-align:center">
-        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#e8534a;line-height:1">65°C</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:#e8534a">65°C</div>
         <div style="font-family:var(--serif);font-style:italic;font-size:.95rem;margin:4px 0">Orthonasal Peak</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">Swirl → ประเมิน aroma<br>กลิ่นดอกไม้ · ผลไม้</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">Swirl → aroma</div>
       </div>
       <div style="padding:12px;border-radius:5px;border:1px solid rgba(201,148,58,.35);background:rgba(201,148,58,.05);text-align:center">
-        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--gold);line-height:1">50°C</div>
-        <div style="font-family:var(--serif);font-style:italic;font-size:.95rem;margin:4px 0">Flavor & Acidity Apex</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">จิบแรก · กรด + หวาน<br>น้ำผึ้ง · น้ำตาลทราย</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--gold)">50°C</div>
+        <div style="font-family:var(--serif);font-style:italic;font-size:.95rem;margin:4px 0">Flavor Apex</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">จิบแรก · กรด + หวาน</div>
       </div>
       <div style="padding:12px;border-radius:5px;border:1px solid rgba(77,124,255,.3);background:rgba(77,124,255,.05);text-align:center">
-        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-lt);line-height:1">&lt;45°C</div>
+        <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--blue-lt)">&lt;45°C</div>
         <div style="font-family:var(--serif);font-style:italic;font-size:.95rem;margin:4px 0">Mouthfeel Shift</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">จิบสุดท้าย · body + finish<br>texture · aftertaste</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">body · aftertaste</div>
       </div>
-    </div>
-    <div style="margin-top:10px;font-family:var(--mono);font-size:9px;color:var(--dim);line-height:1.6">
-      "Modern coffee is no longer a static beverage — it is a spatial and temporal architecture. Design the path. Brew the narrative." — Coffee Architecture Blueprint (2025)
     </div>
   </div>
 </div>
 
-<!-- Footer -->
 <div style="border-top:1px solid var(--border);padding-top:12px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px">
   <span>Cloudbrew Pour Over Lab · Bangkok</span>
-  <span>Sources: Lockhart 1957 · Batali 2020 · Liang 2021 · Happy Workshop 2025</span>
+  <span>Lockhart 1957 · Batali 2020 · Wang 2021 · Farah 2005 · Happy 2025</span>
   <a href="index.html" style="color:var(--dim);text-decoration:none">← All Tools</a>
 </div>
-
 </div>
 
 <script>
-// ── Constants ────────────────────────────────────────────────────────────────
-const NS     = 'http://www.w3.org/2000/svg';
-const CHART  = { eyMin:14, eyMax:26, tdsMin:0.80, tdsMax:1.80 };
-const IDEAL  = { eyLo:18, eyHi:22, tdsLo:1.15, tdsHi:1.45 };
-const EEY    = 19;
 
-const FLAVOR_OPTS = [
-  { id:'verysour',  icon:'🍋', label:'Very Sour',  bloom:2.2, pct:[0.48,0.33,0.19], tempProfile:'high-constant',  desc:'Heavy bloom · front-loaded · maximum acidity · high temp throughout · skip low-temp phase' },
-  { id:'sour',      icon:'🍊', label:'Sour',        bloom:2.0, pct:[0.42,0.35,0.23], tempProfile:'mostly-high',    desc:'Front-heavy pours · bright acidity · moderate sweetness · light temperature drop at finish' },
-  { id:'balanced',  icon:'⚖️', label:'Balanced',    bloom:2.0, pct:[0.38,0.33,0.29], tempProfile:'staged',         desc:'Equal distribution · acid + sweet in balance · staged temperature drop · EEY target 19%' },
-  { id:'sweet',     icon:'🍯', label:'Sweet',        bloom:1.8, pct:[0.32,0.35,0.33], tempProfile:'staged-low',     desc:'Lighter bloom · back-loaded · sweetness focus · significant temperature drop in final pour' },
-  { id:'verysweet', icon:'🍬', label:'Very Sweet',   bloom:1.6, pct:[0.25,0.35,0.40], tempProfile:'low-terminal',   desc:'Minimal bloom · heavy final pour · maximum sweetness · Peng-style low-temp Melodrip finish' },
+const NS='http://www.w3.org/2000/svg';
+const CHART={eyMin:14,eyMax:26,tdsMin:.8,tdsMax:1.8};
+const IDEAL={eyLo:18,eyHi:22,tdsLo:1.15,tdsHi:1.45};
+const EEY=19;
+
+const FLAVOR_OPTS=[
+  {icon:'🍋',label:'Very Sour', bloom:2.2,pct:[.48,.33,.19],tempKey:'constant',
+   desc:'Max front-loading · bloom heavy · 96°C all pours · tail MUST be cut aggressively · constant temp = no thermal protection against CGA lactones'},
+  {icon:'🍊',label:'Sour',      bloom:2.0,pct:[.42,.35,.23],tempKey:'drop-end',
+   desc:'Front-heavy pours · 96°C main extraction → drop P4 only · suppresses tail bitter compounds'},
+  {icon:'⚖️',label:'Balanced', bloom:2.0,pct:[.38,.33,.29],tempKey:'staged',
+   desc:'Equal distribution · staged drop P1→P2→P3→P4 · Happy + Peng framework · EEY 19% target'},
+  {icon:'🍯',label:'Sweet',     bloom:1.8,pct:[.32,.35,.33],tempKey:'early-drop',
+   desc:'Lighter bloom · back-loaded · drop starts at P2 · deep final drop suppresses astringency'},
+  {icon:'🍬',label:'Very Sweet',bloom:1.6,pct:[.25,.35,.40],tempKey:'peng',
+   desc:'Minimal bloom · heavy final pour · Peng two-temperature protocol · kinetic bypass via Melodrip'},
 ];
 
-const TEMP_PROFILES = {
-  'high-constant': { stages:[{t:'96°C',lbl:'All Pours',col:'#e8534a'}], note:'Uniform high temp — maximizes organic acid liberation' },
-  'mostly-high':   { stages:[{t:'96°C',lbl:'P1–P3',col:'#f5a623'},{t:'88°C',lbl:'P4',col:'#4d7cff'}], note:'Small drop at finish — slightly suppresses late bitters' },
-  'staged':        { stages:[{t:'96°C',lbl:'P1–P2',col:'#f5a623'},{t:'92°C',lbl:'P3',col:'#9b7fe8'},{t:'82°C',lbl:'P4',col:'#4d7cff'}], note:'Classic staged profile — Happy + Peng framework' },
-  'staged-low':    { stages:[{t:'96°C',lbl:'P1–P2',col:'#f5a623'},{t:'88°C',lbl:'P3',col:'#9b7fe8'},{t:'78°C',lbl:'P4',col:'#2ecc8f'}], note:'Significant late drop — suppresses astringency, boosts sweetness' },
-  'low-terminal':  { stages:[{t:'96°C',lbl:'P1–P2',col:'#f5a623'},{t:'80°C',lbl:'P3–P4',col:'#2ecc8f'}], note:'Two-temperature Peng protocol — kinetic bypass of bitter compounds' },
+// Temperature profiles based on flavor direction only
+// Key finding: Batali 2020 — at fixed TDS/EY, 87-93°C has little sensory impact
+// What matters: STAGED vs CONSTANT · grind handles EY, not temp
+const TEMP_PROFILES={
+  'constant':{
+    label:'Constant 96°C',
+    stages:[{t:'96°C',lbl:'All Pours',col:'#e8534a'}],
+    rationale:'Maximum extraction rate throughout. Works only with aggressive tail cut (cut at TDS_tail > 0.6%). No thermal protection against CGA lactone formation in late pours.',
+    risk:'HIGH — tail cut timing is critical · every pour at max rate'
+  },
+  'drop-end':{
+    label:'Drop at End',
+    stages:[{t:'96°C',lbl:'P1–P3',col:'#f5a623'},{t:'80°C',lbl:'P4',col:'#4d7cff'}],
+    rationale:'96°C for main extraction efficiency → single drop at P4. Suppresses CGA lactone formation in tail pour (Farah et al., 2005). Practical to execute — only one temperature change needed.',
+    risk:'LOW–MEDIUM · good balance of extraction and bitter suppression'
+  },
+  'staged':{
+    label:'Staged Drop',
+    stages:[{t:'96°C',lbl:'P1–P2',col:'#f5a623'},{t:'88°C',lbl:'P3',col:'#9b7fe8'},{t:'80°C',lbl:'P4',col:'#2ecc8f'}],
+    rationale:'Classic Happy + Peng staged profile. Progressive temperature drop suppresses high-Eₐ compounds in sequence. 88°C at P3 limits melanoidin extraction while allowing sweetness development.',
+    risk:'LOW · recommended for competition'
+  },
+  'early-drop':{
+    label:'Early & Deep Drop',
+    stages:[{t:'96°C',lbl:'P1',col:'#f5a623'},{t:'88°C',lbl:'P2–P3',col:'#9b7fe8'},{t:'76°C',lbl:'P4',col:'#2ecc8f'}],
+    rationale:'Drop begins at P2 — extracts florals/acids aggressively in bloom only, then cools quickly. Deep final drop via Melodrip maximizes sweetness-to-bitterness ratio in back-weighted pours.',
+    risk:'LOW · monitor P4 EY — may under-extract if pour is too large'
+  },
+  'peng':{
+    label:'Peng Protocol',
+    stages:[{t:'96°C',lbl:'P1–P2',col:'#f5a623'},{t:'78–80°C',lbl:'P3–P4 Melodrip',col:'#2ecc8f'}],
+    rationale:'Two-temperature WBrC 2025 protocol. Dramatic 18°C drop for final ~45% of water. Kinetic bypass: suppresses CGA lactone and heavy polyphenol extraction in final pours. Requires Melodrip or dispersing screen.',
+    risk:'LOW · requires Melodrip · verify yield does not drop below target'
+  },
 };
 
-const GRIND_K = { fine:0.70, medium:1.00, coarse:1.40 };
-const GRIND_NOTES = { fine:'k × 0.7 · faster extraction · more clarity', medium:'k × 1.0 · balanced', coarse:'k × 1.4 · slower extraction · more body' };
-const K_BASE = [12, 5, 4.5, 4];
+const C40_BASE={fine:23,medium:30,coarse:37};
+const C40_EY_F=-.6, C40_FLV=[-3,-1.5,0,1.5,3], C40_TDS_F=-1.5;
+const GRIND_K={fine:.7,medium:1.0,coarse:1.4};
+const K_BASE=[12,5,4.5,4];
 
-// Flavor archetype per pour [Acidity, Sweetness, Bitterness, Body, Aroma]
-const POUR_FLAVOR = [
-  [88, 28, 8,  12, 90],  // bloom: volatile acids, high aroma
-  [70, 65, 18, 42, 70],  // P2: main extraction
-  [38, 88, 22, 65, 52],  // P3: sweet zone
-  [18, 38, 72, 88, 25],  // P4: tail — body, bitterness
-];
-const FLAVOR_NAMES = ['Acidity','Sweetness','Bitterness','Body','Aroma'];
-const FLAVOR_COLS  = ['#e8534a','#2ecc8f','#f5a623','#4d7cff','#c084fc'];
+// Flavor model — relative per pour [Acidity,Sweetness,Bitterness,Body,Aroma]
+// Directional only · based on Batali 2020 early=bitter/sour late=sweet/floral
+const POUR_FLAVOR=[[88,28,8,12,90],[70,65,18,42,70],[38,88,22,65,52],[18,38,72,88,25]];
+const FL_NAMES=['Acidity','Sweetness','Bitterness','Body','Aroma'];
+const FL_COLS=['#e8534a','#2ecc8f','#f5a623','#4d7cff','#c084fc'];
 
-// State
-const S = {
-  tds:      1.40,
-  ey:       19,
-  dose:     15,
-  flavorIdx:2,
-  grind:   'medium',
-  X:        1.47,
-  dilution: 0,
-};
+const S={tds:1.40,ey:19,dose:15,flavor:2,grind:'medium',X:1.47,dil:0};
 
-// ── Math ─────────────────────────────────────────────────────────────────────
-function calcRecipe() {
-  const { tds, ey, dose, X } = S;
-  const ratio      = ey / tds + X;
-  const waterIn    = dose * ratio;
-  const yieldTgt   = dose * ey / tds;
-  const retained   = waterIn - yieldTgt;
-  return { ratio, waterIn, yieldTgt, retained };
+function calcRecipe(){
+  const r=S.ey/S.tds+S.X, w=S.dose*r, y=S.dose*S.ey/S.tds;
+  return{ratio:r,water:w,yield_:y,retained:w-y};
 }
-
-function calcPourSchedule(waterIn) {
-  const fd      = FLAVOR_OPTS[S.flavorIdx];
-  const bloom   = S.dose * fd.bloom;
-  const remain  = waterIn - bloom;
-  const pours   = [{ water: bloom, name:'Bloom', isPre:true }];
-  fd.pct.forEach((p, i) => {
-    const w = remain * p;
-    if (w >= 5) pours.push({ water: w, name:`Pour ${i+2}`, isPre:false });
-  });
-  return pours;
+function calcPours(water){
+  const fd=FLAVOR_OPTS[S.flavor], bloom=S.dose*fd.bloom, rem=water-bloom;
+  const p=[{water:bloom,name:'Bloom'}];
+  fd.pct.forEach((pct,i)=>{const w=rem*pct;if(w>=5)p.push({water:w,name:`Pour ${i+2}`});});
+  return p;
 }
-
-function calcAutoTDS(pourIdx, pours) {
-  const totalSol = S.dose * (S.ey / 100 + 0.03);
-  const kMult    = GRIND_K[S.grind];
-  let remaining  = totalSol;
-  for (let i = 0; i <= pourIdx; i++) {
-    const p    = pours[i];
-    const yOut = p.water * 0.83;
-    const k    = (K_BASE[i] !== undefined ? K_BASE[i] : 4) * kMult;
-    const ef   = p.water / (p.water + k * S.dose);
-    const ext  = remaining * ef;
-    const tds  = (ext / yOut) * 100;
-    if (i === pourIdx) return { tds: Math.max(0.05, tds), ext, yOut };
-    remaining -= ext;
+function calcTDS(pi,pours){
+  const total=S.dose*(S.ey/100+.03), kM=GRIND_K[S.grind];
+  let rem=total;
+  for(let i=0;i<=pi;i++){
+    const p=pours[i];
+    const yOut=i===0?Math.max(1,p.water-S.X*S.dose):p.water*.85;
+    const k=(K_BASE[i]!==undefined?K_BASE[i]:4)*kM;
+    const ef=p.water/(p.water+k*S.dose), ext=rem*ef, tds=(ext/yOut)*100;
+    if(i===pi)return{tds:Math.max(.05,tds),ext,yOut};
+    rem-=ext;
   }
-  return { tds: 0, ext: 0, yOut: 0 };
+  return{tds:0,ext:0,yOut:0};
+}
+function calcFlavor(pours){
+  const res=pours.map((_,i)=>calcTDS(i,pours));
+  const tot=res.reduce((s,r)=>s+r.ext,0);
+  if(!tot)return FL_NAMES.map(()=>50);
+  return FL_NAMES.map((_,ai)=>{let s=0;res.forEach((r,i)=>s+=(POUR_FLAVOR[i<4?i:3][ai]*r.ext));return s/tot;});
+}
+function applyDil(fl,vol,add){
+  if(!add)return fl;
+  const df=vol/(vol+add);
+  return fl.map((v,i)=>v*Math.pow(df,[1.2,.8,1.0,.9,1.1][i]));
+}
+function calcC40(){
+  const base=C40_BASE[S.grind];
+  const ea=(S.ey-19)*C40_EY_F, ta=(S.tds-1.40)*C40_TDS_F/.1, fa=C40_FLV[S.flavor];
+  const cl=Math.max(14,Math.min(45,Math.round(base+ea+ta+fa)));
+  return{clicks:cl,lo:Math.max(14,cl-2),hi:Math.min(45,cl+2),ea:ea.toFixed(1),ta:ta.toFixed(1),fa:fa.toFixed(1)};
 }
 
-function calcFlavorBlend(pours) {
-  const results = pours.map((p, i) => calcAutoTDS(i, pours));
-  const totalSol = results.reduce((s, r) => s + r.ext, 0);
-  if (!totalSol) return FLAVOR_NAMES.map(() => 0);
-  return FLAVOR_NAMES.map((_, ai) => {
-    let sum = 0;
-    results.forEach((r, i) => {
-      sum += (POUR_FLAVOR[i < 4 ? i : 3][ai] * r.ext);
-    });
-    return sum / totalSol;
-  });
-}
+// SVG
+function svgEl(tag,attrs,par){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(par)par.appendChild(e);return e;}
+function svgTxt(par,x,y,t,attrs){const e=svgEl('text',{x,y,...attrs},par);e.textContent=t;return e;}
+function toX(ey,W){return((ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin))*W;}
+function toY(tds,H){return H-((tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin))*H;}
 
-function applyDilution(flavors, vol, addW) {
-  if (!addW) return flavors;
-  const df = vol / (vol + addW);
-  return flavors.map((v, i) => {
-    const factors = [1.2, 0.8, 1.0, 0.9, 1.1];
-    return v * Math.pow(df, factors[i]);
-  });
-}
-
-// ── SVG ──────────────────────────────────────────────────────────────────────
-function svgEl(tag, attrs, par) {
-  const e = document.createElementNS(NS, tag);
-  Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k,v));
-  if (par) par.appendChild(e);
-  return e;
-}
-function svgTxt(par, x, y, txt, attrs) {
-  const t = svgEl('text', {x, y, ...attrs}, par);
-  t.textContent = txt;
-  return t;
-}
-function toX(ey, W) { return ((ey - CHART.eyMin)/(CHART.eyMax - CHART.eyMin))*W; }
-function toY(tds, H) { return H - ((tds - CHART.tdsMin)/(CHART.tdsMax - CHART.tdsMin))*H; }
-
-function renderChart() {
-  const svg = document.getElementById('scaChart');
-  svg.innerHTML = '';
-  const W=420, H=270, PAD={l:42,r:12,t:12,b:32};
-  const cW=W-PAD.l-PAD.r, cH=H-PAD.t-PAD.b;
-
-  const defs = svgEl('defs',{},svg);
-  const clip = svgEl('clipPath',{id:'fc'},defs);
-  svgEl('rect',{x:PAD.l,y:PAD.t,width:cW,height:cH},clip);
-  const rg = svgEl('radialGradient',{id:'tg',cx:'50%',cy:'50%',r:'50%'},defs);
-  const s1=svgEl('stop',{offset:'0%'},rg);s1.style.stopColor='#c9943a';s1.style.stopOpacity='0.6';
+function renderChart(){
+  const svg=document.getElementById('scaChart');svg.innerHTML='';
+  const W=420,H=265,P={l:40,r:12,t:10,b:32},cW=W-P.l-P.r,cH=H-P.t-P.b;
+  const defs=svgEl('defs',{},svg);
+  const cp=svgEl('clipPath',{id:'cc'},defs);svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH},cp);
+  const rg=svgEl('radialGradient',{id:'rg',cx:'50%',cy:'50%',r:'50%'},defs);
+  const s1=svgEl('stop',{offset:'0%'},rg);s1.style.stopColor='#c9943a';s1.style.stopOpacity='.55';
   const s2=svgEl('stop',{offset:'100%'},rg);s2.style.stopColor='#c9943a';s2.style.stopOpacity='0';
-
-  svgEl('rect',{x:PAD.l,y:PAD.t,width:cW,height:cH,fill:'#0c0e18',stroke:'#1c2235','stroke-width':1,rx:2},svg);
-  const g = svgEl('g',{'clip-path':'url(#fc)'},svg);
-
-  // Grid
-  for(let ey=14;ey<=26;ey+=2) svgEl('line',{x1:PAD.l+toX(ey,cW),y1:PAD.t,x2:PAD.l+toX(ey,cW),y2:PAD.t+cH,stroke:'#1c2235','stroke-width':1},g);
-  [.8,.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8].forEach(v=>svgEl('line',{x1:PAD.l,y1:PAD.t+toY(v,cH),x2:PAD.l+cW,y2:PAD.t+toY(v,cH),stroke:'#1c2235','stroke-width':1},g));
-
-  // Zone shading
-  svgEl('rect',{x:PAD.l,y:PAD.t,width:toX(IDEAL.eyLo,cW),height:cH,fill:'rgba(232,83,74,.04)'},g);
-  svgEl('rect',{x:PAD.l+toX(IDEAL.eyHi,cW),y:PAD.t,width:cW-toX(IDEAL.eyHi,cW),height:cH,fill:'rgba(232,83,74,.04)'},g);
-
-  // EEY zone 19-22%
-  svgEl('rect',{x:PAD.l+toX(EEY,cW),y:PAD.t,width:toX(22,cW)-toX(EEY,cW),height:cH,fill:'rgba(245,166,35,.05)'},g);
-  svgEl('line',{x1:PAD.l+toX(EEY,cW),y1:PAD.t,x2:PAD.l+toX(EEY,cW),y2:PAD.t+cH,stroke:'rgba(245,166,35,.45)','stroke-width':1.2,'stroke-dasharray':'4,3'},g);
-  svgTxt(g,PAD.l+toX(EEY,cW)+3,PAD.t+10,'EEY',{'text-anchor':'start',fill:'rgba(245,166,35,.6)','font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1});
-
-  // SCA ideal zone
-  const ix1=toX(IDEAL.eyLo,cW),ix2=toX(IDEAL.eyHi,cW);
-  const iy1=toY(IDEAL.tdsHi,cH),iy2=toY(IDEAL.tdsLo,cH);
-  svgEl('rect',{x:PAD.l+ix1,y:PAD.t+iy1,width:ix2-ix1,height:iy2-iy1,fill:'rgba(46,204,143,.07)',stroke:'rgba(46,204,143,.35)','stroke-width':1.2,'stroke-dasharray':'4,3',rx:2},g);
-  svgTxt(g,PAD.l+(ix1+ix2)/2,PAD.t+iy1+11,'SCA IDEAL',{'text-anchor':'middle',fill:'rgba(46,204,143,.55)','font-family':'JetBrains Mono,monospace','font-size':7,'letter-spacing':2,'font-weight':700});
-
-  // Click handler to set target
-  svgEl('rect',{x:PAD.l,y:PAD.t,width:cW,height:cH,fill:'transparent','cursor':'crosshair'},svg).addEventListener('click', function(e) {
-    const rect = svg.getBoundingClientRect();
-    const scaleX = cW / (rect.width * (cW/W));
-    const scaleY = cH / (rect.height * (cH/H));
-    const rawX = e.clientX - rect.left - PAD.l*(rect.width/W);
-    const rawY = e.clientY - rect.top  - PAD.t*(rect.height/H);
-    const newEY  = Math.max(14, Math.min(26,  CHART.eyMin  + (rawX / (rect.width  * cW/W)) * (CHART.eyMax - CHART.eyMin)));
-    const newTDS = Math.max(.8, Math.min(1.8, CHART.tdsMax - (rawY / (rect.height * cH/H)) * (CHART.tdsMax - CHART.tdsMin)));
-    S.ey  = Math.round(newEY*2)/2;
-    S.tds = Math.round(newTDS*100)/100;
-    document.getElementById('tdsSlider').value = S.tds;
-    document.getElementById('eySlider').value  = S.ey;
-    document.getElementById('tdsValDisplay').innerHTML = S.tds.toFixed(2) + '<span>%</span>';
-    document.getElementById('eyValDisplay').innerHTML  = S.ey.toFixed(1)  + '<span>%</span>';
-    renderAll();
-  });
-
-  // Target dot
-  const tx = PAD.l + toX(S.ey, cW), ty = PAD.t + toY(S.tds, cH);
-  svgEl('circle',{cx:tx,cy:ty,r:14,fill:'url(#tg)'},g);
-  svgEl('line',{x1:PAD.l,y1:ty,x2:tx-9,y2:ty,stroke:'#c9943a','stroke-width':.8,'stroke-opacity':.35,'stroke-dasharray':'3,3'},g);
-  svgEl('line',{x1:tx+9,y1:ty,x2:PAD.l+cW,y2:ty,stroke:'#c9943a','stroke-width':.8,'stroke-opacity':.35,'stroke-dasharray':'3,3'},g);
-  svgEl('line',{x1:tx,y1:PAD.t,x2:tx,y2:ty-9,stroke:'#c9943a','stroke-width':.8,'stroke-opacity':.35,'stroke-dasharray':'3,3'},g);
-  svgEl('line',{x1:tx,y1:ty+9,x2:tx,y2:PAD.t+cH,stroke:'#c9943a','stroke-width':.8,'stroke-opacity':.35,'stroke-dasharray':'3,3'},g);
+  svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH,fill:'#0c0e18',stroke:'#1c2235','stroke-width':1,rx:2},svg);
+  const g=svgEl('g',{'clip-path':'url(#cc)'},svg);
+  for(let ey=14;ey<=26;ey+=2)svgEl('line',{x1:P.l+toX(ey,cW),y1:P.t,x2:P.l+toX(ey,cW),y2:P.t+cH,stroke:'#1c2235','stroke-width':1},g);
+  [.8,.9,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8].forEach(v=>svgEl('line',{x1:P.l,y1:P.t+toY(v,cH),x2:P.l+cW,y2:P.t+toY(v,cH),stroke:'#1c2235','stroke-width':1},g));
+  svgEl('rect',{x:P.l+toX(EEY,cW),y:P.t,width:toX(22,cW)-toX(EEY,cW),height:cH,fill:'rgba(245,166,35,.05)'},g);
+  svgEl('line',{x1:P.l+toX(EEY,cW),y1:P.t,x2:P.l+toX(EEY,cW),y2:P.t+cH,stroke:'rgba(245,166,35,.45)','stroke-width':1.2,'stroke-dasharray':'4,3'},g);
+  svgTxt(g,P.l+toX(EEY,cW)+3,P.t+12,'EEY',{'text-anchor':'start',fill:'rgba(245,166,35,.6)','font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1});
+  const ix1=toX(IDEAL.eyLo,cW),ix2=toX(IDEAL.eyHi,cW),iy1=toY(IDEAL.tdsHi,cH),iy2=toY(IDEAL.tdsLo,cH);
+  svgEl('rect',{x:P.l+ix1,y:P.t+iy1,width:ix2-ix1,height:iy2-iy1,fill:'rgba(46,204,143,.07)',stroke:'rgba(46,204,143,.35)','stroke-width':1,'stroke-dasharray':'4,3',rx:2},g);
+  svgTxt(g,P.l+(ix1+ix2)/2,P.t+iy1+11,'SCA IDEAL',{'text-anchor':'middle',fill:'rgba(46,204,143,.55)','font-family':'JetBrains Mono,monospace','font-size':7,'letter-spacing':2,'font-weight':700});
+  svgEl('rect',{x:P.l,y:P.t,width:toX(IDEAL.eyLo,cW),height:cH,fill:'rgba(232,83,74,.04)'},g);
+  svgEl('rect',{x:P.l+toX(IDEAL.eyHi,cW),y:P.t,width:cW-toX(IDEAL.eyHi,cW),height:cH,fill:'rgba(232,83,74,.04)'},g);
+  const tx=P.l+toX(S.ey,cW),ty=P.t+toY(S.tds,cH);
+  svgEl('circle',{cx:tx,cy:ty,r:14,fill:'url(#rg)'},g);
+  [['l',P.l,ty,tx-9,ty],['r',tx+9,ty,P.l+cW,ty],['t',tx,P.t,tx,ty-9],['b',tx,ty+9,tx,P.t+cH]].forEach(([,x1,y1,x2,y2])=>svgEl('line',{x1,y1,x2,y2,stroke:'#c9943a','stroke-width':.8,'stroke-opacity':.3,'stroke-dasharray':'3,3'},g));
   svgEl('circle',{cx:tx,cy:ty,r:7,fill:'#0c0e18',stroke:'#c9943a','stroke-width':2.5},g);
   svgEl('circle',{cx:tx,cy:ty,r:3,fill:'#c9943a'},g);
   svgTxt(g,tx,ty-15,'TARGET',{'text-anchor':'middle',fill:'#e8be78','font-family':'JetBrains Mono,monospace','font-size':7,'font-weight':700,'letter-spacing':1.5});
-
-  // Axis ticks
-  [14,16,18,20,22,24,26].forEach(v => svgTxt(svg,PAD.l+toX(v,cW),H-10,v+'%',{'text-anchor':'middle',fill:'#637a9f','font-family':'JetBrains Mono,monospace','font-size':9}));
-  [.8,1.0,1.2,1.4,1.6,1.8].forEach(v => svgTxt(svg,PAD.l-5,PAD.t+toY(v,cH)+3,v.toFixed(1),{'text-anchor':'end',fill:'#637a9f','font-family':'JetBrains Mono,monospace','font-size':9}));
-  svgTxt(svg,PAD.l+cW/2,H-1,'EXTRACTION YIELD (%)',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1});
-  svgTxt(svg,8,PAD.t+cH/2,'TDS (%)',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1,transform:`rotate(-90,8,${PAD.t+cH/2})`});
-
-  // Legend
-  document.getElementById('chartLegend').innerHTML =
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:8px;border:1px dashed rgba(46,204,143,.4);border-radius:2px;background:rgba(46,204,143,.07);display:inline-block"></span>SCA Ideal</span>' +
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:8px;background:rgba(245,166,35,.15);border-left:2px dashed rgba(245,166,35,.5);display:inline-block"></span>EEY 19–22%</span>' +
-    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block"></span>Your target</span>';
-}
-
-// ── Render: Recipe Output ─────────────────────────────────────────────────────
-function renderRecipe() {
-  const { ratio, waterIn, yieldTgt, retained } = calcRecipe();
-  const pours  = calcPourSchedule(waterIn);
-  const nPours = pours.length;
-
-  const cells = [
-    { val: ratio.toFixed(2),           unit:'',   lbl:'Brew Ratio',   sub:'1:'+ratio.toFixed(1), col:'var(--gold-lt)' },
-    { val: waterIn.toFixed(0),         unit:'g',  lbl:'Total Water',  sub:'water in',            col:'var(--blue-lt)' },
-    { val: yieldTgt.toFixed(0),        unit:'g',  lbl:'Target Yield', sub:'liquid out goal',     col:'var(--green)' },
-    { val: retained.toFixed(1),        unit:'g',  lbl:'Retained',     sub:'X × dose absorbed',   col:'var(--muted)' },
-    { val: nPours,                     unit:'',   lbl:'Pours',        sub:'incl. bloom',         col:'var(--text)' },
-    { val: S.dose.toFixed(1),          unit:'g',  lbl:'Dose',         sub:'',                    col:'var(--text)' },
-  ];
-
-  document.getElementById('recipeOutput').innerHTML = cells.map(c => `
-    <div class="out-cell">
-      <div class="out-val" style="color:${c.col}">${c.val}<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${c.unit}</span></div>
-      <div class="out-lbl">${c.lbl}</div>
-      ${c.sub ? '<div class="out-sub">'+c.sub+'</div>' : ''}
-    </div>`).join('');
-
-  document.getElementById('formulaDisplay').innerHTML =
-    '<span style="color:var(--text)">Ratio</span> = EY ÷ TDS + X = ' + S.ey + ' ÷ ' + S.tds + ' + ' + S.X + ' = <span style="color:var(--gold-lt)">' + ratio.toFixed(2) + '</span>' +
-    '&nbsp;·&nbsp; <span style="color:var(--text)">Yield</span> = dose × EY ÷ TDS = ' + S.dose + ' × ' + S.ey + ' ÷ ' + S.tds + ' = <span style="color:var(--green)">' + yieldTgt.toFixed(0) + 'g</span>';
-}
-
-// ── Render: Pour Schedule ─────────────────────────────────────────────────────
-function renderPourSchedule() {
-  const { waterIn } = calcRecipe();
-  const pours  = calcPourSchedule(waterIn);
-  const total  = waterIn;
-  const colors = ['#637a9f','#e8534a','#f5a623','#2ecc8f','#4d7cff'];
-
-  // Pour bars
-  const pourResults = pours.map((p,i) => {
-    const r = calcAutoTDS(i, pours);
-    return {...p, ...r};
-  });
-
-  let barsHTML = pourResults.map((p, i) => {
-    const pct = (p.water / total * 100);
-    const col = colors[i] || '#637a9f';
-    const tdsColor = p.tds > 0.8 ? '#e8534a' : p.tds > 0.4 ? '#f5a623' : '#2ecc8f';
-    const yOut = p.water * 0.83;
-    const retainG = (p.water - yOut).toFixed(0);
-    return `<div class="pour-bar-row">
-      <div class="pour-bar-label">${p.name}</div>
-      <div class="pour-bar-track">
-        <div class="pour-bar-fill" style="width:${pct}%;background:${col}40;border-left:2px solid ${col}">
-          <span style="color:${col}">${p.water.toFixed(0)}g</span>
-          <span style="margin-left:6px;font-size:8px;color:rgba(255,255,255,.4)">→ ~${yOut.toFixed(0)}g out · ${retainG}g retained</span>
-        </div>
-      </div>
-      <div class="pour-bar-tds" style="color:${tdsColor}">~${p.tds.toFixed(2)}%</div>
-    </div>`;
-  }).join('');
-
-  // Find tail cut
-  let tailIdx = pourResults.length - 1;
-  let tailCalloutHTML = '';
-  for (let i = pourResults.length - 1; i >= 1; i--) {
-    if (pourResults[i].tds > 0.8) {
-      tailIdx = i;
-      tailCalloutHTML = `<div class="tail-callout tail-cut-now">
-        <div style="font-family:var(--mono);font-size:9px;color:#e8534a;font-weight:700;letter-spacing:.1em;margin-bottom:4px">✂ TAIL CUT — ${pourResults[i].name}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TDS ~${pourResults[i].tds.toFixed(2)}% > 0.8% → ยกออกทันที · ตัดก่อนฝาด</div>
-      </div>`;
-      break;
-    } else if (pourResults[i].tds >= 0.4) {
-      tailCalloutHTML = `<div class="tail-callout tail-marginal">
-        <div style="font-family:var(--mono);font-size:9px;color:#f5a623;font-weight:700;letter-spacing:.1em;margin-bottom:4px">⚠ MARGINAL — ${pourResults[i].name}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TDS ~${pourResults[i].tds.toFixed(2)}% (0.4–0.8%) → ตัดสำหรับแข่ง</div>
-      </div>`;
-      break;
-    } else {
-      tailCalloutHTML = `<div class="tail-callout tail-safe">
-        <div style="font-family:var(--mono);font-size:9px;color:#2ecc8f;font-weight:700;letter-spacing:.1em;margin-bottom:4px">✓ SAFE — ${pourResults[i].name}</div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--muted)">TDS ~${pourResults[i].tds.toFixed(2)}% < 0.4% → ไม่มีผลต่อ cup</div>
-      </div>`;
-    }
+  [14,16,18,20,22,24,26].forEach(v=>svgTxt(svg,P.l+toX(v,cW),H-10,v+'%',{'text-anchor':'middle',fill:'#637a9f','font-family':'JetBrains Mono,monospace','font-size':9}));
+  [.8,1.0,1.2,1.4,1.6,1.8].forEach(v=>svgTxt(svg,P.l-4,P.t+toY(v,cH)+3,v.toFixed(1),{'text-anchor':'end',fill:'#637a9f','font-family':'JetBrains Mono,monospace','font-size':9}));
+  svgTxt(svg,P.l+cW/2,H-1,'EXTRACTION YIELD (%)',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1});
+  svgTxt(svg,8,P.t+cH/2,'TDS (%)',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1,transform:`rotate(-90,8,${P.t+cH/2})`});
+  const hit=svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH,fill:'rgba(0,0,0,0.001)','cursor':'crosshair'},svg);
+  function onHit(e){
+    e.preventDefault();
+    const r=svg.getBoundingClientRect(),t=e.touches?e.touches[0]:e;
+    const svgX=(t.clientX-r.left)*(W/r.width),svgY=(t.clientY-r.top)*(H/r.height);
+    const px=svgX-P.l,py=svgY-P.t;
+    if(px<0||px>cW||py<0||py>cH)return;
+    S.ey =Math.max(14,Math.min(26, Math.round((CHART.eyMin +(px/cW)*(CHART.eyMax -CHART.eyMin))*2)/2));
+    S.tds=Math.max(.8,Math.min(1.8,Math.round((CHART.tdsMax-(py/cH)*(CHART.tdsMax-CHART.tdsMin))*100)/100));
+    document.getElementById('tdsSlider').value=S.tds;
+    document.getElementById('eySlider').value=S.ey;
+    document.getElementById('tdsDisplay').innerHTML=S.tds.toFixed(2)+'<span>%</span>';
+    document.getElementById('eyDisplay').innerHTML=S.ey.toFixed(1)+'<span>%</span>';
+    renderAll();
   }
-
-  // Add cumulative EY indicator
-  let cumEY = 0;
-  barsHTML += '<div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--muted)">Cumulative EY:</div>';
-  barsHTML += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
-  pourResults.forEach((p, i) => {
-    const ey_i = (p.ext / S.dose) * 100;
-    cumEY += ey_i;
-    const col = cumEY < EEY ? 'var(--green)' : cumEY < 21 ? 'var(--amber)' : 'var(--red)';
-    barsHTML += '<span style="font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--s1);border:1px solid var(--border)">';
-    barsHTML += p.name + ': <span style="color:'+col+'">' + cumEY.toFixed(1) + '%</span></span>';
-  });
-  barsHTML += '</div>';
-
-  document.getElementById('pourBars').innerHTML = barsHTML;
-  document.getElementById('tailCallout').innerHTML = tailCalloutHTML;
-
-  // Temperature strategy
-  const tp = TEMP_PROFILES[FLAVOR_OPTS[S.flavorIdx].tempProfile];
-  let tempHTML = '<div class="temp-strip">' + tp.stages.map(st =>
-    `<div class="temp-stage" style="background:${st.col}18;border:1px solid ${st.col}40">
-      <div style="font-family:var(--mono);font-size:13px;font-weight:700;color:${st.col}">${st.t}</div>
-      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px">${st.lbl}</div>
-    </div>`
-  ).join('') + '</div>';
-  tempHTML += `<div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px;line-height:1.5">${tp.note}</div>`;
-  document.getElementById('tempStrategy').innerHTML = tempHTML;
-
-  // Grind recommendation
-  const eyZone = S.ey < 18 ? 'under' : S.ey > 22 ? 'over' : 'ideal';
-  const tdsZone = S.tds < 1.15 ? 'weak' : S.tds > 1.45 ? 'strong' : 'ideal';
-  let grindRec = '';
-  if (eyZone === 'under') grindRec = '<span style="color:#e8534a">↓ Grind finer</span> — EY target ต่ำกว่า 18%, ต้องเพิ่ม surface area เพื่อ extraction';
-  else if (eyZone === 'over') grindRec = '<span style="color:#f5a623">↑ Grind coarser</span> — EY target สูงกว่า 22%, ระวัง over-extraction';
-  else if (tdsZone === 'weak') grindRec = '<span style="color:#f5a623">↓ Grind finer หรือ tighter ratio</span> — TDS ต่ำ ต้องเพิ่ม concentration';
-  else if (tdsZone === 'strong') grindRec = '<span style="color:#f5a623">↑ Grind coarser หรือ looser ratio</span> — TDS สูง ลด concentration';
-  else grindRec = '<span style="color:#2ecc8f">✓ Medium grind</span> — Target อยู่ใน SCA ideal zone, medium grind เหมาะสม';
-
-  if (S.flavorIdx <= 1) grindRec += '<br><span style="color:#e8534a">Sour target:</span> ลอง grind ละเอียดขึ้นเล็กน้อย + early tail cut';
-  if (S.flavorIdx >= 3) grindRec += '<br><span style="color:#2ecc8f">Sweet target:</span> grind ปกติ, เน้น low-temp final pour มากกว่า';
-  document.getElementById('grindRec').innerHTML = grindRec;
+  hit.addEventListener('click',onHit);hit.addEventListener('touchstart',onHit,{passive:false});
+  document.getElementById('chartLegend').innerHTML=
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:7px;border:1px dashed rgba(46,204,143,.4);border-radius:2px;display:inline-block"></span>SCA Ideal</span>'+
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:7px;background:rgba(245,166,35,.2);border-left:2px dashed rgba(245,166,35,.5);display:inline-block"></span>EEY 19–22%</span>'+
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--gold);display:inline-block"></span>Target</span>';
 }
 
-// ── Render: Flavor + Dilution ─────────────────────────────────────────────────
-function renderFlavor() {
-  const { waterIn, yieldTgt } = calcRecipe();
-  const pours  = calcPourSchedule(waterIn);
-  const raw    = calcFlavorBlend(pours);
-  const diluted = applyDilution(raw, yieldTgt, S.dilution);
+function renderRecipe(){
+  const r=calcRecipe();
+  document.getElementById('recipeOut').innerHTML=[
+    {v:r.ratio.toFixed(2),u:'',l:'Brew Ratio',s:'1:'+r.ratio.toFixed(1),c:'var(--gold-lt)'},
+    {v:r.water.toFixed(0),u:'g',l:'Total Water',s:'',c:'var(--blue-lt)'},
+    {v:r.yield_.toFixed(0),u:'g',l:'Yield Target',s:'liquid out',c:'var(--green)'},
+    {v:r.retained.toFixed(1),u:'g',l:'Retained',s:'X × dose',c:'var(--muted)'},
+    {v:S.dose.toFixed(1),u:'g',l:'Dose',s:'',c:'var(--text)'},
+  ].map(c=>`<div class="out-cell"><div class="out-val" style="color:${c.c}">${c.v}<span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${c.u}</span></div><div class="out-lbl">${c.l}</div>${c.s?`<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px">${c.s}</div>`:''}</div>`).join('');
+  document.getElementById('formulaLine').innerHTML=
+    `<span style="color:var(--text)">Ratio</span> = EY/TDS + X = ${S.ey}/${S.tds} + ${S.X} = <span style="color:var(--gold-lt)">${r.ratio.toFixed(2)}</span>&nbsp;&nbsp;<span style="color:var(--text)">Yield</span> = ${S.dose} × ${S.ey}/${S.tds} = <span style="color:var(--green)">${r.yield_.toFixed(0)}g</span>`;
+}
 
-  // Flavor bars (before vs after dilution)
-  document.getElementById('flavorBars').innerHTML = FLAVOR_NAMES.map((name, i) => {
-    const before = raw[i], after = diluted[i];
-    const col = FLAVOR_COLS[i];
-    return `<div class="flavor-bar-row">
-      <div class="flavor-bar-header">
-        <span class="flavor-bar-name">${name}</span>
-        <span class="flavor-bar-val" style="color:${col}">${after.toFixed(0)}<span style="font-size:9px;color:var(--dim)">/100</span></span>
-      </div>
-      <div class="flavor-bar-track">
-        <div class="flavor-bar-before" style="width:${before}%;background:${col}"></div>
-        <div class="flavor-bar-fill" style="width:${after}%;background:${col}"></div>
-      </div>
-    </div>`;
+function renderPours(){
+  const{water}=calcRecipe();
+  const pours=calcPours(water);
+  const total=water;
+  const cols=['#637a9f','#e8534a','#f5a623','#2ecc8f','#4d7cff'];
+  const res=pours.map((_,i)=>({...pours[i],...calcTDS(i,pours)}));
+  let bars='<div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-bottom:7px;display:flex;gap:12px"><span>↑ yield out estimate</span><span>↓ absorbed</span></div>';
+  bars+=res.map((p,i)=>{
+    const pct=p.water/total*100, col=cols[i]||'#637a9f';
+    const tc=p.tds>.8?'#e8534a':p.tds>.4?'#f5a623':'#2ecc8f';
+    const yOut=i===0?Math.max(0,p.water-S.X*S.dose):p.water*.85;
+    const ret=(p.water-yOut).toFixed(0);
+    return `<div class="pbr-row"><div class="pbr-lbl">${p.name}</div><div class="pbr-track"><div class="pbr-fill" style="width:${Math.max(8,pct)}%;background:${col}35;border-left:2px solid ${col}"><span style="color:${col}">${p.water.toFixed(0)}g</span></div></div><div class="pbr-right"><span style="color:${tc}">~${p.tds.toFixed(2)}%</span><span style="color:var(--dim);font-size:8px;margin-left:5px">↑${yOut.toFixed(0)}g ↓${ret}g</span></div></div>`;
   }).join('');
-
-  // Dilution result
-  const newTDS = S.dilution > 0 ? (S.tds * yieldTgt / (yieldTgt + S.dilution)) : S.tds;
-  const newEY  = S.dilution > 0 ? (S.ey  * yieldTgt / (yieldTgt + S.dilution)) : S.ey;
-  document.getElementById('dilResult').innerHTML = S.dilution > 0 ? `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-      <div style="padding:8px;background:var(--s1);border-radius:4px;border:1px solid var(--border);text-align:center">
-        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue-lt)">${newTDS.toFixed(2)}<span style="font-size:9px;color:var(--muted)">%</span></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">New TDS</div>
-      </div>
-      <div style="padding:8px;background:var(--s1);border-radius:4px;border:1px solid var(--border);text-align:center">
-        <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${newEY<19?'var(--green)':newEY<21?'var(--amber)':'var(--red)'}">${newEY.toFixed(1)}<span style="font-size:9px;color:var(--muted)">%</span></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">Effective EY</div>
-      </div>
-    </div>
-    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">Final volume: ${(yieldTgt + S.dilution).toFixed(0)}mL</div>` :
-    `<div style="font-family:var(--mono);font-size:10px;color:var(--dim);padding:10px;text-align:center">เลื่อน slider เพื่อดูผลของการ dilute</div>`;
-
-  // Dilution flavor change summary
-  if (S.dilution > 0) {
-    const changes = FLAVOR_NAMES.map((n,i) => ({
-      name:n, before:raw[i], after:diluted[i],
-      delta: diluted[i] - raw[i], col:FLAVOR_COLS[i]
-    }));
-    document.getElementById('dilFlavors').innerHTML = changes.map(c => {
-      const sign = c.delta >= 0 ? '+' : '';
-      const absChange = Math.abs(c.delta).toFixed(1);
-      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px">
-        <span style="color:${c.col}">${c.name}</span>
-        <span>${c.before.toFixed(0)} → <span style="color:${c.col};font-weight:700">${c.after.toFixed(0)}</span>
-        <span style="color:${c.delta < 0 ? '#637a9f' : '#2ecc8f'};font-size:9px;margin-left:4px">(${sign}${c.delta.toFixed(1)})</span></span>
-      </div>`;
-    }).join('');
-  } else {
-    document.getElementById('dilFlavors').innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;padding:8px">เพิ่มน้ำเพื่อดูการเปลี่ยนแปลง</div>';
-  }
+  document.getElementById('pourBars').innerHTML=bars;
+  let cumEY=0;
+  document.getElementById('cumEYRow').innerHTML=res.map((p,i)=>{
+    cumEY+=(p.ext/S.dose)*100;
+    const col=cumEY<EEY?'var(--green)':cumEY<21?'var(--amber)':'var(--red)';
+    return `<span style="font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;background:var(--s1);border:1px solid var(--border)">${p.name}: <span style="color:${col}">${cumEY.toFixed(1)}%</span></span>`;
+  }).join('');
+  const lp=res[res.length-1];
+  const ts=lp.tds>.8?'rgba(232,83,74,.07);border:1px solid rgba(232,83,74,.3)':lp.tds>.4?'rgba(245,166,35,.06);border:1px solid rgba(245,166,35,.25)':'rgba(46,204,143,.06);border:1px solid rgba(46,204,143,.25)';
+  const tc2=lp.tds>.8?'#e8534a':lp.tds>.4?'#f5a623':'#2ecc8f';
+  const msg=lp.tds>.8?'✂ CUT NOW — TDS > 0.8%':lp.tds>.4?'⚠ Marginal — cut สำหรับแข่ง':'✓ Safe — TDS < 0.4%';
+  document.getElementById('tailCallout').innerHTML=`<div style="padding:9px 12px;border-radius:5px;background:${ts}"><div style="font-family:var(--mono);font-size:9px;color:${tc2};font-weight:700;letter-spacing:.08em">${msg}</div><div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px">Final pour ~${lp.tds.toFixed(2)}% TDS (Batali et al. 2020 threshold)</div></div>`;
 }
 
-// ── Init UI ───────────────────────────────────────────────────────────────────
-function initFlavorStrip() {
-  document.getElementById('flavorStrip').innerHTML = FLAVOR_OPTS.map((f,i) =>
-    `<button class="flavor-btn ${i===S.flavorIdx?'active':''}" id="fb${i}" onclick="setFlavor(${i})">
-      <span class="flavor-icon">${f.icon}</span>${f.label}
-    </button>`
-  ).join('');
-  document.getElementById('flavorDesc').textContent = FLAVOR_OPTS[S.flavorIdx].desc;
+function renderTemp(){
+  const tp=TEMP_PROFILES[FLAVOR_OPTS[S.flavor].tempKey];
+  const strip=`<div class="temp-strip">${tp.stages.map(s=>`<div class="temp-stage" style="background:${s.col}18;border:1px solid ${s.col}40"><div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${s.col}">${s.t}</div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px">${s.lbl}</div></div>`).join('')}</div>`;
+  const rc=tp.risk.startsWith('HIGH')?'#f87171':tp.risk.startsWith('LOW–MEDIUM')||tp.risk.startsWith('LOW-MEDIUM')?'#f5a623':'#2ecc8f';
+  document.getElementById('tempProfile').innerHTML=
+    `<div style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:700;margin-bottom:6px">${tp.label}</div>`+
+    strip+
+    `<div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.65">${tp.rationale}</div>`+
+    `<div style="margin-top:6px;font-family:var(--mono);font-size:9px;color:${rc}">Risk: ${tp.risk}</div>`;
 }
 
-function initGrindRow() {
-  document.getElementById('grindRow').innerHTML = ['fine','medium','coarse'].map(g =>
-    `<button class="grind-btn ${g===S.grind?'active':''}" id="g_${g}" onclick="setGrind('${g}')">${g.charAt(0).toUpperCase()+g.slice(1)}</button>`
-  ).join('');
+function renderC40(){
+  const c=calcC40();
+  document.getElementById('c40Num').textContent=c.clicks;
+  document.getElementById('c40Range').textContent='range '+c.lo+'–'+c.hi+' clicks';
+  const g=S.grind.charAt(0).toUpperCase()+S.grind.slice(1);
+  document.getElementById('c40Detail').innerHTML=`Base (${g}): ${C40_BASE[S.grind]}cl &nbsp;· EY: ${parseFloat(c.ea)>=0?'+':''}${c.ea} &nbsp;· TDS: ${parseFloat(c.ta)>=0?'+':''}${c.ta} &nbsp;· Flavor: ${parseFloat(c.fa)>=0?'+':''}${c.fa}<br><span style="color:var(--dim)">Light roast Arabica · V60/Kalita · 15g baseline · adjust ±2–3 clicks per bean density</span>`;
+  const pct=((c.clicks-14)/(45-14))*100;
+  const m=document.getElementById('c40Marker');if(m)m.style.left=Math.max(1,Math.min(98,pct))+'%';
 }
 
-// ── Event handlers ────────────────────────────────────────────────────────────
-function onTDSSlider(v) {
-  S.tds = parseFloat(v);
-  document.getElementById('tdsValDisplay').innerHTML = S.tds.toFixed(2)+'<span>%</span>';
+function renderFlavor(){
+  const{water,yield_}=calcRecipe();
+  const pours=calcPours(water);
+  const raw=calcFlavor(pours);
+  const dil=applyDil(raw,yield_,S.dil);
+  document.getElementById('flavorBars').innerHTML=FL_NAMES.map((n,i)=>{
+    const col=FL_COLS[i];
+    return `<div class="fd-attr"><div class="fd-bar-header"><span style="color:var(--muted)">${n}</span><span style="color:${col};font-weight:700">${dil[i].toFixed(0)}<span style="font-size:8px;color:var(--dim)">/100</span></span></div><div class="fd-bar-track"><div style="position:absolute;top:0;height:100%;width:${raw[i]}%;background:${col};opacity:.2;border-radius:3px"></div><div class="fd-bar-fill" style="width:${dil[i]}%;background:${col}"></div></div></div>`;
+  }).join('');
+  const nt=S.dil>0?(S.tds*yield_/(yield_+S.dil)):S.tds;
+  const ne=S.dil>0?(S.ey*yield_/(yield_+S.dil)):S.ey;
+  document.getElementById('dilResult').innerHTML=S.dil>0?
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px"><div style="padding:8px;background:var(--s1);border-radius:4px;border:1px solid var(--border);text-align:center"><div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--blue-lt)">${nt.toFixed(2)}<span style="font-size:9px;color:var(--muted)">%</span></div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em">New TDS</div></div><div style="padding:8px;background:var(--s1);border-radius:4px;border:1px solid var(--border);text-align:center"><div style="font-family:var(--mono);font-size:14px;font-weight:700;color:${ne<19?'var(--green)':ne<21?'var(--amber)':'var(--red)'}">${ne.toFixed(1)}<span style="font-size:9px;color:var(--muted)">%</span></div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.08em">Effective EY</div></div></div><div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:5px">Final: ${(yield_+S.dil).toFixed(0)}mL · 1:${((yield_+S.dil)/S.dose).toFixed(1)}</div>`:
+    `<div style="font-family:var(--mono);font-size:10px;color:var(--dim);text-align:center;padding:10px">เลื่อน slider เพื่อดูผลของการ dilute</div>`;
+  document.getElementById('dilFlavors').innerHTML=S.dil>0?
+    FL_NAMES.map((n,i)=>{const d=dil[i]-raw[i],s=d>=0?'+':'';return `<div class="dil-row"><span style="color:${FL_COLS[i]}">${n}</span><span>${raw[i].toFixed(0)} → <span style="color:${FL_COLS[i]};font-weight:700">${dil[i].toFixed(0)}</span><span style="color:${d<0?'#637a9f':'#2ecc8f'};font-size:9px;margin-left:4px">(${s}${d.toFixed(1)})</span></span></div>`;}).join(''):'';
+}
+
+function initFlavors(){
+  document.getElementById('flavorStrip').innerHTML=FLAVOR_OPTS.map((f,i)=>
+    `<button class="flavor-btn${i===S.flavor?' active':''}" id="fb${i}" onclick="setFlavor(${i})"><span class="fi">${f.icon}</span>${f.label}</button>`).join('');
+  document.getElementById('flavorDesc').textContent=FLAVOR_OPTS[S.flavor].desc;
+}
+function initGrind(){
+  const labels={fine:'Fine\n~20–26cl',medium:'Medium\n~27–33cl',coarse:'Coarse\n~34–41cl'};
+  document.getElementById('grindRow').innerHTML=['fine','medium','coarse'].map(g=>
+    `<button class="grind-btn${g===S.grind?' active':''}" id="gb_${g}" onclick="setGrind('${g}')">${labels[g].replace('\n','<br>')}</button>`).join('');
+  const notes={fine:'k × 0.7 · faster extraction · more clarity',medium:'k × 1.0 · balanced',coarse:'k × 1.4 · slower · more body'};
+  document.getElementById('grindNote').textContent=notes[S.grind];
+}
+function onSlider(k,v){
+  S[k]=parseFloat(v);
+  const ids={tds:'tdsDisplay',ey:'eyDisplay',dose:'doseDisplay'};
+  const u={tds:'%',ey:'%',dose:'g'};
+  const e=document.getElementById(ids[k]);
+  if(e)e.innerHTML=parseFloat(v).toFixed(k==='dose'?1:k==='ey'?1:2)+`<span>${u[k]}</span>`;
   renderAll();
 }
-function onEYSlider(v) {
-  S.ey = parseFloat(v);
-  document.getElementById('eyValDisplay').innerHTML = S.ey.toFixed(1)+'<span>%</span>';
+function onX(v){const val=parseFloat(v);if(!isNaN(val)&&val>.5&&val<3)S.X=val;renderAll();}
+function onDilution(v){S.dil=parseInt(v);document.getElementById('dilDisplay').innerHTML=S.dil+'<span>g</span>';renderFlavor();}
+function setFlavor(i){
+  S.flavor=i;S.dil=0;
+  document.getElementById('dilSlider').value=0;document.getElementById('dilDisplay').innerHTML='0<span>g</span>';
+  FLAVOR_OPTS.forEach((_,j)=>{const b=document.getElementById('fb'+j);if(b)b.className='flavor-btn'+(j===i?' active':'');});
+  document.getElementById('flavorDesc').textContent=FLAVOR_OPTS[i].desc;
   renderAll();
 }
-function onDoseSlider(v) {
-  S.dose = parseFloat(v);
-  document.getElementById('doseValDisplay').innerHTML = S.dose.toFixed(1)+'<span>g</span>';
+function setGrind(g){
+  S.grind=g;
+  ['fine','medium','coarse'].forEach(s=>{const b=document.getElementById('gb_'+s);if(b)b.className='grind-btn'+(s===g?' active':'');});
+  const notes={fine:'k × 0.7 · faster extraction · more clarity',medium:'k × 1.0 · balanced',coarse:'k × 1.4 · slower · more body'};
+  document.getElementById('grindNote').textContent=notes[g];
   renderAll();
 }
-function onDilution(v) {
-  S.dilution = parseInt(v);
-  document.getElementById('dilValDisplay').innerHTML = S.dilution+'<span>g</span>';
-  renderFlavor();
-}
-function onX(v) {
-  const val = parseFloat(v);
-  if (!isNaN(val) && val > 0.5 && val < 3.0) S.X = val;
-  renderAll();
-}
-function setFlavor(idx) {
-  S.flavorIdx = idx;
-  S.dilution  = 0;
-  document.getElementById('dilSlider').value = 0;
-  document.getElementById('dilValDisplay').innerHTML = '0<span>g</span>';
-  FLAVOR_OPTS.forEach((_,i) => {
-    const btn = document.getElementById('fb'+i);
-    if (btn) btn.className = 'flavor-btn' + (i===idx?' active':'');
-  });
-  document.getElementById('flavorDesc').textContent = FLAVOR_OPTS[idx].desc;
-  renderAll();
-}
-function setGrind(g) {
-  S.grind = g;
-  ['fine','medium','coarse'].forEach(s => {
-    const btn = document.getElementById('g_'+s);
-    if (btn) btn.className = 'grind-btn' + (s===g?' active':'');
-  });
-  document.getElementById('grindNote').textContent = GRIND_NOTES[g];
-  renderAll();
-}
+function renderAll(){renderChart();renderRecipe();renderPours();renderTemp();renderC40();renderFlavor();}
+initFlavors();initGrind();renderAll();
 
-// ── Master render ─────────────────────────────────────────────────────────────
-function renderAll() {
-  renderChart();
-  renderRecipe();
-  renderPourSchedule();
-  renderFlavor();
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-initFlavorStrip();
-initGrindRow();
-renderAll();
 </script>
 </body>
 </html>
