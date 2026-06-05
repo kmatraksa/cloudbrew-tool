@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Basics · Cloudbrew Cheatsheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--s1:#0d1018;--s2:#12161f;--s3:#181e2b;
+  --border:#1c2235;--border2:#252d40;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#5a3e18;
+  --blue:#4d7cff;--blue-lt:#7ba4ff;
+  --green:#2ecc8f;--red:#e8534a;--amber:#f5a623;
+  --text:#dce8f8;--muted:#637a9f;--dim:#283550;
+  --mono:"JetBrains Mono",monospace;
+  --serif:"Fraunces",serif;
+  --sans:"Bai Jamjuree",sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,255,.018) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
+
+.page{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:24px 16px 80px}
+
+/* Header */
+.header{border-bottom:1px solid var(--border2);padding-bottom:16px;margin-bottom:28px}
+.header-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.header-title{font-family:var(--serif);font-weight:200;font-size:clamp(1.8rem,5vw,3rem);line-height:.95;letter-spacing:-.03em}
+.header-title em{font-style:italic;color:var(--gold)}
+.header-sub{font-size:13px;color:var(--muted);margin-top:8px;max-width:480px;line-height:1.6}
+
+/* Level badge */
+.level-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.25);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-top:10px}
+
+/* Section */
+.section{margin-bottom:28px}
+.sec-num{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--blue);letter-spacing:.15em}
+.sec-title{font-family:var(--serif);font-style:italic;font-weight:300;font-size:1.3rem;margin:0 8px}
+.sec-head{display:flex;align-items:center;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--border2),transparent);margin-left:10px}
+
+/* Cards */
+.card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:16px;position:relative}
+.card-accent{position:absolute;top:0;left:0;right:0;height:2px;border-radius:8px 8px 0 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+
+/* Concept cards — big visual simple */
+.concept{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.concept-emoji{font-size:32px;display:block;margin-bottom:8px}
+.concept-title{font-family:var(--serif);font-weight:300;font-size:1rem;margin-bottom:6px}
+.concept-body{font-size:12px;color:var(--muted);line-height:1.65}
+.concept-num{font-family:var(--mono);font-size:24px;font-weight:700;margin:6px 0;line-height:1}
+
+/* Step flow */
+.step-flow{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px}
+.step-title{font-weight:600;font-size:13px;margin-bottom:3px}
+.step-body{font-size:12px;color:var(--muted);line-height:1.6}
+.step-tip{display:inline-block;margin-top:5px;padding:3px 8px;border-radius:4px;font-family:var(--mono);font-size:9px}
+
+/* Analogy box */
+.analogy{background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:12px 14px;margin-top:10px}
+.analogy-label{font-family:var(--mono);font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px}
+.analogy-body{font-size:12px;color:var(--muted);line-height:1.65}
+
+/* Scale bar simple */
+.scale-wrap{margin:10px 0}
+.scale-bar{height:28px;border-radius:5px;overflow:hidden;display:flex}
+.scale-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700}
+.scale-labels{display:flex;justify-content:space-between;font-size:11px;margin-top:6px;color:var(--muted)}
+
+/* Compare table */
+.compare{width:100%;border-collapse:collapse;font-size:12px}
+.compare th{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--border2);text-align:left;background:var(--s1)}
+.compare td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.compare tr:last-child td{border-bottom:none}
+.tag{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:600}
+
+/* Mineral */
+.mineral-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mineral-card{padding:12px;border-radius:7px;border:1px solid var(--border);text-align:center}
+.mineral-sym{font-family:var(--serif);font-style:italic;font-size:1.8rem;font-weight:200;line-height:1;margin-bottom:4px}
+.mineral-role{font-size:11px;margin-bottom:6px}
+.mineral-desc{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.5}
+.mineral-note{font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:4px}
+
+/* Quick ref */
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.qr-cell{background:var(--s3);border-radius:5px;padding:10px;text-align:center}
+.qr-num{font-family:var(--serif);font-size:1.6rem;font-weight:200;line-height:1;margin-bottom:3px}
+.qr-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.qr-why{font-size:10px;color:var(--dim);margin-top:3px}
+
+/* Vocab */
+.vocab-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);align-items:baseline}
+.vocab-word{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold-lt);min-width:90px}
+.vocab-def{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* Print btn */
+.print-btn{position:fixed;bottom:20px;right:20px;background:var(--gold);color:#000;border:none;border-radius:100px;padding:10px 20px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;z-index:100;transition:all .2s}
+.print-btn:hover{background:var(--gold-lt)}
+
+/* Footer */
+.footer{border-top:1px solid var(--border);padding-top:12px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+
+@media(max-width:600px){
+  .grid2,.grid3,.mineral-grid{grid-template-columns:1fr}
+  .qr-grid{grid-template-columns:1fr 1fr}
+}
+@media print{
+  body{background:white;color:#111}
+  body::before{display:none}
+  .print-btn{display:none}
+  .card,.concept,.qr-cell,.step,.analogy{background:#f8f8f8;border-color:#ddd}
+  :root{--text:#111;--muted:#555;--dim:#999;--s1:#f0f0f0;--s2:#f8f8f8;--s3:#ebebeb;--border:#ddd}
+}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 Print / PDF</button>
+<div class="page">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-eyebrow">Cloudbrew Pour Over Lab · Workshop Notes</div>
+  <h1 class="header-title">เริ่มต้น<br>ชง<em>กาแฟ</em>ให้อร่อย</h1>
+  <p class="header-sub">สรุปสิ่งสำคัญจาก Mr. Happy Workshop — ทำความเข้าใจกาแฟทีละขั้น ไม่ต้องจำสูตรก็ได้ ขอแค่เข้าใจหลักการ</p>
+  <span class="level-badge">✦ สำหรับผู้เริ่มต้น</span>
+</div>
+
+<!-- ══ 1. กาแฟที่ดีคืออะไร ════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <span class="sec-title">กาแฟที่ดีหน้าตาเป็นยังไง</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="grid3" style="margin-bottom:12px">
+    <div class="concept" style="border-color:rgba(232,83,74,.3)">
+      <span class="concept-emoji">🍋</span>
+      <div class="concept-title">กรด (Acidity)</div>
+      <div class="concept-body">สดใส ชวนดื่ม เหมือนน้ำส้มสายชู แต่สะอาด ไม่ฝาด</div>
+    </div>
+    <div class="concept" style="border-color:rgba(46,204,143,.3)">
+      <span class="concept-emoji">🍯</span>
+      <div class="concept-title">หวาน (Sweetness)</div>
+      <div class="concept-body">น้ำตาลทราย น้ำผึ้ง ความกลมกล่อมที่อยู่หลังรสกรด</div>
+    </div>
+    <div class="concept" style="border-color:rgba(77,124,255,.3)">
+      <span class="concept-emoji">⚖️</span>
+      <div class="concept-title">สมดุล (Balance)</div>
+      <div class="concept-body">ไม่มีอะไรครอบงำ กรด หวาน Body อยู่ด้วยกันได้</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--gold-dim)">
+    <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--gold),transparent)"></div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.15em;margin-bottom:8px">สิ่งที่ judges ต้องการในปี 2026</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="tag" style="background:rgba(232,83,74,.12);color:#e8534a;border:1px solid rgba(232,83,74,.2)">Acidity ชัด</span>
+      <span class="tag" style="background:rgba(46,204,143,.12);color:var(--green);border:1px solid rgba(46,204,143,.2)">Sweetness มี</span>
+      <span class="tag" style="background:rgba(77,124,255,.12);color:var(--blue-lt);border:1px solid rgba(77,124,255,.2)">Balance ดี</span>
+      <span class="tag" style="background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border2)">Clean ไม่ขม/ฝาด</span>
+    </div>
+    <div class="analogy">
+      <div class="analogy-label">เปรียบเทียบ</div>
+      <div class="analogy-body">การแข่งชงกาแฟ = การสอบ · ไม่ใช่การแสดงว่าตัวเองชงเก่ง<br>แต่คือการ <strong style="color:var(--text)">ตอบในสิ่งที่ judge ต้องการ</strong> วันนั้น</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2. ตัวเลขสำคัญ 2 ตัว ════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <span class="sec-title">ตัวเลข 2 ตัวที่ต้องรู้</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="border-color:rgba(77,124,255,.3)">
+      <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--blue),transparent)"></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--blue-lt);letter-spacing:.15em;font-weight:700;margin-bottom:8px">TDS — ความเข้มข้น</div>
+      <div class="concept-num" style="color:var(--blue-lt)">1.15–1.45<span style="font-size:14px;color:var(--muted)">%</span></div>
+      <div style="font-size:12px;color:var(--muted);margin:6px 0">ปริมาณสารที่ละลายอยู่ในแก้ว</div>
+      <div class="analogy">
+        <div class="analogy-label">เปรียบเทียบ</div>
+        <div class="analogy-body">เหมือน "ความเค็มของซุป" — TDS สูง = เข้มข้น · TDS ต่ำ = จืด<br><strong style="color:var(--text)">วัดด้วย Refractometer</strong></div>
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(46,204,143,.3)">
+      <div class="card-accent" style="background:linear-gradient(to right,transparent,var(--green),transparent)"></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--green);letter-spacing:.15em;font-weight:700;margin-bottom:8px">EY — %สกัด</div>
+      <div class="concept-num" style="color:var(--green)">18–22<span style="font-size:14px;color:var(--muted)">%</span></div>
+      <div style="font-size:12px;color:var(--muted);margin:6px 0">กาแฟถูกดึงรสออกมาเท่าไหร่</div>
+      <div class="analogy">
+        <div class="analogy-label">เปรียบเทียบ</div>
+        <div class="analogy-body">
+          <strong style="color:var(--text)">เหมือนชงชา:</strong><br>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0;font-size:11px">
+            <div style="padding:8px;border-radius:5px;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.2);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">🫖</div>
+              <div style="color:var(--amber);font-weight:600;margin-bottom:3px">แช่แค่ 30 วิ</div>
+              <div style="color:var(--muted)">จืด · ไม่มีรส<br>ส่วนหวานยังไม่ออก</div>
+            </div>
+            <div style="padding:8px;border-radius:5px;background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.25);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">✨</div>
+              <div style="color:var(--green);font-weight:600;margin-bottom:3px">แช่พอดี</div>
+              <div style="color:var(--muted)">หอม หวาน<br>กลมกล่อม</div>
+            </div>
+            <div style="padding:8px;border-radius:5px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);text-align:center">
+              <div style="font-size:16px;margin-bottom:3px">😬</div>
+              <div style="color:#f87171;font-weight:600;margin-bottom:3px">แช่นานเกิน</div>
+              <div style="color:var(--muted)">ขม · Astringent<br>แห้งปาก · ฝาด</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.65;padding:8px;background:var(--s1);border-radius:4px">
+            กาแฟก็เหมือนกัน — รสออกตามลำดับ: <span style="color:#e8534a">กรด</span> → <span style="color:var(--green)">หวาน</span> → <span style="color:var(--blue-lt)">Body</span> → <span style="color:#f87171">ขม</span><br>
+            ถ้าสกัดน้อย = ดึงได้แค่กรด ส่วนหวาน<strong style="color:var(--text)">ยังไม่ออกมา</strong> → เลยเปรี้ยวไม่สมดุล<br>
+            ถ้าสกัดมากเกิน = ดึงถึงส่วนขม/ฝาดที่ไม่ต้องการ
+          </div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--gold-lt);font-weight:700">เป้าหมาย: ~19% (Happy Workshop 2025)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EY Zone bar visual -->
+  <div class="card" style="margin-top:12px">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.1em;margin-bottom:10px">%สกัด บอกอะไร?</div>
+    <div class="scale-bar">
+      <div class="scale-seg" style="width:26%;background:rgba(245,166,35,.2);color:var(--amber)">สกัดน้อยเกิน</div>
+      <div class="scale-seg" style="width:26%;background:rgba(46,204,143,.2);color:var(--green);border-left:2px solid rgba(46,204,143,.5)">✓ Perfect</div>
+      <div class="scale-seg" style="width:26%;background:rgba(245,166,35,.12);color:var(--amber);border-left:2px solid rgba(245,166,35,.4)">ระวัง</div>
+      <div class="scale-seg" style="width:22%;background:rgba(232,83,74,.15);color:#e8534a;border-left:2px solid rgba(232,83,74,.4)">สกัดมากเกิน</div>
+    </div>
+    <div class="scale-labels">
+      <span>14%</span>
+      <span style="color:var(--amber)">18%</span>
+      <span style="color:var(--green)">19%</span>
+      <span style="color:var(--amber)">21%</span>
+      <span>26%</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;font-size:11px">
+      <div style="text-align:center;color:var(--amber)">กรดเด่น ขาดหวาน<br>Bright แต่ไม่สมดุล</div>
+      <div style="text-align:center;color:var(--green)">กรด + หวาน<br>สมดุล</div>
+      <div style="text-align:center;color:var(--amber)">เริ่มฝาด<br>ระวัง</div>
+      <div style="text-align:center;color:#e8534a">ขม ฝาด<br>แห้ง</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 3. เหตุผลที่กาแฟขม/ฝาด ═══════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <span class="sec-title">ทำไมกาแฟถึงขม/ฝาด</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:700;margin-bottom:10px">รสออกตามลำดับ</div>
+      <div class="step-flow">
+        <div class="step">
+          <div class="step-circle" style="background:rgba(232,83,74,.15);color:#e8534a">1</div>
+          <div><div class="step-title">กรด + กลิ่น 🍋</div><div class="step-body">ออกก่อน · ละลายง่าย · ให้ความ Bright · Aromatic</div></div>
+        </div>
+        <div class="step">
+          <div class="step-circle" style="background:rgba(46,204,143,.15);color:var(--green)">2</div>
+          <div><div class="step-title">หวาน + Maillard 🍯</div><div class="step-body">ตามมา · caramel · brown sugar</div></div>
+        </div>
+        <div class="step">
+          <div class="step-circle" style="background:rgba(77,124,255,.15);color:var(--blue-lt)">3</div>
+          <div><div class="step-title">Body</div><div class="step-body">ความรู้สึกหนัก/เบาในปาก · Texture · Mouthfeel<br><span style="font-size:10px;color:var(--dim)">Body มาก = "เข้มข้น ใหญ่ หนัก" · Body น้อย = "บาง เบา สะอาด"</span></div></div>
+        </div>
+        <div class="step">
+          <div class="step-circle" style="background:rgba(248,113,113,.15);color:#f87171">⚠</div>
+          <div><div class="step-title">ขม + ฝาด 😬</div><div class="step-body">ออกช้าสุด · ถ้าสกัดนานเกิน → ขมสะสม<br><span class="step-tip" style="background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2)">ตัดน้ำหางก่อนถึงตรงนี้!</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;font-weight:700;margin-bottom:10px">Tail Cut — ตัดหางกาแฟ</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px">น้ำหางที่ไหลออกช่วงท้ายมีสาร<strong style="color:#f87171">ขม/ฝาด</strong>เข้มข้น — ถ้าปล่อยลงแก้วหมดจะทำให้ทั้งแก้วเสีย</div>
+
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.08em;margin-bottom:8px">วัด TDS น้ำหาง → ตัดสินใจ</div>
+      <table class="compare">
+        <tr>
+          <th>TDS น้ำหาง</th><th>ทำอะไร</th>
+        </tr>
+        <tr>
+          <td><span class="tag" style="background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.2)">&gt; 0.8%</span></td>
+          <td style="color:#f87171;font-weight:600">ยกออกทันที ✂</td>
+        </tr>
+        <tr>
+          <td><span class="tag" style="background:rgba(245,166,35,.1);color:#f5a623;border:1px solid rgba(245,166,35,.2)">0.4–0.8%</span></td>
+          <td style="color:#f5a623">ตัดถ้าแข่ง</td>
+        </tr>
+        <tr>
+          <td><span class="tag" style="background:rgba(46,204,143,.1);color:var(--green);border:1px solid rgba(46,204,143,.2)">&lt; 0.4%</span></td>
+          <td style="color:var(--green)">ไม่เป็นไร</td>
+        </tr>
+      </table>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:8px">📖 Batali et al. (2020) · UC Davis</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 4. น้ำ ════════════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <span class="sec-title">น้ำก็สำคัญมาก</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="mineral-grid">
+    <div class="mineral-card" style="border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.04)">
+      <div class="mineral-sym" style="color:#06b6d4">Mg</div>
+      <div style="font-family:var(--mono);font-size:8px;color:#06b6d4;font-weight:700;letter-spacing:.1em;margin-bottom:6px">MAGNESIUM</div>
+      <div class="mineral-role">ความสดใส กรดชัด</div>
+      <div class="mineral-desc">ช่วยดึงรสออกมามากกว่า Ca<br>ทำให้กาแฟ "bright"</div>
+      <div class="mineral-note" style="color:rgba(6,182,212,.5)">เป้า: 35–50 ppm</div>
+    </div>
+    <div class="mineral-card" style="border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04)">
+      <div class="mineral-sym" style="color:var(--amber)">Ca</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:6px">CALCIUM</div>
+      <div class="mineral-role">Body + Mouthfeel</div>
+      <div class="mineral-desc">เพิ่ม Body และ Mouthfeel<br>กาแฟรู้สึก "หนักขึ้น" ในปาก</div>
+      <div class="mineral-note" style="color:rgba(245,158,11,.5)">เป้า: 15–25 ppm</div>
+    </div>
+    <div class="mineral-card" style="border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.04)">
+      <div class="mineral-sym" style="color:var(--green)">HCO₃</div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--green);font-weight:700;letter-spacing:.1em;margin-bottom:6px">BICARBONATE</div>
+      <div class="mineral-role">ลดความเปรี้ยว</div>
+      <div class="mineral-desc">เป็น buffer ของกรด<br>เยอะเกิน → กาแฟจืดชืด</div>
+      <div class="mineral-note" style="color:rgba(52,211,153,.5)">เป้า: 15–25 ppm KH</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;padding:9px 12px;border-radius:5px;background:var(--s2);border:1px solid var(--border2);font-family:var(--mono);font-size:9px;color:var(--muted)">
+    ⓘ ทิศทางยืนยันจาก Hendon et al. (2014) · ตัวเลข % เฉพาะเป็น estimate ไม่ใช่ค่า peer-reviewed · เป้า GH:KH = 3:1
+  </div>
+</div>
+
+<!-- ══ 5. เทน้ำหลายรอบดีกว่า ═══════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <span class="sec-title">ทำไมเทหลายรอบดีกว่ารอบเดียว</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="card">
+    <div class="analogy" style="margin-bottom:12px">
+      <div class="analogy-label">เปรียบเทียบ</div>
+      <div class="analogy-body">เหมือนล้างจาน — ล้างด้วยน้ำสกปรกที่อิ่มตัวแล้วไม่สะอาดเท่าเปลี่ยนน้ำใหม่ · น้ำสะอาดสกัดได้ดีกว่าน้ำที่อิ่มตัวแล้วเสมอ</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px">
+      <div style="background:var(--s3);padding:12px;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">เท 1 ครั้ง 300g</div>
+        <div style="font-family:var(--serif);font-size:1.6rem;font-weight:200;color:var(--muted)">1.875<span style="font-size:12px">%</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:3px">TDS blend</div>
+      </div>
+      <div style="background:var(--s2);padding:12px;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:6px">เท 2 ครั้ง 170+130g</div>
+        <div style="font-family:var(--serif);font-size:1.6rem;font-weight:200;color:var(--green)">1.97<span style="font-size:12px">%</span></div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-top:3px;opacity:.7">TDS สูงกว่า ↑</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7">
+      Pour schedule แนะนำ: <strong style="color:var(--gold-lt)">เยอะต้น → น้อยท้าย</strong><br>
+      เช่น 120g / 100g / 80g ดีกว่า 100g / 100g / 100g<br>
+      <span style="color:var(--dim)">Bloom ก่อนเสมอ — ใช้น้ำ 2× dose เพื่อปล่อย CO₂</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 6. Grind Size ════════════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <span class="sec-title">Grind Size ส่งผลอะไร</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="card">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+      <div style="padding:12px;border-radius:6px;border:1px solid rgba(232,83,74,.3);background:rgba(232,83,74,.05);text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🔴</div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px">บดละเอียด</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5">สกัดเร็ว · TDS สูง · Clarity ดี (รสชัดเจน)<br><span style="color:#e8534a">ระวังขมถ้าไม่ตัดหาง</span></div>
+      </div>
+      <div style="padding:12px;border-radius:6px;border:1px solid var(--gold-dim);background:rgba(201,148,58,.05);text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🟡</div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px">บดกลาง</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5">สมดุล · เหมาะสำหรับ V60<br><span style="color:var(--gold-lt)">Starting point ที่ดี</span></div>
+      </div>
+      <div style="padding:12px;border-radius:6px;border:1px solid rgba(77,124,255,.3);background:rgba(77,124,255,.05);text-align:center">
+        <div style="font-size:20px;margin-bottom:4px">🔵</div>
+        <div style="font-weight:600;font-size:12px;margin-bottom:4px">บดหยาบ</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.5">สกัดช้า · Body มาก<br><span style="color:var(--blue-lt)">ระวัง under-extract</span></div>
+      </div>
+    </div>
+    <div class="analogy">
+      <div class="analogy-label">เปรียบเทียบ</div>
+      <div class="analogy-body">เหมือน "ขนาดก้อนน้ำตาล" — บดละเอียด = น้ำตาลทราย ละลายเร็ว · บดหยาบ = น้ำตาลก้อน ละลายช้า · พื้นที่สัมผัสมากกว่า = ละลายเร็วกว่า</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 7. ชิมที่อุณหภูมิต่างกัน ════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <span class="sec-title">ชิมที่อุณหภูมิต่างกัน ได้รสต่างกัน</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <div style="padding:14px;border-radius:7px;border:1px solid rgba(232,83,74,.3);background:rgba(232,83,74,.05);text-align:center">
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:#e8534a;line-height:1;margin-bottom:6px">65°C</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:5px">กลิ่น</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">Swirl แก้วก่อนจิบ<br>ดมกลิ่นดอกไม้ ผลไม้<br>กลิ่นจะหายไปเร็ว</div>
+    </div>
+    <div style="padding:14px;border-radius:7px;border:1px solid rgba(201,148,58,.35);background:rgba(201,148,58,.05);text-align:center">
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--gold);line-height:1;margin-bottom:6px">50°C</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:5px">รสชาติ</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">จิบแรก สำคัญที่สุด<br>กรด + หวาน ชัดเจน<br>ประเมิน balance</div>
+    </div>
+    <div style="padding:14px;border-radius:7px;border:1px solid rgba(77,124,255,.3);background:rgba(77,124,255,.05);text-align:center">
+      <div style="font-family:var(--mono);font-size:22px;font-weight:700;color:var(--blue-lt);line-height:1;margin-bottom:6px">&lt;45°C</div>
+      <div style="font-size:12px;font-weight:600;margin-bottom:5px">ความรู้สึก</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.5">ตอนเย็นแล้ว<br>Body · Mouthfeel · Finish<br>หวานตาม · Aftertaste</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;padding:9px 12px;border-radius:5px;background:var(--s2);border:1px solid var(--border2);font-size:12px;color:var(--muted)">
+    💡 ถ้ากาแฟอร่อยตอนร้อนแต่ไม่อร่อยตอนเย็น → มักมีความขมซ่อนอยู่ · ลองลด EY หรือตัดหางเร็วขึ้น
+  </div>
+</div>
+
+<!-- ══ 8. Quick Reference ════════════════════════════════ -->
+<div class="section">
+  <div class="sec-head">
+    <span class="sec-num">08</span>
+    <span class="sec-title">ตัวเลขจำเอาไว้</span>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="qr-grid" style="margin-bottom:12px">
+    <div class="qr-cell">
+      <div class="qr-num" style="color:var(--gold-lt)">1.40<span style="font-size:12px">%</span></div>
+      <div class="qr-lbl">Target TDS</div>
+      <div class="qr-why">ความเข้มข้นที่อยากได้</div>
+    </div>
+    <div class="qr-cell">
+      <div class="qr-num" style="color:var(--green)">19<span style="font-size:12px">%</span></div>
+      <div class="qr-lbl">Target EY</div>
+      <div class="qr-why">%สกัดเป้าหมาย (Happy)</div>
+    </div>
+    <div class="qr-cell">
+      <div class="qr-num" style="color:#e8534a">0.8<span style="font-size:12px">%</span></div>
+      <div class="qr-lbl">Tail Cut TDS</div>
+      <div class="qr-why">ถ้าน้ำหางเกินนี้ ตัดเลย</div>
+    </div>
+    <div class="qr-cell">
+      <div class="qr-num" style="color:var(--blue-lt)">1.47<span style="font-size:12px">g/g</span></div>
+      <div class="qr-lbl">Absorption X</div>
+      <div class="qr-why">กาแฟ 1g ดูดน้ำ 1.47g</div>
+    </div>
+    <div class="qr-cell">
+      <div class="qr-num" style="color:var(--text)">1:15</div>
+      <div class="qr-lbl">Brew Ratio</div>
+      <div class="qr-why">น้ำ 15× ของกาแฟ</div>
+    </div>
+    <div class="qr-cell">
+      <div class="qr-num" style="color:var(--text)">2×</div>
+      <div class="qr-lbl">Bloom Water</div>
+      <div class="qr-why">น้ำ bloom = 2× dose</div>
+    </div>
+  </div>
+
+  <!-- Vocab -->
+  <div class="card">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:700;letter-spacing:.1em;margin-bottom:10px">คำศัพท์ที่ได้ยินบ่อย</div>
+    <div class="vocab-row">
+      <span class="vocab-word">TDS</span>
+      <span class="vocab-def">ความเข้มข้นของสารในแก้ว — วัดด้วย refractometer</span>
+    </div>
+    <div class="vocab-row">
+      <span class="vocab-word">EY / %สกัด</span>
+      <span class="vocab-def">กาแฟถูกดึงรสออกมาเท่าไหร่จากทั้งหมด</span>
+    </div>
+    <div class="vocab-row">
+      <span class="vocab-word">Brew Ratio</span>
+      <span class="vocab-def">อัตราส่วนน้ำ:กาแฟ เช่น 1:15 = กาแฟ 15g ต่อน้ำ 225g</span>
+    </div>
+    <div class="vocab-row">
+      <span class="vocab-word">Body</span>
+      <span class="vocab-def">ความรู้สึกหนัก/เบาของกาแฟในปาก — เหมือนเปรียบ นม vs น้ำเปล่า · ไม่ใช่รส แต่เป็น Texture/Mouthfeel</span>
+    </div>
+    <div class="vocab-row">
+      <span class="vocab-word">Bloom</span>
+      <span class="vocab-def">เทน้ำรอบแรก เพื่อให้ CO₂ ออก กาแฟ roast ใหม่จะฟูมาก</span>
+    </div>
+    <div class="vocab-row">
+      <span class="vocab-word">Tail Cut</span>
+      <span class="vocab-def">ยก dripper ออกก่อนน้ำหางสกปรกลงแก้ว</span>
+    </div>
+    <div class="vocab-row" style="border-bottom:none">
+      <span class="vocab-word">Retention</span>
+      <span class="vocab-def">น้ำที่กาแฟดูดซับไว้ ไม่ไหลออกมา</span>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>Cloudbrew Pour Over Lab · Bangkok · <em style="font-style:normal;color:var(--gold-dim)">ordinary is specialty</em></span>
+  <span>Sources: Lockhart 1957 · Batali 2020 · Hendon 2014 · Happy Workshop 2025</span>
+  <span>kmatraksa.github.io/cloudbrew-tool</span>
+</div>
+
+</div>
+</body>
+</html>
