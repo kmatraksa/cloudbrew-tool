@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brew Log · Cloudbrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600&family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--s1:#0c0e18;--s2:#11141f;--s3:#161a28;
+  --border:#1c2235;--border2:#252e46;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#5a3e18;
+  --blue:#4d7cff;--blue-lt:#7ba4ff;
+  --green:#2ecc8f;--red:#e8534a;--amber:#f5a623;--violet:#9b7fe8;
+  --text:#dce8f8;--muted:#637a9f;--dim:#283550;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;--sans:'Bai Jamjuree',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;line-height:1.5}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,255,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:20px 14px 80px}
+.back-link{font-family:var(--mono);font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;gap:5px;margin-bottom:16px}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:200;font-size:clamp(2rem,6vw,3.2rem);letter-spacing:-.03em;line-height:.95}
+h1 em{font-style:italic;font-weight:300;color:var(--gold)}
+.label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.section{margin-bottom:14px}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.card-head{display:flex;align-items:center;gap:8px;padding:13px 16px;cursor:pointer;user-select:none;transition:background .2s}
+.card-head:hover{background:var(--s3)}
+.card-head .num{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.1em}
+.card-head .title{font-family:var(--serif);font-style:italic;font-weight:300;font-size:1.05rem;flex:1}
+.card-head .chev{font-family:var(--mono);font-size:12px;color:var(--muted);transition:transform .25s}
+.card-head.collapsed .chev{transform:rotate(-90deg)}
+.card-body{padding:0 16px 16px;animation:fade .25s ease}
+.card-body.hidden{display:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.fld{margin-bottom:12px}
+.fld-label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+input,select,textarea{width:100%;background:var(--s1);border:1px solid var(--border2);color:var(--text);border-radius:5px;padding:8px 10px;font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s}
+input:focus,select,textarea:focus{border-color:var(--gold)}
+input[type=number]{font-family:var(--mono);-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+@media(max-width:640px){input,select,textarea{font-size:16px}}
+textarea{resize:vertical;min-height:60px;line-height:1.5}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23637a9f' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 11px;border-radius:100px;border:1px solid var(--border2);background:var(--s1);font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.chip:active{opacity:.7}
+.chip.on{background:rgba(201,148,58,.12);border-color:var(--gold);color:var(--gold-lt)}
+.pour-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.pour-table th{font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:5px 4px;border-bottom:1px solid var(--border2);text-align:center;font-weight:500}
+.pour-table td{padding:3px;border-bottom:1px solid var(--border)}
+.pour-table input{padding:6px 4px;text-align:center;font-size:12px;border-radius:4px}
+.pour-table .pnum{text-align:center;color:var(--gold-lt);font-weight:700;font-size:11px}
+.pour-table .calc{text-align:center;color:var(--blue-lt);font-size:10px}
+.pour-table .del-btn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;width:auto}
+.pour-table .del-btn:hover{color:var(--red)}
+.mini-btn{background:var(--s1);border:1px solid var(--border2);color:var(--muted);border-radius:5px;padding:7px 13px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .2s;width:auto;-webkit-tap-highlight-color:transparent}
+.mini-btn:hover{border-color:var(--gold);color:var(--gold-lt)}
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
+.res-cell{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px 8px;text-align:center}
+.res-val{font-family:var(--mono);font-size:16px;font-weight:700;line-height:1}
+.res-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
+.slider-row{margin-bottom:11px}
+.slider-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.slider-name{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:capitalize}
+.slider-val{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold-lt)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--border2);border-radius:2px;padding:0;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);cursor:pointer}
+.save-bar{position:sticky;bottom:0;z-index:20;background:linear-gradient(to top,var(--bg) 60%,transparent);padding:14px 0 6px;margin-top:8px;display:flex;gap:8px}
+.btn-primary{flex:1;background:var(--gold);color:#000;border:none;border-radius:7px;padding:13px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.btn-primary:active{background:var(--gold-lt)}
+.btn-ghost{background:var(--s2);border:1px solid var(--border2);color:var(--muted);border-radius:7px;padding:13px 16px;font-family:var(--mono);font-size:11px;cursor:pointer;width:auto}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-lt)}
+.log-entry{background:var(--s2);border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.log-head{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer}
+.log-head:hover{background:var(--s3)}
+.log-bean{flex:1}
+.log-bean-name{font-family:var(--serif);font-style:italic;font-size:1.05rem;line-height:1.1}
+.log-bean-meta{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px}
+.log-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.log-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;font-weight:600}
+.log-detail{padding:0 15px 15px;border-top:1px solid var(--border);animation:fade .25s}
+.log-detail.hidden{display:none}
+.detail-section{margin-top:12px}
+.detail-section-label{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.detail-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px}
+.detail-row .k{color:var(--muted)}
+.detail-row .v{color:var(--text)}
+.stars{display:inline-flex;gap:1px}
+.star{cursor:pointer;font-size:16px;color:var(--dim);transition:color .15s}
+.star.on{color:var(--gold)}
+.empty{text-align:center;padding:40px 20px;font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.8}
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:8px;margin-bottom:16px}
+.stat{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:10px 6px;text-align:center}
+.stat-val{font-family:var(--serif);font-size:1.5rem;font-weight:200;line-height:1;color:var(--gold-lt)}
+.stat-lbl{font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin-top:4px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:100px;font-family:var(--mono);font-size:11px;font-weight:700;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.divider{height:1px;background:var(--border);margin:24px 0 18px}
+@media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr}.pour-table{font-size:10px}.pour-table th{font-size:7px}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="index.html" class="back-link">← Back</a>
+<div class="eyebrow" style="margin-bottom:10px">Cloudbrew · Competition Brew Log</div>
+<h1>Brew <em>Log</em></h1>
+<p style="font-family:var(--mono);font-size:11px;color:var(--muted);max-width:540px;line-height:1.7;margin:10px 0 20px">บันทึกทุกรายละเอียด — bean profile · per-pour drawdown + flow rate · temperature · sensory · auto-calc EY/X_actual · export CSV/JSON</p>
+
+<!-- Stats -->
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- New brew form -->
+<div class="section">
+  <div class="label" style="margin-bottom:10px">＋ New Brew Entry</div>
+
+  <!-- ① Coffee -->
+  <div class="card section">
+    <div class="card-head" onclick="toggleCard(this)"><span class="num">①</span><span class="title">Coffee / Bean Profile</span><span class="chev">▾</span></div>
+    <div class="card-body">
+      <div class="fld"><label class="fld-label">Bean Name / Lot</label><input id="f_beanName" placeholder="เช่น Ethiopia Bildimoo Natural"></div>
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Origin / Region</label><input id="f_origin" placeholder="Ethiopia · Sidamo"></div>
+        <div class="fld"><label class="fld-label">Producer / Farm</label><input id="f_producer" placeholder="Bildimoo Village"></div>
+      </div>
+      <div class="grid3">
+        <div class="fld"><label class="fld-label">Process</label>
+          <select id="f_process"><option value="">—</option><option>Washed</option><option>Natural</option><option>Honey</option><option>Anaerobic</option><option>Carbonic Maceration</option><option>Wet Hulled</option><option>Experimental</option></select>
+        </div>
+        <div class="fld"><label class="fld-label">Variety</label><input id="f_variety" placeholder="Heirloom"></div>
+        <div class="fld"><label class="fld-label">Roast Level</label>
+          <select id="f_roastLevel"><option value="">—</option><option>Light</option><option>Light-Medium</option><option>Medium</option><option>Medium-Dark</option><option>Dark</option><option>Agtron 95+</option><option>Agtron 85-95</option><option>Agtron 75-85</option></select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Roast Date</label><input type="date" id="f_roastDate" onchange="updateDaysOff()"></div>
+        <div class="fld"><label class="fld-label">Days Off Roast</label><input id="f_daysOff" readonly placeholder="auto" style="color:var(--blue-lt)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② Equipment -->
+  <div class="card section">
+    <div class="card-head collapsed" onclick="toggleCard(this)"><span class="num">②</span><span class="title">Equipment & Water</span><span class="chev">▾</span></div>
+    <div class="card-body hidden">
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Dripper</label>
+          <select id="f_dripper"><option value="">—</option><option>Orea V4 Wide</option><option>Orea V4 Narrow</option><option>Orea Z1</option><option>Hario V60 02</option><option>Hario V60 01</option><option>Kalita Wave 185</option><option>Kalita Wave 155</option><option>Origami</option><option>Solo / Flower</option><option>April</option><option>Other</option></select>
+        </div>
+        <div class="fld"><label class="fld-label">Filter</label><input id="f_filter" placeholder="Cafec Abaca / Sibarist"></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Grinder</label>
+          <select id="f_grinder"><option value="">—</option><option>Comandante C40 MK4</option><option>Comandante C40 MK3</option><option>Zentis NZR-64V</option><option>1Zpresso ZP6</option><option>1Zpresso K-Ultra</option><option>Fellow Ode Gen2</option><option>Niche Zero</option><option>EK43</option><option>Other</option></select>
+        </div>
+        <div class="fld"><label class="fld-label">Grind Setting (clicks/scale)</label><input id="f_grindSetting" placeholder="28 clicks"></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Water Recipe</label><input id="f_water" placeholder="TWW / Mg 40 Ca 15 KH 20"></div>
+        <div class="fld"><label class="fld-label">Water TDS (ppm)</label><input type="number" id="f_waterTDS" placeholder="40"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ Recipe + Pours -->
+  <div class="card section">
+    <div class="card-head" onclick="toggleCard(this)"><span class="num">③</span><span class="title">Recipe & Per-Pour Detail</span><span class="chev">▾</span></div>
+    <div class="card-body">
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Dose (g)</label><input type="number" id="f_dose" value="15" step="0.1" oninput="recalc()"></div>
+        <div class="fld"><label class="fld-label">Target Temp Base (°C)</label><input type="number" id="f_baseTemp" value="93" oninput="prefillTemp()"></div>
+      </div>
+      <label class="fld-label" style="margin-bottom:6px">Pours — water · temp · timing · drawdown <span style="color:var(--dim)">(flow rate auto)</span></label>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table class="pour-table" id="pourTable">
+          <thead><tr>
+            <th>#</th><th>Water g</th><th>Cum</th><th>°C</th><th>Start</th><th>Clear</th><th>Dur</th><th>g/s</th><th>TDS</th><th></th>
+          </tr></thead>
+          <tbody id="pourBody"></tbody>
+        </table>
+      </div>
+      <button class="mini-btn" style="margin-top:10px" onclick="addPour()">＋ Add Pour</button>
+    </div>
+  </div>
+
+  <!-- ④ Results -->
+  <div class="card section">
+    <div class="card-head" onclick="toggleCard(this)"><span class="num">④</span><span class="title">Results</span><span class="chev">▾</span></div>
+    <div class="card-body">
+      <div class="grid2" style="margin-bottom:12px">
+        <div class="fld"><label class="fld-label">Final Yield Out (g)</label><input type="number" id="f_yield" placeholder="190" step="0.1" oninput="recalc()"></div>
+        <div class="fld"><label class="fld-label">Final TDS (%)</label><input type="number" id="f_finalTDS" placeholder="1.40" step="0.01" oninput="recalc()"></div>
+      </div>
+      <div class="fld"><label class="fld-label">Total Brew Time</label><input id="f_brewTime" placeholder="3:15"></div>
+      <div class="results-grid">
+        <div class="res-cell"><div class="res-val" id="r_water" style="color:var(--blue-lt)">—</div><div class="res-lbl">Total Water</div></div>
+        <div class="res-cell"><div class="res-val" id="r_ratio" style="color:var(--gold-lt)">—</div><div class="res-lbl">Ratio</div></div>
+        <div class="res-cell"><div class="res-val" id="r_ey" style="color:var(--green)">—</div><div class="res-lbl">EY %</div></div>
+        <div class="res-cell"><div class="res-val" id="r_x" style="color:var(--muted)">—</div><div class="res-lbl">X actual</div></div>
+        <div class="res-cell"><div class="res-val" id="r_avgflow" style="color:var(--violet)">—</div><div class="res-lbl">Avg Flow</div></div>
+      </div>
+      <div id="eyNote" style="font-family:var(--mono);font-size:9px;margin-top:8px;line-height:1.5"></div>
+    </div>
+  </div>
+
+  <!-- ⑤ Sensory -->
+  <div class="card section">
+    <div class="card-head collapsed" onclick="toggleCard(this)"><span class="num">⑤</span><span class="title">Sensory Evaluation</span><span class="chev">▾</span></div>
+    <div class="card-body hidden">
+      <div id="sensorySliders"></div>
+      <div class="fld" style="margin-top:8px"><label class="fld-label">Flavor Descriptors</label>
+        <div class="chips" id="flavorChips"></div>
+      </div>
+      <div class="fld" style="margin-top:12px"><label class="fld-label">Tasting Notes</label><textarea id="f_tasting" placeholder="กลิ่นดอกไม้ชัด · กรด citric · body กลาง · finish หวานยาว..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- ⑥ Meta -->
+  <div class="card section">
+    <div class="card-head collapsed" onclick="toggleCard(this)"><span class="num">⑥</span><span class="title">Session Meta</span><span class="chev">▾</span></div>
+    <div class="card-body hidden">
+      <div class="grid2">
+        <div class="fld"><label class="fld-label">Purpose</label>
+          <select id="f_purpose"><option value="">—</option><option>Dialing In</option><option>Practice</option><option>Competition Prep</option><option>Competition</option><option>QC / Cupping</option><option>Casual</option></select>
+        </div>
+        <div class="fld"><label class="fld-label">Overall Rating</label>
+          <div class="stars" id="starRating"></div>
+        </div>
+      </div>
+      <div class="fld"><label class="fld-label">General Notes</label><textarea id="f_notes" placeholder="สิ่งที่จะปรับครั้งหน้า..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Save bar -->
+  <div class="save-bar">
+    <button class="btn-primary" id="saveBtn" onclick="saveBrew()">Save Brew</button>
+    <button class="btn-ghost" onclick="resetForm()">Clear</button>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- History -->
+<div class="section">
+  <div class="toolbar">
+    <div class="label" style="flex:1;align-self:center">Brew History (<span id="logCount">0</span>)</div>
+    <button class="mini-btn" onclick="exportCSV()">⬇ CSV</button>
+    <button class="mini-btn" onclick="exportJSON()">⬇ JSON</button>
+    <button class="mini-btn" onclick="clearAll()" style="border-color:rgba(232,83,74,.3);color:var(--red)">Clear All</button>
+  </div>
+  <div id="logList"></div>
+</div>
+
+<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:30px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px">
+  <span>Cloudbrew Pour Over Lab · Bangkok</span>
+  <span>Data stored locally in browser · export to backup</span>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_KEY='cloudbrew_brewlog_v2';
+const SENSORY=['Fragrance/Aroma','Flavor','Acidity','Sweetness','Body','Aftertaste','Balance','Overall'];
+const FLAVORS=['Floral','Fruity','Berry','Citrus','Stone Fruit','Tropical','Chocolate','Caramel','Nutty','Honey','Tea-like','Winey','Spice','Herbal','Clean','Juicy','Complex','Creamy'];
+let pours=[];
+let sensoryVals={};
+let selectedFlavors=new Set();
+let starVal=0;
+let editingId=null;
+
+// ── Helpers ──
+function parseTime(t){if(!t)return null;const p=String(t).trim().split(':');if(p.length===2)return parseInt(p[0]||0)*60+parseFloat(p[1]||0);const n=parseFloat(t);return isNaN(n)?null:n;}
+function fmtDur(s){if(s==null||isNaN(s)||s<0)return '—';const m=Math.floor(s/60),sec=Math.round(s%60);return m+':'+String(sec).padStart(2,'0');}
+function num(id){const v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
+function val(id){return document.getElementById(id).value.trim();}
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+// ── Card toggle ──
+function toggleCard(head){head.classList.toggle('collapsed');head.nextElementSibling.classList.toggle('hidden');}
+
+// ── Days off roast ──
+function updateDaysOff(){
+  const rd=val('f_roastDate');if(!rd){document.getElementById('f_daysOff').value='';return;}
+  const days=Math.floor((Date.now()-new Date(rd).getTime())/86400000);
+  document.getElementById('f_daysOff').value=days>=0?days+' days':'—';
+}
+
+// ── Pours ──
+function addPour(water,temp,start,clear,tds){
+  const i=pours.length;
+  pours.push({water:water||'',temp:temp!==undefined?temp:(num('f_baseTemp')||93),start:start||'',clear:clear||'',tds:tds||''});
+  renderPours();
+}
+function delPour(i){pours.splice(i,1);renderPours();recalc();}
+function renderPours(){
+  const tb=document.getElementById('pourBody');
+  let cum=0;
+  tb.innerHTML=pours.map((p,i)=>{
+    const w=parseFloat(p.water)||0;cum+=w;
+    const dur=(parseTime(p.start)!=null&&parseTime(p.clear)!=null)?parseTime(p.clear)-parseTime(p.start):null;
+    const flow=(dur&&dur>0&&w)?(w/dur).toFixed(1):'—';
+    const nm=i===0?'B':i+1;
+    return '<tr>'+
+      '<td class="pnum">'+nm+'</td>'+
+      '<td><input type="number" value="'+p.water+'" step="1" oninput="updPour('+i+',\'water\',this.value)" style="width:46px"></td>'+
+      '<td class="calc">'+(cum||'—')+'</td>'+
+      '<td><input type="number" value="'+p.temp+'" oninput="updPour('+i+',\'temp\',this.value)" style="width:42px"></td>'+
+      '<td><input value="'+p.start+'" placeholder="0:00" oninput="updPour('+i+',\'start\',this.value)" style="width:44px"></td>'+
+      '<td><input value="'+p.clear+'" placeholder="0:40" oninput="updPour('+i+',\'clear\',this.value)" style="width:44px"></td>'+
+      '<td class="calc">'+fmtDur(dur)+'</td>'+
+      '<td class="calc">'+flow+'</td>'+
+      '<td><input type="number" value="'+p.tds+'" step="0.01" placeholder="—" oninput="updPour('+i+',\'tds\',this.value)" style="width:46px"></td>'+
+      '<td><button class="del-btn" onclick="delPour('+i+')">×</button></td>'+
+    '</tr>';
+  }).join('');
+  recalc();
+}
+function updPour(i,k,v){pours[i][k]=v;if(k==='water'||k==='start'||k==='clear')renderPours();}
+function prefillTemp(){const t=num('f_baseTemp')||93;pours.forEach(p=>{if(!p.temp)p.temp=t;});renderPours();}
+
+// ── Recalc results ──
+function recalc(){
+  const dose=num('f_dose'),yield_=num('f_yield'),tds=num('f_finalTDS');
+  const totalWater=pours.reduce((s,p)=>s+(parseFloat(p.water)||0),0);
+  document.getElementById('r_water').textContent=totalWater?totalWater.toFixed(0)+'g':'—';
+  document.getElementById('r_ratio').textContent=(dose&&totalWater)?'1:'+(totalWater/dose).toFixed(1):'—';
+  const ey=(dose&&yield_&&tds)?(tds/100*yield_)/dose*100:null;
+  document.getElementById('r_ey').textContent=ey!=null?ey.toFixed(1)+'%':'—';
+  const x=(dose&&yield_&&totalWater)?(totalWater-yield_)/dose:null;
+  document.getElementById('r_x').textContent=x!=null?x.toFixed(2):'—';
+  // avg flow
+  let totF=0,nF=0;
+  pours.forEach(p=>{const w=parseFloat(p.water)||0;const d=(parseTime(p.start)!=null&&parseTime(p.clear)!=null)?parseTime(p.clear)-parseTime(p.start):null;if(d&&d>0&&w){totF+=w/d;nF++;}});
+  document.getElementById('r_avgflow').textContent=nF?(totF/nF).toFixed(1)+' g/s':'—';
+  // EY note
+  const note=document.getElementById('eyNote');
+  if(ey!=null){
+    let msg,col;
+    if(ey<18){msg='Under-extracted — กรดเด่น ขาดหวาน (ลอง grind ละเอียดขึ้น)';col='var(--amber)';}
+    else if(ey<=22){msg='✓ SCA ideal zone (18–22%) — สมดุล';col='var(--green)';}
+    else{msg='Over-extracted — ระวังขม/ฝาด (ลอง grind หยาบขึ้น หรือตัดหางเร็ว)';col='var(--red)';}
+    note.innerHTML='<span style="color:'+col+'">'+msg+'</span>';
+    if(x!=null&&x>2.5)note.innerHTML+='<br><span style="color:var(--amber)">X_actual '+x.toFixed(2)+' สูง — dripper/filter retention เยอะ (เช่น Orea flat-bottom)</span>';
+  }else note.innerHTML='';
+}
+
+// ── Sensory ──
+function renderSensory(){
+  document.getElementById('sensorySliders').innerHTML=SENSORY.map(s=>{
+    const v=sensoryVals[s]||6;
+    return '<div class="slider-row"><div class="slider-head"><span class="slider-name">'+s+'</span><span class="slider-val" id="sv_'+s.replace(/[^a-z]/gi,'')+'">'+v.toFixed(1)+'</span></div>'+
+      '<input type="range" min="6" max="10" step="0.25" value="'+v+'" oninput="setSensory(\''+s+'\',this.value)"></div>';
+  }).join('');
+}
+function setSensory(s,v){sensoryVals[s]=parseFloat(v);document.getElementById('sv_'+s.replace(/[^a-z]/gi,'')).textContent=parseFloat(v).toFixed(2);}
+function renderChips(){
+  document.getElementById('flavorChips').innerHTML=FLAVORS.map(f=>'<span class="chip'+(selectedFlavors.has(f)?' on':'')+'" onclick="toggleChip(\''+f+'\')">'+f+'</span>').join('');
+}
+function toggleChip(f){if(selectedFlavors.has(f))selectedFlavors.delete(f);else selectedFlavors.add(f);renderChips();}
+function renderStars(){
+  document.getElementById('starRating').innerHTML=[1,2,3,4,5].map(i=>'<span class="star'+(i<=starVal?' on':'')+'" onclick="setStar('+i+')">★</span>').join('');
+}
+function setStar(i){starVal=(starVal===i)?0:i;renderStars();}
+
+// ── Save ──
+function saveBrew(){
+  const totalWater=pours.reduce((s,p)=>s+(parseFloat(p.water)||0),0);
+  const dose=num('f_dose'),yield_=num('f_yield'),tds=num('f_finalTDS');
+  const ey=(dose&&yield_&&tds)?(tds/100*yield_)/dose*100:null;
+  const x=(dose&&yield_&&totalWater)?(totalWater-yield_)/dose:null;
+  if(!val('f_beanName')&&!totalWater){toast('ใส่ข้อมูลก่อนบันทึก');return;}
+  const brew={
+    id:editingId||Date.now(),
+    date:new Date().toISOString(),
+    beanName:val('f_beanName'),origin:val('f_origin'),producer:val('f_producer'),
+    process:val('f_process'),variety:val('f_variety'),roastLevel:val('f_roastLevel'),
+    roastDate:val('f_roastDate'),daysOff:val('f_daysOff'),
+    dripper:val('f_dripper'),filter:val('f_filter'),grinder:val('f_grinder'),
+    grindSetting:val('f_grindSetting'),water:val('f_water'),waterTDS:val('f_waterTDS'),
+    dose:dose,baseTemp:num('f_baseTemp'),pours:JSON.parse(JSON.stringify(pours)),
+    totalWater:totalWater,yield_:yield_,finalTDS:tds,brewTime:val('f_brewTime'),
+    ey:ey,xActual:x,
+    sensory:Object.assign({},sensoryVals),flavors:[...selectedFlavors],
+    tasting:val('f_tasting'),purpose:val('f_purpose'),rating:starVal,notes:val('f_notes'),
+  };
+  let log=load();
+  if(editingId){log=log.map(b=>b.id===editingId?brew:b);}else{log.unshift(brew);}
+  localStorage.setItem(LS_KEY,JSON.stringify(log));
+  editingId=null;
+  document.getElementById('saveBtn').textContent='Save Brew';
+  toast(editingId?'อัปเดตแล้ว':'บันทึกแล้ว ✓');
+  resetForm();renderLog();
+}
+
+function resetForm(){
+  ['f_beanName','f_origin','f_producer','f_variety','f_roastDate','f_daysOff','f_filter','f_grindSetting','f_water','f_waterTDS','f_yield','f_finalTDS','f_brewTime','f_tasting','f_notes'].forEach(id=>document.getElementById(id).value='');
+  ['f_process','f_roastLevel','f_dripper','f_grinder','f_purpose'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f_dose').value='15';document.getElementById('f_baseTemp').value='93';
+  pours=[];addPour(40,93,'0:00','0:40');addPour(60,92,'0:45','1:25');addPour(60,88,'1:30','2:20');addPour(50,82,'2:25','3:15');
+  sensoryVals={};selectedFlavors=new Set();starVal=0;editingId=null;
+  document.getElementById('saveBtn').textContent='Save Brew';
+  renderSensory();renderChips();renderStars();recalc();
+}
+
+// ── Load / render history ──
+function load(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch(e){return[];}}
+function renderLog(){
+  const log=load();
+  document.getElementById('logCount').textContent=log.length;
+  renderStats(log);
+  const list=document.getElementById('logList');
+  if(!log.length){list.innerHTML='<div class="empty">ยังไม่มีบันทึก<br>กรอกฟอร์มด้านบนแล้วกด Save Brew</div>';return;}
+  list.innerHTML=log.map(b=>{
+    const d=new Date(b.date);
+    const dateStr=d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    const eyCol=b.ey==null?'var(--muted)':b.ey<18?'#f5a623':b.ey<=22?'#2ecc8f':'#e8534a';
+    const badges=[];
+    if(b.ey!=null)badges.push('<span class="log-badge" style="background:rgba(46,204,143,.1);color:'+eyCol+'">EY '+b.ey.toFixed(1)+'%</span>');
+    if(b.finalTDS)badges.push('<span class="log-badge" style="background:rgba(77,124,255,.1);color:var(--blue-lt)">TDS '+b.finalTDS+'%</span>');
+    if(b.rating)badges.push('<span class="log-badge" style="background:rgba(201,148,58,.1);color:var(--gold-lt)">'+'★'.repeat(b.rating)+'</span>');
+    return '<div class="log-entry">'+
+      '<div class="log-head" onclick="toggleLog(this)">'+
+        '<div class="log-bean"><div class="log-bean-name">'+(esc(b.beanName)||'Untitled')+'</div>'+
+        '<div class="log-bean-meta">'+dateStr+(b.process?' · '+esc(b.process):'')+(b.dripper?' · '+esc(b.dripper):'')+'</div></div>'+
+        '<div class="log-badges">'+badges.join('')+'</div>'+
+      '</div>'+
+      '<div class="log-detail hidden">'+renderDetail(b)+
+        '<div style="display:flex;gap:8px;margin-top:14px">'+
+          '<button class="mini-btn" onclick="editBrew('+b.id+')">✎ Edit</button>'+
+          '<button class="mini-btn" onclick="dupBrew('+b.id+')">⎘ Duplicate</button>'+
+          '<button class="mini-btn" style="border-color:rgba(232,83,74,.3);color:var(--red)" onclick="delBrew('+b.id+')">🗑 Delete</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderDetail(b){
+  let h='';
+  // Coffee
+  const coffee=[['Origin',b.origin],['Producer',b.producer],['Variety',b.variety],['Roast',b.roastLevel],['Days off',b.daysOff]].filter(r=>r[1]);
+  if(coffee.length)h+='<div class="detail-section"><div class="detail-section-label">Coffee</div>'+coffee.map(r=>'<div class="detail-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>';
+  // Equipment
+  const eq=[['Dripper',b.dripper],['Filter',b.filter],['Grinder',b.grinder],['Grind',b.grindSetting],['Water',b.water],['Water TDS',b.waterTDS?b.waterTDS+' ppm':'']].filter(r=>r[1]);
+  if(eq.length)h+='<div class="detail-section"><div class="detail-section-label">Equipment</div>'+eq.map(r=>'<div class="detail-row"><span class="k">'+r[0]+'</span><span class="v">'+esc(r[1])+'</span></div>').join('')+'</div>';
+  // Recipe
+  h+='<div class="detail-section"><div class="detail-section-label">Recipe</div>'+
+    '<div class="detail-row"><span class="k">Dose</span><span class="v">'+b.dose+'g</span></div>'+
+    '<div class="detail-row"><span class="k">Total Water</span><span class="v">'+b.totalWater+'g</span></div>'+
+    '<div class="detail-row"><span class="k">Ratio</span><span class="v">1:'+(b.dose?(b.totalWater/b.dose).toFixed(1):'—')+'</span></div>'+
+    (b.yield_?'<div class="detail-row"><span class="k">Yield</span><span class="v">'+b.yield_+'g</span></div>':'')+
+    (b.xActual!=null?'<div class="detail-row"><span class="k">X actual</span><span class="v">'+b.xActual.toFixed(2)+' g/g</span></div>':'')+
+    (b.brewTime?'<div class="detail-row"><span class="k">Brew time</span><span class="v">'+esc(b.brewTime)+'</span></div>':'')+
+    '</div>';
+  // Pours
+  if(b.pours&&b.pours.length){
+    let cum=0;
+    h+='<div class="detail-section"><div class="detail-section-label">Pours</div>'+
+      '<table class="pour-table"><thead><tr><th>#</th><th>g</th><th>cum</th><th>°C</th><th>start</th><th>clear</th><th>dur</th><th>g/s</th><th>TDS</th></tr></thead><tbody>'+
+      b.pours.map((p,i)=>{const w=parseFloat(p.water)||0;cum+=w;const dur=(parseTime(p.start)!=null&&parseTime(p.clear)!=null)?parseTime(p.clear)-parseTime(p.start):null;const flow=(dur&&dur>0&&w)?(w/dur).toFixed(1):'—';
+        return '<tr><td class="pnum">'+(i===0?'B':i+1)+'</td><td class="calc">'+w+'</td><td class="calc">'+cum+'</td><td class="calc">'+(p.temp||'—')+'</td><td class="calc">'+(p.start||'—')+'</td><td class="calc">'+(p.clear||'—')+'</td><td class="calc">'+fmtDur(dur)+'</td><td class="calc">'+flow+'</td><td class="calc">'+(p.tds||'—')+'</td></tr>';
+      }).join('')+'</tbody></table></div>';
+  }
+  // Sensory
+  if(b.sensory&&Object.keys(b.sensory).length){
+    h+='<div class="detail-section"><div class="detail-section-label">Sensory</div>'+
+      Object.entries(b.sensory).map(([k,v])=>'<div class="detail-row"><span class="k">'+k+'</span><span class="v">'+v.toFixed(2)+'</span></div>').join('')+'</div>';
+  }
+  if(b.flavors&&b.flavors.length)h+='<div class="detail-section"><div class="detail-section-label">Flavors</div><div class="chips">'+b.flavors.map(f=>'<span class="chip on" style="cursor:default">'+esc(f)+'</span>').join('')+'</div></div>';
+  if(b.tasting)h+='<div class="detail-section"><div class="detail-section-label">Tasting Notes</div><div style="font-size:12px;color:var(--text);line-height:1.6">'+esc(b.tasting)+'</div></div>';
+  if(b.notes)h+='<div class="detail-section"><div class="detail-section-label">Notes</div><div style="font-size:12px;color:var(--muted);line-height:1.6">'+esc(b.notes)+'</div></div>';
+  return h;
+}
+
+function toggleLog(head){head.nextElementSibling.classList.toggle('hidden');}
+
+function renderStats(log){
+  const bar=document.getElementById('statsBar');
+  if(!log.length){bar.innerHTML='';return;}
+  const withEY=log.filter(b=>b.ey!=null);
+  const avgEY=withEY.length?(withEY.reduce((s,b)=>s+b.ey,0)/withEY.length):null;
+  const inZone=withEY.filter(b=>b.ey>=18&&b.ey<=22).length;
+  const withTDS=log.filter(b=>b.finalTDS);
+  const avgTDS=withTDS.length?(withTDS.reduce((s,b)=>s+parseFloat(b.finalTDS),0)/withTDS.length):null;
+  bar.innerHTML=
+    '<div class="stat"><div class="stat-val">'+log.length+'</div><div class="stat-lbl">Brews</div></div>'+
+    (avgEY!=null?'<div class="stat"><div class="stat-val">'+avgEY.toFixed(1)+'</div><div class="stat-lbl">Avg EY %</div></div>':'')+
+    (avgTDS!=null?'<div class="stat"><div class="stat-val">'+avgTDS.toFixed(2)+'</div><div class="stat-lbl">Avg TDS</div></div>':'')+
+    (withEY.length?'<div class="stat"><div class="stat-val">'+Math.round(inZone/withEY.length*100)+'%</div><div class="stat-lbl">In Zone</div></div>':'');
+}
+
+// ── Edit / dup / delete ──
+function editBrew(id){
+  const b=load().find(x=>x.id===id);if(!b)return;
+  document.getElementById('f_beanName').value=b.beanName||'';document.getElementById('f_origin').value=b.origin||'';
+  document.getElementById('f_producer').value=b.producer||'';document.getElementById('f_process').value=b.process||'';
+  document.getElementById('f_variety').value=b.variety||'';document.getElementById('f_roastLevel').value=b.roastLevel||'';
+  document.getElementById('f_roastDate').value=b.roastDate||'';document.getElementById('f_daysOff').value=b.daysOff||'';
+  document.getElementById('f_dripper').value=b.dripper||'';document.getElementById('f_filter').value=b.filter||'';
+  document.getElementById('f_grinder').value=b.grinder||'';document.getElementById('f_grindSetting').value=b.grindSetting||'';
+  document.getElementById('f_water').value=b.water||'';document.getElementById('f_waterTDS').value=b.waterTDS||'';
+  document.getElementById('f_dose').value=b.dose||15;document.getElementById('f_baseTemp').value=b.baseTemp||93;
+  document.getElementById('f_yield').value=b.yield_||'';document.getElementById('f_finalTDS').value=b.finalTDS||'';
+  document.getElementById('f_brewTime').value=b.brewTime||'';document.getElementById('f_tasting').value=b.tasting||'';
+  document.getElementById('f_purpose').value=b.purpose||'';document.getElementById('f_notes').value=b.notes||'';
+  pours=JSON.parse(JSON.stringify(b.pours||[]));sensoryVals=Object.assign({},b.sensory||{});
+  selectedFlavors=new Set(b.flavors||[]);starVal=b.rating||0;editingId=id;
+  document.getElementById('saveBtn').textContent='Update Brew';
+  renderPours();renderSensory();renderChips();renderStars();recalc();
+  window.scrollTo({top:0,behavior:'smooth'});toast('แก้ไข — กรอกแล้วกด Update');
+}
+function dupBrew(id){editBrew(id);editingId=null;document.getElementById('saveBtn').textContent='Save Brew';toast('คัดลอกแล้ว — แก้ไขแล้ว save');}
+function delBrew(id){if(!confirm('ลบบันทึกนี้?'))return;localStorage.setItem(LS_KEY,JSON.stringify(load().filter(b=>b.id!==id)));renderLog();toast('ลบแล้ว');}
+function clearAll(){if(!confirm('ลบบันทึกทั้งหมด? กู้คืนไม่ได้'))return;localStorage.removeItem(LS_KEY);renderLog();toast('ลบทั้งหมดแล้ว');}
+
+// ── Export ──
+function exportCSV(){
+  const log=load();if(!log.length){toast('ไม่มีข้อมูล');return;}
+  const maxP=Math.max(...log.map(b=>(b.pours||[]).length),0);
+  const head=['Date','Bean','Origin','Producer','Process','Variety','Roast','DaysOff','Dripper','Filter','Grinder','GrindSetting','Water','WaterTDS','Dose','TotalWater','Ratio','Yield','FinalTDS','EY','Xactual','BrewTime','Purpose','Rating','Flavors','Tasting','Notes'];
+  for(let i=0;i<maxP;i++){const n=i===0?'Bloom':'P'+(i+1);head.push(n+'_water',n+'_temp',n+'_start',n+'_clear',n+'_tds');}
+  SENSORY.forEach(s=>head.push('S_'+s.replace(/[^a-z]/gi,'')));
+  const rows=log.map(b=>{
+    const r=[new Date(b.date).toISOString(),b.beanName,b.origin,b.producer,b.process,b.variety,b.roastLevel,b.daysOff,b.dripper,b.filter,b.grinder,b.grindSetting,b.water,b.waterTDS,b.dose,b.totalWater,(b.dose?(b.totalWater/b.dose).toFixed(1):''),b.yield_,b.finalTDS,(b.ey!=null?b.ey.toFixed(1):''),(b.xActual!=null?b.xActual.toFixed(2):''),b.brewTime,b.purpose,b.rating,(b.flavors||[]).join('; '),b.tasting,b.notes];
+    for(let i=0;i<maxP;i++){const p=(b.pours||[])[i]||{};r.push(p.water||'',p.temp||'',p.start||'',p.clear||'',p.tds||'');}
+    SENSORY.forEach(s=>r.push(b.sensory&&b.sensory[s]!=null?b.sensory[s]:''));
+    return r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',');
+  });
+  dl([head.join(',')].concat(rows).join('\n'),'cloudbrew_brewlog_'+Date.now()+'.csv','text/csv');
+  toast('CSV exported ✓');
+}
+function exportJSON(){const log=load();if(!log.length){toast('ไม่มีข้อมูล');return;}dl(JSON.stringify(log,null,2),'cloudbrew_brewlog_'+Date.now()+'.json','application/json');toast('JSON exported ✓');}
+function dl(content,name,type){const blob=new Blob([content],{type:type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+
+// ── Toast ──
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2000);}
+
+// ── Init ──
+resetForm();renderLog();
+
+</script>
+</body>
+</html>

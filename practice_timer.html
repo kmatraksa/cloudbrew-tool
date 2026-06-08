@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Practice Timer · Cloudbrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600&family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,1,300&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080f;--s1:#0c0e18;--s2:#11141f;--s3:#161a28;
+  --border:#1c2235;--border2:#252e46;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#5a3e18;
+  --blue:#4d7cff;--blue-lt:#7ba4ff;
+  --green:#2ecc8f;--red:#e8534a;--amber:#f5a623;--violet:#9b7fe8;
+  --text:#dce8f8;--muted:#637a9f;--dim:#283550;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;--sans:'Bai Jamjuree',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,255,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:16px 14px 40px}
+.back-link{font-family:var(--mono);font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;gap:5px;margin-bottom:12px}
+.eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:200;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:-.03em;line-height:.95}
+h1 em{font-style:italic;font-weight:300;color:var(--gold)}
+.label{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.mode-toggle{display:flex;gap:4px;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:4px;margin:16px 0}
+.mode-btn{flex:1;padding:10px;border-radius:5px;border:none;background:none;color:var(--muted);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.mode-btn.active{background:var(--gold);color:#000}
+.panel{display:none}
+.panel.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px}
+
+/* ── RUN MODE ── */
+.timer-display{text-align:center;padding:8px 0 4px}
+.timer-big{font-family:var(--mono);font-size:clamp(3.5rem,18vw,6rem);font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;transition:color .2s}
+.timer-limit{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:2px}
+.now-card{border-radius:12px;padding:20px;margin:12px 0;text-align:center;border:2px solid var(--border);background:var(--s2);transition:all .3s;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.now-card.active{border-color:var(--gold);background:linear-gradient(135deg,var(--s2),rgba(201,148,58,.08))}
+.now-card.getready{border-color:var(--amber);background:linear-gradient(135deg,var(--s2),rgba(245,166,35,.1));animation:pulse .5s infinite alternate}
+.now-card.pour{border-color:var(--green);background:linear-gradient(135deg,var(--s2),rgba(46,204,143,.15));animation:flash .4s}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.015)}}
+@keyframes flash{0%{transform:scale(1.05);background:rgba(46,204,143,.25)}100%{transform:scale(1)}}
+.now-state{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.now-water{font-family:var(--serif);font-weight:200;font-size:clamp(2.8rem,14vw,4.5rem);line-height:1;color:var(--gold-lt)}
+.now-water span{font-size:.35em;color:var(--muted)}
+.now-label{font-family:var(--serif);font-style:italic;font-size:1.3rem;margin-top:4px}
+.now-meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:8px}
+.countdown-big{font-family:var(--mono);font-size:5rem;font-weight:700;color:var(--amber);line-height:1}
+.next-preview{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--s1);border:1px solid var(--border);border-radius:8px;margin-bottom:12px}
+.next-label{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted)}
+.next-detail{font-family:var(--mono);font-size:13px;color:var(--text);margin-top:2px}
+.next-countdown{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--blue-lt);font-variant-numeric:tabular-nums}
+.cum-bar-wrap{margin-bottom:12px}
+.cum-head{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:5px}
+.cum-track{height:10px;background:var(--s1);border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.cum-fill{height:100%;background:linear-gradient(to right,var(--gold-dim),var(--gold));border-radius:5px;transition:width .4s}
+.controls{display:flex;gap:8px;margin:14px 0}
+.ctrl-btn{flex:1;padding:16px;border-radius:10px;border:none;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.ctrl-btn:active{transform:scale(.97)}
+.ctrl-start{background:var(--green);color:#000}
+.ctrl-pause{background:var(--amber);color:#000}
+.ctrl-reset{background:var(--s2);border:1px solid var(--border2);color:var(--muted);flex:0 0 auto;padding:16px 20px}
+.timeline{margin-top:8px}
+.tl-pour{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:7px;border:1px solid var(--border);margin-bottom:6px;transition:all .25s;background:var(--s2)}
+.tl-pour.done{opacity:.45}
+.tl-pour.current{border-color:var(--gold);background:rgba(201,148,58,.08)}
+.tl-time{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--blue-lt);min-width:44px}
+.tl-info{flex:1}
+.tl-name{font-family:var(--mono);font-size:12px;font-weight:600}
+.tl-sub{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px}
+.tl-water{font-family:var(--serif);font-size:1.3rem;font-weight:300;color:var(--gold-lt)}
+.tl-water span{font-size:.55em;color:var(--muted)}
+.tl-temp{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:42px;text-align:right}
+.toggles{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.tg{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:100px;border:1px solid var(--border2);background:var(--s1);font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s}
+.tg.on{background:rgba(46,204,143,.1);border-color:var(--green);color:var(--green)}
+
+/* ── SETUP MODE ── */
+.fld{margin-bottom:12px}
+.fld-label{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;background:var(--s1);border:1px solid var(--border2);color:var(--text);border-radius:5px;padding:8px 10px;font-family:var(--sans);font-size:14px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+input[type=number]{font-family:var(--mono);-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+@media(max-width:640px){input,select{font-size:16px}}
+.setup-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
+.setup-table th{font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:5px 4px;border-bottom:1px solid var(--border2);font-weight:500}
+.setup-table td{padding:3px;border-bottom:1px solid var(--border)}
+.setup-table input{padding:7px 5px;text-align:center;font-size:13px}
+.setup-table .del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:2px 6px;width:auto}
+.setup-table .del:hover{color:var(--red)}
+.setup-table .pn{text-align:center;color:var(--gold-lt);font-weight:700}
+.mini-btn{background:var(--s1);border:1px solid var(--border2);color:var(--muted);border-radius:6px;padding:9px 14px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .2s;width:auto}
+.mini-btn:hover{border-color:var(--gold);color:var(--gold-lt)}
+.preset-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.preset-chip{padding:7px 13px;border-radius:7px;border:1px solid var(--border2);background:var(--s1);font-family:var(--mono);font-size:10px;color:var(--muted);cursor:pointer;transition:all .15s}
+.preset-chip:hover{border-color:var(--gold);color:var(--gold-lt)}
+.setup-total{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px;padding:8px 12px;background:var(--s1);border-radius:6px}
+.setup-total b{color:var(--gold-lt)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:100px;font-family:var(--mono);font-size:11px;font-weight:700;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="index.html" class="back-link">← Back</a>
+<div class="eyebrow" style="margin-bottom:8px">Cloudbrew · Competition Practice</div>
+<h1>Practice <em>Timer</em></h1>
+
+<div class="mode-toggle">
+  <button class="mode-btn active" id="mb-run" onclick="setMode('run')">▶ Run</button>
+  <button class="mode-btn" id="mb-setup" onclick="setMode('setup')">⚙ Setup</button>
+</div>
+
+<!-- ══ RUN PANEL ══ -->
+<div class="panel active" id="panel-run">
+  <div class="timer-display">
+    <div class="timer-big" id="timerBig">0:00</div>
+    <div class="timer-limit" id="timerLimit"></div>
+  </div>
+
+  <div class="now-card" id="nowCard">
+    <div class="now-state" id="nowState">Press Start</div>
+    <div class="now-water" id="nowWater" style="display:none"></div>
+    <div class="countdown-big" id="countdownBig" style="display:none"></div>
+    <div class="now-label" id="nowLabel"></div>
+    <div class="now-meta" id="nowMeta"></div>
+  </div>
+
+  <div class="next-preview" id="nextPreview" style="display:none">
+    <div><div class="next-label">Next Pour</div><div class="next-detail" id="nextDetail">—</div></div>
+    <div class="next-countdown" id="nextCountdown">—</div>
+  </div>
+
+  <div class="cum-bar-wrap">
+    <div class="cum-head"><span>Water poured</span><span id="cumText">0 / 0g</span></div>
+    <div class="cum-track"><div class="cum-fill" id="cumFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn ctrl-start" id="startBtn" onclick="toggleTimer()">Start</button>
+    <button class="ctrl-btn ctrl-reset" onclick="resetTimer()">Reset</button>
+  </div>
+
+  <div class="toggles">
+    <div class="tg on" id="tg-beep" onclick="toggleOpt('beep')">🔊 Beep</div>
+    <div class="tg on" id="tg-voice" onclick="toggleOpt('voice')">🗣 Voice</div>
+    <div class="tg" id="tg-vibrate" onclick="toggleOpt('vibrate')">📳 Vibrate</div>
+    <div class="tg" id="tg-leadin" onclick="toggleOpt('leadin')">3-2-1 Lead-in</div>
+  </div>
+
+  <div class="label" style="margin:20px 0 8px">Timeline</div>
+  <div class="timeline" id="timeline"></div>
+</div>
+
+<!-- ══ SETUP PANEL ══ -->
+<div class="panel" id="panel-setup">
+  <div class="card">
+    <div class="label" style="margin-bottom:10px">Quick Load Preset</div>
+    <div class="preset-row" id="presetRow"></div>
+  </div>
+
+  <div class="card">
+    <div class="grid2">
+      <div class="fld"><label class="fld-label">Schedule Name</label><input id="schedName" placeholder="My Routine"></div>
+      <div class="fld"><label class="fld-label">Time Limit (optional)</label><input id="schedLimit" placeholder="5:00"></div>
+    </div>
+    <label class="fld-label" style="margin-bottom:6px">Pours — time · water · temp · label</label>
+    <div style="overflow-x:auto">
+      <table class="setup-table" id="setupTable">
+        <thead><tr><th>#</th><th>Time</th><th>Water g</th><th>°C</th><th>Label</th><th></th></tr></thead>
+        <tbody id="setupBody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="mini-btn" onclick="addRow()">＋ Add Pour</button>
+      <button class="mini-btn" onclick="savePreset()" style="border-color:var(--gold-dim);color:var(--gold-lt)">💾 Save as Preset</button>
+    </div>
+    <div class="setup-total" id="setupTotal"></div>
+  </div>
+
+  <div class="card" id="savedPresetsCard" style="display:none">
+    <div class="label" style="margin-bottom:10px">Saved Presets</div>
+    <div id="savedPresets"></div>
+  </div>
+</div>
+
+<div style="border-top:1px solid var(--border);padding-top:12px;margin-top:24px;font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center">
+  Cloudbrew Pour Over Lab · Bangkok · ซ้อมแบบไม่ต้องมองจอ
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LS_KEY='cloudbrew_timer_schedules';
+const DEFAULT_PRESETS={
+  'Balanced 4-pour':{limit:'4:00',pours:[
+    {time:0,water:40,temp:94,label:'Bloom'},{time:45,water:70,temp:92,label:'Pour 2'},
+    {time:90,water:70,temp:90,label:'Pour 3'},{time:135,water:70,temp:88,label:'Pour 4'}]},
+  'Peng 2-temp (210g)':{limit:'2:30',pours:[
+    {time:0,water:30,temp:96,label:'Bloom'},{time:30,water:90,temp:96,label:'Pour 2'},
+    {time:70,water:90,temp:80,label:'Pour 3 · Melodrip'}]},
+  'Medina 5-pour (250g)':{limit:'3:00',pours:[
+    {time:0,water:50,temp:91,label:'Pour 1'},{time:30,water:50,temp:91,label:'Pour 2'},
+    {time:60,water:50,temp:91,label:'Pour 3'},{time:90,water:50,temp:91,label:'Pour 4'},
+    {time:120,water:50,temp:91,label:'Pour 5'}]},
+  'Sweet back-load':{limit:'3:30',pours:[
+    {time:0,water:35,temp:93,label:'Bloom'},{time:45,water:55,temp:90,label:'Pour 2'},
+    {time:95,water:70,temp:86,label:'Pour 3'},{time:150,water:80,temp:78,label:'Pour 4'}]},
+};
+
+let pours=[];
+let limitSec=null;
+let elapsed=0,running=false,lastTs=null,rafId=null;
+let firedCues=new Set();
+let opts={beep:true,voice:true,vibrate:false,leadin:false};
+let leadinActive=false,leadinVal=0;
+let audioCtx=null;
+
+// ── Helpers ──
+function parseTime(t){if(t===0)return 0;if(!t)return null;const p=String(t).trim().split(':');if(p.length===2)return parseInt(p[0]||0)*60+parseFloat(p[1]||0);const n=parseFloat(t);return isNaN(n)?null:n;}
+function fmt(s){if(s<0)s=0;const m=Math.floor(s/60),sec=Math.floor(s%60);return m+':'+String(sec).padStart(2,'0');}
+function totalWater(){return pours.reduce((a,p)=>a+(parseFloat(p.water)||0),0);}
+
+// ── Audio ──
+function initAudio(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();}
+function beep(freq,dur,vol){
+  if(!opts.beep||!audioCtx)return;
+  try{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=freq;g.gain.value=vol||0.25;
+    o.connect(g);g.connect(audioCtx.destination);
+    o.start();g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+dur);
+    o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+function tick(){beep(660,0.08,0.18);}
+function pourBeep(){beep(880,0.18,0.3);setTimeout(()=>beep(1180,0.22,0.3),120);}
+function speak(text){
+  if(!opts.voice||!('speechSynthesis'in window))return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=1.05;u.pitch=1;speechSynthesis.speak(u);}catch(e){}
+}
+function vibrate(ms){if(opts.vibrate&&navigator.vibrate)navigator.vibrate(ms);}
+
+// ── Build cues ──
+let cueList=[];
+function buildCues(){
+  cueList=[];
+  pours.forEach((p,i)=>{
+    const t=parseTime(p.time)||0;
+    cueList.push({t:Math.max(0,t-3),id:'a'+i,type:'announce',pour:i});
+    cueList.push({t:Math.max(0,t-2),id:'t2'+i,type:'tick',pour:i});
+    cueList.push({t:Math.max(0,t-1),id:'t1'+i,type:'tick',pour:i});
+    cueList.push({t:t,id:'p'+i,type:'pour',pour:i});
+  });
+}
+
+// ── Timer loop ──
+function loop(ts){
+  if(lastTs!=null)elapsed+=(ts-lastTs)/1000;
+  lastTs=ts;
+  checkCues();
+  render();
+  if(running)rafId=requestAnimationFrame(loop);
+}
+function checkCues(){
+  cueList.forEach(c=>{
+    if(elapsed>=c.t&&!firedCues.has(c.id)){
+      firedCues.add(c.id);
+      const p=pours[c.pour];
+      if(c.type==='announce'){
+        const wn=(parseFloat(p.water)||0);
+        speak((p.label||'Pour')+', '+wn+' grams');
+      }else if(c.type==='tick'){tick();}
+      else if(c.type==='pour'){pourBeep();vibrate(250);}
+    }
+  });
+}
+
+function currentPourIdx(){let cur=-1;pours.forEach((p,i)=>{if(elapsed>=(parseTime(p.time)||0)-0.05)cur=i;});return cur;}
+function nextPourIdx(){for(let i=0;i<pours.length;i++){if((parseTime(pours[i].time)||0)>elapsed+0.05)return i;}return -1;}
+
+// ── Render ──
+function render(){
+  document.getElementById('timerBig').textContent=fmt(elapsed);
+  // limit color
+  const big=document.getElementById('timerBig');
+  if(limitSec){
+    document.getElementById('timerLimit').textContent='Limit '+fmt(limitSec)+(elapsed>limitSec?' · OVER!':'');
+    big.style.color=elapsed>limitSec?'var(--red)':elapsed>limitSec-15?'var(--amber)':'var(--text)';
+  }else{document.getElementById('timerLimit').textContent='';big.style.color='var(--text)';}
+
+  const ci=currentPourIdx(),ni=nextPourIdx();
+  const card=document.getElementById('nowCard');
+  const stEl=document.getElementById('nowState'),wEl=document.getElementById('nowWater'),
+        cdEl=document.getElementById('countdownBig'),lbEl=document.getElementById('nowLabel'),mtEl=document.getElementById('nowMeta');
+
+  // Lead-in countdown to next pour (within 3s)
+  let getready=false,pourFlash=false;
+  if(ni>=0){
+    const nt=parseTime(pours[ni].time)||0;
+    const togo=nt-elapsed;
+    if(togo<=3&&togo>0.15){getready=true;
+      card.className='now-card getready';
+      stEl.style.display='block';stEl.textContent='Get Ready · '+(pours[ni].label||'');
+      wEl.style.display='none';cdEl.style.display='block';
+      cdEl.textContent=Math.ceil(togo);
+      lbEl.textContent='';mtEl.textContent=(parseFloat(pours[ni].water)||0)+'g coming';
+    }
+  }
+  if(!getready){
+    cdEl.style.display='none';
+    if(ci>=0&&running){
+      const p=pours[ci];
+      const pt=parseTime(p.time)||0;
+      const justPoured=(elapsed-pt)<2;
+      card.className='now-card '+(justPoured?'pour':'active');
+      stEl.style.display='block';stEl.textContent=justPoured?'POUR NOW':'Current';
+      wEl.style.display='block';wEl.innerHTML=(parseFloat(p.water)||0)+'<span>g</span>';
+      lbEl.textContent=p.label||'';
+      mtEl.textContent=p.temp+'°C · cumulative '+pours.slice(0,ci+1).reduce((a,x)=>a+(parseFloat(x.water)||0),0)+'g';
+    }else if(!running&&elapsed===0){
+      card.className='now-card';stEl.style.display='block';stEl.textContent='Press Start';
+      wEl.style.display='none';lbEl.textContent='';mtEl.textContent=pours.length+' pours · '+totalWater()+'g total';
+    }else if(running&&ci<0){
+      card.className='now-card';stEl.style.display='block';stEl.textContent='Get ready...';
+      wEl.style.display='none';lbEl.textContent='';mtEl.textContent='First pour at '+fmt(parseTime(pours[0]?pours[0].time:0)||0);
+    }else{
+      card.className='now-card';stEl.style.display='block';stEl.textContent='Done ✓';
+      wEl.style.display='none';lbEl.textContent='';mtEl.textContent='Total '+totalWater()+'g';
+    }
+  }
+
+  // Next preview
+  const np=document.getElementById('nextPreview');
+  if(ni>=0&&running){np.style.display='flex';
+    const nt=parseTime(pours[ni].time)||0;
+    document.getElementById('nextDetail').textContent=(pours[ni].label||'Pour')+' · '+(parseFloat(pours[ni].water)||0)+'g @'+pours[ni].temp+'°C';
+    document.getElementById('nextCountdown').textContent=fmt(Math.max(0,nt-elapsed));
+  }else np.style.display='none';
+
+  // Cumulative
+  const cum=ci>=0?pours.slice(0,ci+1).reduce((a,x)=>a+(parseFloat(x.water)||0),0):0;
+  const tot=totalWater();
+  document.getElementById('cumText').textContent=cum+' / '+tot+'g';
+  document.getElementById('cumFill').style.width=(tot?cum/tot*100:0)+'%';
+
+  renderTimeline(ci);
+}
+
+function renderTimeline(ci){
+  document.getElementById('timeline').innerHTML=pours.map((p,i)=>{
+    const t=parseTime(p.time)||0;
+    const cls=i===ci?'current':(elapsed>t?'done':'');
+    return '<div class="tl-pour '+cls+'"><div class="tl-time">'+fmt(t)+'</div>'+
+      '<div class="tl-info"><div class="tl-name">'+(p.label||'Pour '+(i+1))+'</div><div class="tl-sub">cumulative '+pours.slice(0,i+1).reduce((a,x)=>a+(parseFloat(x.water)||0),0)+'g</div></div>'+
+      '<div class="tl-water">'+(parseFloat(p.water)||0)+'<span>g</span></div>'+
+      '<div class="tl-temp">'+p.temp+'°C</div></div>';
+  }).join('');
+}
+
+// ── Controls ──
+function toggleTimer(){
+  if(running){running=false;lastTs=null;document.getElementById('startBtn').textContent='Resume';document.getElementById('startBtn').className='ctrl-btn ctrl-start';if(rafId)cancelAnimationFrame(rafId);}
+  else{
+    initAudio();
+    if(opts.leadin&&elapsed===0){doLeadin();return;}
+    running=true;document.getElementById('startBtn').textContent='Pause';document.getElementById('startBtn').className='ctrl-btn ctrl-pause';
+    lastTs=null;rafId=requestAnimationFrame(loop);
+  }
+}
+function doLeadin(){
+  let n=3;const stEl=document.getElementById('nowState'),cdEl=document.getElementById('countdownBig'),wEl=document.getElementById('nowWater');
+  document.getElementById('nowCard').className='now-card getready';
+  stEl.style.display='block';stEl.textContent='Starting in';wEl.style.display='none';cdEl.style.display='block';
+  const iv=setInterval(()=>{
+    if(n>0){cdEl.textContent=n;tick();n--;}
+    else{clearInterval(iv);cdEl.style.display='none';pourBeep();
+      running=true;document.getElementById('startBtn').textContent='Pause';document.getElementById('startBtn').className='ctrl-btn ctrl-pause';
+      lastTs=null;rafId=requestAnimationFrame(loop);}
+  },1000);
+}
+function resetTimer(){
+  running=false;elapsed=0;lastTs=null;firedCues=new Set();
+  if(rafId)cancelAnimationFrame(rafId);
+  if('speechSynthesis'in window)speechSynthesis.cancel();
+  document.getElementById('startBtn').textContent='Start';document.getElementById('startBtn').className='ctrl-btn ctrl-start';
+  render();
+}
+function toggleOpt(k){opts[k]=!opts[k];document.getElementById('tg-'+k).classList.toggle('on',opts[k]);if(k==='beep'&&opts[k])initAudio();}
+
+// ── Mode ──
+function setMode(m){
+  document.getElementById('panel-run').classList.toggle('active',m==='run');
+  document.getElementById('panel-setup').classList.toggle('active',m==='setup');
+  document.getElementById('mb-run').classList.toggle('active',m==='run');
+  document.getElementById('mb-setup').classList.toggle('active',m==='setup');
+  if(m==='run'){loadFromSetup();resetTimer();buildCues();render();}
+  if(m==='setup'){renderSetup();renderSavedPresets();}
+}
+
+// ── Setup ──
+function renderSetup(){
+  document.getElementById('schedName').value=document.getElementById('schedName').value||'My Routine';
+  const tb=document.getElementById('setupBody');
+  tb.innerHTML=pours.map((p,i)=>'<tr>'+
+    '<td class="pn">'+(i+1)+'</td>'+
+    '<td><input value="'+(p.timeStr||fmt(parseTime(p.time)||0))+'" placeholder="0:00" oninput="updRow('+i+',\'time\',this.value)" style="width:50px"></td>'+
+    '<td><input type="number" value="'+p.water+'" oninput="updRow('+i+',\'water\',this.value)" style="width:54px"></td>'+
+    '<td><input type="number" value="'+p.temp+'" oninput="updRow('+i+',\'temp\',this.value)" style="width:48px"></td>'+
+    '<td><input value="'+(p.label||'')+'" oninput="updRow('+i+',\'label\',this.value)"></td>'+
+    '<td><button class="del" onclick="delRow('+i+')">×</button></td></tr>'
+  ).join('');
+  const tot=totalWater();
+  const last=pours.length?fmt(parseTime(pours[pours.length-1].time)||0):'0:00';
+  document.getElementById('setupTotal').innerHTML='Total water: <b>'+tot+'g</b> · '+pours.length+' pours · last pour at <b>'+last+'</b>';
+}
+function updRow(i,k,v){
+  if(k==='time'){pours[i].timeStr=v;pours[i].time=parseTime(v);}
+  else pours[i][k]=v;
+  if(k==='water')renderSetup();
+}
+function addRow(){const last=pours[pours.length-1];const lt=last?(parseTime(last.time)||0)+45:0;pours.push({time:lt,timeStr:fmt(lt),water:60,temp:90,label:'Pour '+(pours.length+1)});renderSetup();}
+function delRow(i){pours.splice(i,1);renderSetup();}
+
+function loadFromSetup(){
+  limitSec=parseTime(document.getElementById('schedLimit').value);
+}
+
+// ── Presets ──
+function renderPresets(){
+  document.getElementById('presetRow').innerHTML=Object.keys(DEFAULT_PRESETS).map(n=>
+    '<div class="preset-chip" onclick="loadPreset(\''+n.replace(/'/g,"")+'\')">'+n+'</div>').join('');
+}
+function loadPreset(name){
+  const p=DEFAULT_PRESETS[name];if(!p)return;
+  pours=p.pours.map(x=>Object.assign({},x,{timeStr:fmt(x.time)}));
+  document.getElementById('schedName').value=name;
+  document.getElementById('schedLimit').value=p.limit||'';
+  renderSetup();toast('โหลด '+name);
+}
+function savePreset(){
+  const name=document.getElementById('schedName').value.trim()||'Untitled';
+  let saved=loadSaved();
+  saved[name]={limit:document.getElementById('schedLimit').value,pours:pours.map(p=>({time:parseTime(p.time)||0,water:parseFloat(p.water)||0,temp:parseFloat(p.temp)||90,label:p.label||''}))};
+  localStorage.setItem(LS_KEY,JSON.stringify(saved));
+  renderSavedPresets();toast('บันทึก preset แล้ว ✓');
+}
+function loadSaved(){try{return JSON.parse(localStorage.getItem(LS_KEY))||{};}catch(e){return{};}}
+function renderSavedPresets(){
+  const saved=loadSaved();const keys=Object.keys(saved);
+  const card=document.getElementById('savedPresetsCard');
+  if(!keys.length){card.style.display='none';return;}
+  card.style.display='block';
+  document.getElementById('savedPresets').innerHTML=keys.map(n=>
+    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'+
+    '<div class="preset-chip" style="flex:1" onclick="loadSavedPreset(\''+n.replace(/'/g,"")+'\')">'+n+' · '+(saved[n].pours.reduce((a,p)=>a+p.water,0))+'g</div>'+
+    '<button class="del" style="background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px" onclick="delSaved(\''+n.replace(/'/g,"")+'\')">×</button></div>'
+  ).join('');
+}
+function loadSavedPreset(name){
+  const saved=loadSaved();const p=saved[name];if(!p)return;
+  pours=p.pours.map(x=>Object.assign({},x,{timeStr:fmt(x.time)}));
+  document.getElementById('schedName').value=name;document.getElementById('schedLimit').value=p.limit||'';
+  renderSetup();toast('โหลด '+name);
+}
+function delSaved(name){const saved=loadSaved();delete saved[name];localStorage.setItem(LS_KEY,JSON.stringify(saved));renderSavedPresets();}
+
+// ── Toast ──
+let toastT;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1800);}
+
+// ── Init ──
+pours=DEFAULT_PRESETS['Balanced 4-pour'].pours.map(x=>Object.assign({},x,{timeStr:fmt(x.time)}));
+document.getElementById('schedLimit').value='4:00';
+document.getElementById('schedName').value='Balanced 4-pour';
+renderPresets();buildCues();loadFromSetup();render();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วิธีอ่าน SCA Chart · Cloudbrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Fraunces:opsz,ital,wght@9..144,0,200;9..144,0,300;9..144,1,300;9..144,1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--s1:#0d1018;--s2:#12161f;--s3:#181e2b;
+  --border:#1c2235;--border2:#252d40;
+  --gold:#c9943a;--gold-lt:#e8be78;--gold-dim:#5a3e18;
+  --blue:#4d7cff;--blue-lt:#7ba4ff;
+  --green:#2ecc8f;--red:#e8534a;--amber:#f5a623;
+  --text:#dce8f8;--muted:#637a9f;--dim:#283550;
+  --mono:'JetBrains Mono',monospace;--serif:'Fraunces',serif;--sans:'Bai Jamjuree',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(77,124,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(77,124,255,.018) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0}
+.page{position:relative;z-index:1;max-width:820px;margin:0 auto;padding:24px 16px 80px}
+.back-link{font-family:var(--mono);font-size:9px;color:var(--muted);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;display:inline-flex;gap:5px;margin-bottom:16px}
+.header{border-bottom:1px solid var(--border2);padding-bottom:16px;margin-bottom:28px}
+.header-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.header-title{font-family:var(--serif);font-weight:200;font-size:clamp(1.8rem,5vw,3rem);line-height:.95;letter-spacing:-.03em}
+.header-title em{font-style:italic;color:var(--gold)}
+.header-sub{font-size:13px;color:var(--muted);margin-top:8px;max-width:520px;line-height:1.6}
+.level-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:100px;background:rgba(46,204,143,.1);border:1px solid rgba(46,204,143,.25);font-family:var(--mono);font-size:9px;font-weight:700;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-top:10px}
+.section{margin-bottom:28px}
+.sec-num{font-family:var(--mono);font-size:8px;font-weight:700;color:var(--blue);letter-spacing:.15em}
+.sec-title{font-family:var(--serif);font-style:italic;font-weight:300;font-size:1.3rem;margin:0 8px}
+.sec-head{display:flex;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.sec-line{flex:1;height:1px;background:linear-gradient(to right,var(--border2),transparent);margin-left:10px}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:16px}
+.analogy{background:var(--s3);border:1px solid var(--border2);border-radius:6px;padding:12px 14px;margin-top:10px}
+.analogy-label{font-family:var(--mono);font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px}
+.analogy-body{font-size:12px;color:var(--muted);line-height:1.65}
+.axis-card{display:flex;gap:14px;align-items:flex-start;padding:14px;border-radius:8px;border:1px solid var(--border);margin-bottom:10px}
+.axis-icon{font-size:28px;flex-shrink:0}
+.axis-title{font-family:var(--serif);font-weight:300;font-size:1.1rem;margin-bottom:2px}
+.axis-sub{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.axis-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.vs-box{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:14px 0}
+.vs-side{padding:14px;border-radius:8px;text-align:center}
+.vs-mid{font-family:var(--serif);font-style:italic;font-size:1.2rem;color:var(--muted)}
+.vs-label{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.vs-big{font-family:var(--serif);font-weight:300;font-size:1.3rem;margin-bottom:4px}
+.vs-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.chart-wrap{position:relative}
+.chart-svg{width:100%;height:auto;display:block;touch-action:manipulation}
+.region-detail{margin-top:12px;padding:14px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--s2);transition:all .25s;min-height:120px}
+.rd-name{font-family:var(--serif);font-style:italic;font-size:1.25rem;margin-bottom:4px}
+.rd-coords{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.05em;margin-bottom:10px}
+.rd-taste{font-size:13px;line-height:1.6;margin-bottom:10px}
+.rd-fix-label{font-family:var(--mono);font-size:8px;color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.rd-fix{display:flex;flex-wrap:wrap;gap:6px}
+.fix-chip{padding:5px 11px;border-radius:100px;font-family:var(--mono);font-size:10px;font-weight:500}
+.hint-tap{text-align:center;font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:8px}
+.move-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.move-card{padding:14px;border-radius:8px;border:1px solid var(--border)}
+.move-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.move-arrow{font-size:18px}
+.move-title{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.05em}
+.move-list{list-style:none;font-size:12px;color:var(--muted);line-height:1.7}
+.move-list li{padding-left:14px;position:relative}
+.move-list li::before{content:'→';position:absolute;left:0;color:var(--dim)}
+.flow{display:flex;flex-direction:column;gap:0}
+.flow-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.flow-step:last-child{border-bottom:none}
+.flow-q{width:30px;height:30px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex-shrink:0}
+.flow-text{font-size:13px;line-height:1.5}
+.flow-text b{color:var(--text)}
+.footer{border-top:1px solid var(--border);padding-top:12px;margin-top:30px;font-family:var(--mono);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+@media(max-width:560px){.move-grid{grid-template-columns:1fr}.vs-box{grid-template-columns:1fr;gap:8px}.vs-mid{transform:rotate(90deg)}}
+
+</style>
+</head>
+<body>
+<div class="page">
+<a href="index.html" class="back-link">← Back</a>
+<div class="header">
+  <div class="header-eyebrow">Cloudbrew Pour Over Lab · Learn</div>
+  <h1 class="header-title">วิธีอ่าน<br><em>SCA Chart</em></h1>
+  <p class="header-sub">SCA Brewing Control Chart คือ "แผนที่" บอกว่ากาแฟแก้วนี้อยู่ตรงไหน และต้องปรับอะไรให้อร่อยขึ้น — มาอ่านให้เป็นทีละขั้น</p>
+  <span class="level-badge">✦ สำหรับผู้เริ่มต้น</span>
+</div>
+
+<!-- 1. แผนที่ -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Chart นี้คืออะไร</span><div class="sec-line"></div></div>
+  <div class="card">
+    <div style="font-size:13px;line-height:1.7;color:var(--text)">ลองนึกว่า chart นี้เป็น<strong style="color:var(--gold-lt)">แผนที่</strong> — กาแฟทุกแก้วมี "พิกัด" ของตัวเองบนแผนที่นี้ วัดได้จาก 2 ค่า แล้วเอามาหาจุดตัด เหมือนพิกัด GPS</div>
+    <div class="analogy">
+      <div class="analogy-label">เปรียบเทียบ</div>
+      <div class="analogy-body">เหมือนแผนที่ที่มีแกนนอน (ตะวันออก-ตก) และแกนตั้ง (เหนือ-ใต้) → กาแฟก็มีแกนนอน (<strong style="color:var(--text)">สกัดเท่าไหร่</strong>) และแกนตั้ง (<strong style="color:var(--text)">เข้มแค่ไหน</strong>) · จุดที่ดีที่สุดคือ "บ้าน" ตรงกลางแผนที่</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. สองแกน -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">02</span><span class="sec-title">2 แกนของแผนที่</span><div class="sec-line"></div></div>
+
+  <div class="axis-card" style="border-color:rgba(77,124,255,.3)">
+    <span class="axis-icon">↕️</span>
+    <div>
+      <div class="axis-sub" style="color:var(--blue-lt)">แกนตั้ง · Vertical</div>
+      <div class="axis-title">TDS = ความเข้มข้น (Strength)</div>
+      <div class="axis-desc">กาแฟแก้วนี้ "เข้ม" หรือ "จืด" · สูง = เข้มข้น · ต่ำ = บางจืด<br><strong style="color:var(--blue-lt)">ควบคุมด้วย: ratio (น้ำ:กาแฟ)</strong> — น้ำเยอะ = จืดลง</div>
+      <div class="analogy" style="margin-top:8px"><div class="analogy-label">เปรียบเทียบ</div><div class="analogy-body">เหมือน "ความเค็มของซุป" — ใส่น้ำเยอะ ซุปจืด · ใส่น้ำน้อย ซุปเข้ม</div></div>
+    </div>
+  </div>
+
+  <div class="axis-card" style="border-color:rgba(46,204,143,.3)">
+    <span class="axis-icon">↔️</span>
+    <div>
+      <div class="axis-sub" style="color:var(--green)">แกนนอน · Horizontal</div>
+      <div class="axis-title">EY = %สกัด (Extraction)</div>
+      <div class="axis-desc">ดึงรสออกจากผงกาแฟได้กี่ % · น้อย = ยังดึงไม่หมด · มาก = ดึงเยอะเกิน<br><strong style="color:var(--green)">ควบคุมด้วย: grind · เวลา · อุณหภูมิ</strong></div>
+      <div class="analogy" style="margin-top:8px"><div class="analogy-label">เปรียบเทียบ</div><div class="analogy-body">เหมือน "ชงชานานแค่ไหน" — แช่สั้น ดึงรสน้อย · แช่นาน ดึงรสเยอะ (จนขม)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. ความเข้ม ≠ สกัด -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">03</span><span class="sec-title">จุดที่มือใหม่สับสนที่สุด</span><div class="sec-line"></div></div>
+  <div class="card" style="border-color:var(--gold-dim)">
+    <div style="font-size:14px;line-height:1.7;text-align:center;margin-bottom:4px"><strong style="color:var(--gold-lt)">"เข้ม" ไม่เท่ากับ "สกัดเยอะ"</strong></div>
+    <div style="font-size:12px;color:var(--muted);text-align:center;line-height:1.6">2 ค่านี้แยกกันอิสระ — คุมคนละปุ่ม</div>
+    <div class="vs-box">
+      <div class="vs-side" style="background:rgba(77,124,255,.06);border:1px solid rgba(77,124,255,.25)">
+        <div class="vs-label" style="color:var(--blue-lt)">กาแฟ A</div>
+        <div class="vs-big" style="color:var(--blue-lt)">เข้ม แต่สกัดน้อย</div>
+        <div class="vs-desc">ใส่กาแฟเยอะ น้ำน้อย แต่บดหยาบ/ชงเร็ว<br>→ เข้มข้นแต่เปรี้ยว ขาดหวาน</div>
+      </div>
+      <div class="vs-mid">vs</div>
+      <div class="vs-side" style="background:rgba(46,204,143,.06);border:1px solid rgba(46,204,143,.25)">
+        <div class="vs-label" style="color:var(--green)">กาแฟ B</div>
+        <div class="vs-big" style="color:var(--green)">จืด แต่สกัดดี</div>
+        <div class="vs-desc">ใส่กาแฟน้อย น้ำเยอะ แต่บดละเอียด/ชงนาน<br>→ บางแต่รสครบ หวานสมดุล</div>
+      </div>
+    </div>
+    <div class="analogy">
+      <div class="analogy-label">จำง่ายๆ</div>
+      <div class="analogy-body"><strong style="color:var(--text)">เข้ม (TDS)</strong> = ปริมาณกาแฟในแก้วมากแค่ไหน (คุมด้วย ratio)<br><strong style="color:var(--text)">สกัด (EY)</strong> = ดึงรสจากผงได้ดีแค่ไหน (คุมด้วย grind/เวลา)<br>ชาแก้วเดียวกัน เทใส่น้ำเพิ่ม → จืดลง (TDS ลด) แต่ดึงรสมาเท่าเดิม (EY เท่าเดิม)</div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Interactive 9-region -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">9 โซนบนแผนที่</span><div class="sec-line"></div></div>
+  <div class="card">
+    <div class="chart-wrap">
+      <svg id="scaMap" class="chart-svg" viewBox="0 0 400 360"></svg>
+    </div>
+    <div class="hint-tap">👆 แตะแต่ละโซนเพื่อดูรสชาติและวิธีแก้</div>
+    <div class="region-detail" id="regionDetail">
+      <div class="rd-name" style="color:var(--green)">★ Gold Cup — จุดที่ดีที่สุด</div>
+      <div class="rd-coords">TDS 1.15–1.45% · EY 18–22%</div>
+      <div class="rd-taste">กาแฟสมดุล — กรดสดใส หวานตาม body กำลังดี สะอาด ไม่ขม ไม่เปรี้ยวเกิน · นี่คือเป้าหมายที่ทุกแก้วอยากไปให้ถึง</div>
+      <div class="rd-fix-label">ทำยังไง</div>
+      <div class="rd-fix"><span class="fix-chip" style="background:rgba(46,204,143,.12);color:var(--green);border:1px solid rgba(46,204,143,.25)">รักษาสูตรนี้ไว้ ✓</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. วิธีเลื่อน -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">05</span><span class="sec-title">วิธีเลื่อนแก้วเข้าหา Gold Cup</span><div class="sec-line"></div></div>
+  <div class="move-grid">
+    <div class="move-card" style="border-color:rgba(245,166,35,.3)">
+      <div class="move-head"><span class="move-arrow" style="color:var(--amber)">→</span><span class="move-title" style="color:var(--amber)">เปรี้ยว / สกัดน้อย</span></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:6px">เลื่อนไปขวา (EY เพิ่ม)</div>
+      <ul class="move-list"><li>บดละเอียดขึ้น</li><li>น้ำร้อนขึ้น</li><li>ชงนานขึ้น / กวนเพิ่ม</li></ul>
+    </div>
+    <div class="move-card" style="border-color:rgba(232,83,74,.3)">
+      <div class="move-head"><span class="move-arrow" style="color:var(--red)">←</span><span class="move-title" style="color:var(--red)">ขม / สกัดมาก</span></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:6px">เลื่อนไปซ้าย (EY ลด)</div>
+      <ul class="move-list"><li>บดหยาบขึ้น</li><li>น้ำเย็นลง</li><li>ตัดหางเร็วขึ้น</li></ul>
+    </div>
+    <div class="move-card" style="border-color:rgba(77,124,255,.3)">
+      <div class="move-head"><span class="move-arrow" style="color:var(--blue-lt)">↑</span><span class="move-title" style="color:var(--blue-lt)">จืด / บาง</span></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:6px">เลื่อนขึ้น (TDS เพิ่ม)</div>
+      <ul class="move-list"><li>ใช้น้ำน้อยลง (ratio แน่นขึ้น)</li><li>เพิ่มกาแฟ</li></ul>
+    </div>
+    <div class="move-card" style="border-color:rgba(155,127,232,.3)">
+      <div class="move-head"><span class="move-arrow" style="color:#9b7fe8">↓</span><span class="move-title" style="color:#9b7fe8">เข้มเกิน</span></div>
+      <div style="font-size:11px;color:var(--dim);margin-bottom:6px">เลื่อนลง (TDS ลด)</div>
+      <ul class="move-list"><li>ใช้น้ำมากขึ้น (ratio หลวมขึ้น)</li><li>ลดกาแฟ</li></ul>
+    </div>
+  </div>
+</div>
+
+<!-- 6. Flowchart -->
+<div class="section">
+  <div class="sec-head"><span class="sec-num">06</span><span class="sec-title">วินิจฉัยเร็วๆ</span><div class="sec-line"></div></div>
+  <div class="card">
+    <div class="flow">
+      <div class="flow-step"><div class="flow-q">🍋</div><div class="flow-text"><b>เปรี้ยวแหลม ขาดหวาน?</b><br><span style="color:var(--muted)">→ สกัดน้อยไป · บดละเอียดขึ้น หรือชงนานขึ้น</span></div></div>
+      <div class="flow-step"><div class="flow-q">😬</div><div class="flow-text"><b>ขม ฝาด แห้งปาก?</b><br><span style="color:var(--muted)">→ สกัดมากไป · บดหยาบขึ้น หรือตัดหางเร็วขึ้น</span></div></div>
+      <div class="flow-step"><div class="flow-q">💧</div><div class="flow-text"><b>จืด บาง เหมือนน้ำ?</b><br><span style="color:var(--muted)">→ เข้มไม่พอ · ใช้น้ำน้อยลง (ratio แน่นขึ้น)</span></div></div>
+      <div class="flow-step"><div class="flow-q">😤</div><div class="flow-text"><b>เข้มจัดจนแสบ?</b><br><span style="color:var(--muted)">→ เข้มเกิน · ใช้น้ำมากขึ้น (ratio หลวมขึ้น)</span></div></div>
+      <div class="flow-step"><div class="flow-q">😋</div><div class="flow-text"><b>กรด+หวานสมดุล สะอาด?</b><br><span style="color:var(--green)">→ คุณอยู่ที่ Gold Cup แล้ว! จดสูตรไว้</span></div></div>
+    </div>
+    <div style="margin-top:12px;padding:9px 12px;border-radius:5px;background:var(--s1);border:1px solid var(--border2);font-size:12px;color:var(--muted)">
+      💡 วัด TDS ด้วย refractometer แล้วเอาค่ามาใส่ใน <a href="sca_brewing_calculator.html" style="color:var(--gold-lt)">TDS → Ideal Cup</a> เพื่อหาพิกัดจริงบน chart ได้เลย
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span>Cloudbrew Pour Over Lab · Bangkok · <em style="font-style:normal;color:var(--gold-dim)">ordinary is specialty</em></span>
+  <span>SCA Brewing Control Chart · Batali/Guinard/Ristenpart framework</span>
+</div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+// 9 regions [tdsZone 0=strong,1=ideal,2=weak][eyZone 0=under,1=ideal,2=over]
+const REGIONS=[
+  [ // strong (top)
+    {name:'เข้มแต่เปรี้ยว',coords:'TDS สูง · EY ต่ำ',taste:'เข้มข้นมาก แต่เปรี้ยวแหลม ขาดความหวาน — กาแฟแรงแต่ไม่กลมกล่อม',fix:['บดละเอียดขึ้น','ใช้น้ำมากขึ้น'],col:'#e8534a'},
+    {name:'เข้มกำลังดี',coords:'TDS สูง · EY ดี',taste:'สกัดดี รสครบ แต่เข้มข้นไปนิด — ถ้าชอบ body หนักก็โอเค',fix:['ใช้น้ำมากขึ้นเล็กน้อย'],col:'#f5a623'},
+    {name:'เข้มแต่ขม',coords:'TDS สูง · EY สูง',taste:'เข้มและขม/ฝาด — สกัดมากไปด้วย เข้มไปด้วย แก้วที่หนักที่สุด',fix:['บดหยาบขึ้น','ตัดหางเร็ว','ใช้น้ำมากขึ้น'],col:'#e8534a'},
+  ],
+  [ // ideal (middle)
+    {name:'เปรี้ยว ขาดหวาน',coords:'TDS ดี · EY ต่ำ',taste:'ความเข้มกำลังดี แต่สกัดยังไม่พอ — เปรี้ยว บาง ส่วนหวานยังไม่ออกมา',fix:['บดละเอียดขึ้น','ชงนานขึ้น','น้ำร้อนขึ้น'],col:'#f5a623'},
+    {name:'★ GOLD CUP ★',coords:'TDS 1.15–1.45% · EY 18–22%',taste:'กาแฟสมดุล — กรดสดใส หวานตาม body กำลังดี สะอาด · นี่คือเป้าหมายที่ทุกแก้วอยากไปให้ถึง',fix:['รักษาสูตรนี้ไว้ ✓'],col:'#2ecc8f'},
+    {name:'ขม ฝาด',coords:'TDS ดี · EY สูง',taste:'ความเข้มกำลังดี แต่สกัดมากไป — เริ่มขม ฝาด แห้งปาก',fix:['บดหยาบขึ้น','ตัดหางเร็วขึ้น','น้ำเย็นลง'],col:'#e8534a'},
+  ],
+  [ // weak (bottom)
+    {name:'จืดและเปรี้ยว',coords:'TDS ต่ำ · EY ต่ำ',taste:'บางจืดเหมือนน้ำ และเปรี้ยวด้วย — แก้วที่อ่อนที่สุด สกัดก็ไม่พอ เข้มก็ไม่ถึง',fix:['บดละเอียดขึ้น','ใช้น้ำน้อยลง'],col:'#f5a623'},
+    {name:'จืด บาง',coords:'TDS ต่ำ · EY ดี',taste:'สกัดดี รสครบ แต่บางจืดไป — เหมือนกาแฟดีที่โดนเจือจาง',fix:['ใช้น้ำน้อยลง','เพิ่มกาแฟ'],col:'#4d7cff'},
+    {name:'จืดแต่ขม',coords:'TDS ต่ำ · EY สูง',taste:'บางจืด แต่ยังขม — สกัดมากไปจนได้รสขม แต่เข้มไม่พอ',fix:['บดหยาบขึ้น','ใช้น้ำน้อยลง'],col:'#e8534a'},
+  ],
+];
+const EY_LABELS=['สกัดน้อย','สกัดดี','สกัดมาก'];
+const TDS_LABELS=['เข้ม','กำลังดี','จืด'];
+
+function svgEl(tag,attrs,par){const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));if(par)par.appendChild(e);return e;}
+function svgTxt(par,x,y,t,attrs){const e=svgEl('text',{x,y,...attrs},par);e.textContent=t;return e;}
+
+function drawMap(){
+  const svg=document.getElementById('scaMap');svg.innerHTML='';
+  const W=400,H=360,P={l:46,r:14,t:14,b:40};
+  const cW=W-P.l-P.r,cH=H-P.t-P.b;
+  const cellW=cW/3,cellH=cH/3;
+  // bg
+  svgEl('rect',{x:P.l,y:P.t,width:cW,height:cH,fill:'#0d1018',stroke:'#1c2235','stroke-width':1,rx:3},svg);
+  // 9 cells
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){
+    const reg=REGIONS[r][c];
+    const x=P.l+c*cellW,y=P.t+r*cellH;
+    const isGold=(r===1&&c===1);
+    const g=svgEl('g',{cursor:'pointer'},svg);
+    g.addEventListener('click',()=>selectRegion(r,c));
+    g.addEventListener('touchstart',(e)=>{e.preventDefault();selectRegion(r,c);},{passive:false});
+    svgEl('rect',{x:x+2,y:y+2,width:cellW-4,height:cellH-4,rx:5,
+      fill:isGold?'rgba(46,204,143,.14)':reg.col+'12',
+      stroke:isGold?'rgba(46,204,143,.6)':reg.col+'33',
+      'stroke-width':isGold?2:1,'stroke-dasharray':isGold?'0':'0',id:'cell_'+r+'_'+c},g);
+    // mini label
+    const cx=x+cellW/2;
+    if(isGold){
+      svgTxt(g,cx,y+cellH/2-4,'★',{'text-anchor':'middle',fill:'#2ecc8f','font-size':18});
+      svgTxt(g,cx,y+cellH/2+14,'GOLD',{'text-anchor':'middle',fill:'#2ecc8f','font-family':'JetBrains Mono,monospace','font-size':9,'font-weight':700,'letter-spacing':1});
+    }else{
+      const words=reg.name.replace('★','').trim().split(' ');
+      svgTxt(g,cx,y+cellH/2+4,reg.name.length>8?reg.name.substring(0,7)+'…':reg.name,{'text-anchor':'middle',fill:reg.col,'font-family':'Bai Jamjuree,sans-serif','font-size':11,'font-weight':500});
+    }
+  }
+  // axis labels — EY (bottom)
+  EY_LABELS.forEach((l,i)=>svgTxt(svg,P.l+cellW*(i+0.5),H-18,l,{'text-anchor':'middle',fill:'#637a9f','font-family':'Bai Jamjuree,sans-serif','font-size':11}));
+  svgTxt(svg,P.l+cW/2,H-3,'EY · %สกัด (Extraction) →',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1});
+  // axis labels — TDS (left)
+  TDS_LABELS.forEach((l,i)=>svgTxt(svg,P.l-10,P.t+cellH*(i+0.5)+4,l,{'text-anchor':'end',fill:'#637a9f','font-family':'Bai Jamjuree,sans-serif','font-size':11}));
+  svgTxt(svg,12,P.t+cH/2,'↑ TDS · ความเข้ม (Strength)',{'text-anchor':'middle',fill:'#283550','font-family':'JetBrains Mono,monospace','font-size':8,'letter-spacing':1,transform:`rotate(-90,12,${P.t+cH/2})`});
+}
+
+let selected={r:1,c:1};
+function selectRegion(r,c){
+  selected={r,c};
+  // reset all cell strokes
+  for(let rr=0;rr<3;rr++)for(let cc=0;cc<3;cc++){
+    const cell=document.getElementById('cell_'+rr+'_'+cc);
+    const isGold=(rr===1&&cc===1);
+    const reg=REGIONS[rr][cc];
+    if(cell){
+      cell.setAttribute('stroke',isGold?'rgba(46,204,143,.6)':reg.col+'33');
+      cell.setAttribute('stroke-width',isGold?2:1);
+    }
+  }
+  // highlight selected
+  const sel=document.getElementById('cell_'+r+'_'+c);
+  if(sel){sel.setAttribute('stroke',REGIONS[r][c].col);sel.setAttribute('stroke-width',3);}
+  renderDetail(r,c);
+}
+
+function renderDetail(r,c){
+  const reg=REGIONS[r][c];
+  const fixChips=reg.fix.map(f=>{
+    const isKeep=f.includes('รักษา');
+    const col=isKeep?'#2ecc8f':'#c9943a';
+    return '<span class="fix-chip" style="background:'+col+'1f;color:'+col+';border:1px solid '+col+'40">'+f+'</span>';
+  }).join('');
+  document.getElementById('regionDetail').innerHTML=
+    '<div class="rd-name" style="color:'+reg.col+'">'+reg.name+'</div>'+
+    '<div class="rd-coords">'+reg.coords+'</div>'+
+    '<div class="rd-taste">'+reg.taste+'</div>'+
+    '<div class="rd-fix-label">วิธีแก้ให้เข้าใกล้ Gold Cup</div>'+
+    '<div class="rd-fix">'+fixChips+'</div>';
+}
+
+drawMap();
+selectRegion(1,1);
+
+</script>
+</body>
+</html>
