@@ -204,9 +204,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
   <div id="autoDisclaimer" style="display:none;margin-bottom:12px;padding:11px 14px;border-radius:5px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25)">
     <div style="font-family:var(--mono);font-size:9px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:5px">⚠ ESTIMATED VALUES — NOT MEASURED</div>
     <div style="font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.65">
-      TDS calculated from kinetic depletion model (Liang et al. 2021 equilibrium form, UC Davis).
-      K-resistance values [12, 5, 4.5, 4] are empirically calibrated — not from direct literature.
-      <strong style="color:var(--text)">For accurate results: measure TDS with refractometer → switch to Manual TDS mode.</strong>
+      TDS estimated from an empirical saturation curve, hand-calibrated to land near the target EY.
+      K-resistance values [12, 5, 4.5, 4] are fitted to typical pour patterns — not derived from literature.
+      <strong style="color:var(--text)">This predicts pour <em>shape</em>, not absolute TDS. For real numbers: measure with refractometer → Manual TDS mode.</strong>
     </div>
     <!-- Auto-estimate controls -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
@@ -232,7 +232,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <!-- Model info -->
     <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.5">
-      Model: TDS_i = (remaining × w/(w + k_i × dose)) / yield_out · Source: Liang et al. (2021) Sci. Rep.
+      Model: TDS_i = (remaining × w/(w + k_i × dose)) / yield_out · empirical saturation form (hand-calibrated, not from literature)
     </div>
   </div>
 
@@ -328,9 +328,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           </div>
           <div class="tds-scale-labels">
             <span style="color:var(--green)">0%</span>
-            <span style="color:var(--green)">0.3%</span>
+            <span style="color:var(--green)">0.4%</span>
             <span style="color:var(--amber)">↑safe</span>
-            <span style="color:var(--amber)">0.6%</span>
+            <span style="color:var(--amber)">0.6% comp-cut</span>
             <span style="color:var(--red)">↑marginal</span>
             <span style="color:var(--red)">0.8%</span>
             <span style="color:var(--red)">1.0%</span>
@@ -351,7 +351,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="label" style="margin-bottom:12px">Derived Diagnostics</div>
         <div class="diag-grid" id="diagGrid">
           <div class="diag-cell"><div class="diag-val" id="diagEYmain" style="color:var(--gold-lt)">—</div><div class="diag-lbl">Pre-Tail EY</div><div class="diag-sub" style="color:var(--dim)">Target &lt; 19%</div></div>
-          <div class="diag-cell"><div class="diag-val" id="diagXactual" style="color:var(--blue)">—</div><div class="diag-lbl">X actual</div><div class="diag-sub" style="color:var(--dim)">Baseline 1.47</div></div>
+          <div class="diag-cell"><div class="diag-val" id="diagXactual" style="color:var(--blue)">—</div><div class="diag-lbl">X actual</div><div class="diag-sub" style="color:var(--dim)">retention g/g</div></div>
           <div class="diag-cell"><div class="diag-val" id="diagEEY" style="color:var(--muted)">—</div><div class="diag-lbl">EEY corrected</div><div class="diag-sub" style="color:var(--dim)">with X actual</div></div>
         </div>
         <div style="margin-top:12px;font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;padding:10px;background:var(--surface);border-radius:4px;border:1px solid var(--border)" id="diagFormulas">
@@ -372,11 +372,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
             <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Bitter/astringent compound concentration still high. Each additional gram drawn down adds disproportionately more astringency than sweetness. Lift dripper immediately.</div>
           </div>
           <div style="padding:10px 12px;border-radius:5px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25)">
-            <div style="font-family:var(--mono);font-size:9px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:4px">MARGINAL — TDS_tail 0.4–0.6%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--amber);font-weight:700;letter-spacing:.1em;margin-bottom:4px">MARGINAL — TDS_tail 0.4–0.8%</div>
             <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Bitterness declining, sweetness/floral increasing. Acceptable to include for some brews. For competition: cut at ~0.6% to eliminate astringency risk entirely.</div>
           </div>
           <div style="padding:10px 12px;border-radius:5px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.25)">
-            <div style="font-family:var(--mono);font-size:9px;color:var(--green);font-weight:700;letter-spacing:.1em;margin-bottom:4px">SAFE — TDS_tail &lt; 0.3%</div>
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);font-weight:700;letter-spacing:.1em;margin-bottom:4px">SAFE — TDS_tail &lt; 0.4%</div>
             <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.6">Extract is highly dilute — neither bitter nor sweet compounds in significant quantity. Negligible impact on final cup. Drawdown may complete without quality risk.</div>
           </div>
         </div>
@@ -393,11 +393,12 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 
         <!-- X_actual interpretation -->
         <div style="margin-top:10px;padding:10px 12px;border-radius:5px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2)">
-          <div class="label" style="margin-bottom:6px;color:var(--blue)">X_actual Interpretation</div>
+          <div class="label" style="margin-bottom:6px;color:var(--blue)">X_actual — system retention (g water held per g coffee)</div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--muted);line-height:1.8">
-            <div><span style="color:var(--blue)">X = 1.47</span> — Standard absorption (moderate ROR roast)</div>
-            <div><span style="color:var(--amber)">X 1.7–2.0</span> — High-ROR light roast, more absorption</div>
-            <div><span style="color:var(--red)">X &gt; 2.0</span> — Very porous roast, recalibrate EEY target</div>
+            <div style="margin-bottom:4px;color:var(--dim)">Captures grounds absorption <em>plus</em> dripper dead-space — not roast alone.</div>
+            <div><span style="color:var(--blue)">X ≈ 1.5–2.0</span> — Grounds only (cone filter, minimal dead-space)</div>
+            <div><span style="color:var(--amber)">X ≈ 2.5–3.5</span> — Flat-bottom / high dead-space (e.g. Orea Z1)</div>
+            <div><span style="color:var(--red)">X &gt; 3.5</span> — Check for excess retained liquid or short draw-down</div>
           </div>
         </div>
       </div>
@@ -466,7 +467,7 @@ const state = {
   })),
 };
 
-// ── Auto-Estimate TDS: kinetic depletion model ────────────────────────────────
+// ── Auto-Estimate TDS: empirical saturation estimator ─────────────────────────
 // Responds in real time to dose, water, and yieldOut inputs.
 // Physics: grounds start dry (bloom harder to extract), then wet (easier).
 // Calibrated to Happy's EEY=19% target with typical light-roast Arabica.
@@ -477,9 +478,9 @@ const state = {
 
 // ── Auto-Estimate model parameters ──────────────────────────────────────────
 // BASE k_resist: higher = slower extraction (bloom dry, later pours wet)
-// Physics basis: Liang et al. (2021) equilibrium desorption model, UC Davis
+// Functional form is a saturation curve w/(w + k·D) — chosen for shape, not from a specific paper.
 // k form: TDS_i = (remaining × w/(w + k×D)) / yield_out
-// k values calibrated to match observed TDS patterns; not directly from literature
+// k values hand-calibrated to match observed pour patterns; not from literature
 const AUTO_K_BASE = [12, 5, 4.5, 4];
 
 // Grind multiplier: coarser grind → less surface area → slower extraction → higher k
@@ -833,15 +834,19 @@ function renderBlend() {
     renderGauge('TDS (blend)', blend.tds, 0.80, 1.80, '%', 1.15, 1.45, 2, false) +
     renderGauge('Extraction Yield (blend)', blend.ey, 14, 28, '%', 18, 22, 1, true);
 
-  // Hidden formula + X=1.47 note
+  // Golden Cup check — self-consistent with the Tail panel's retention math.
+  // R = total water ÷ dose (brew ratio).  X = measured retention (water in − liquid out) ÷ dose.
+  // (R − X) reduces to beverage ÷ dose, so TDS = EY / (R − X) = EY / R_beverage. No double-count.
   if (blend) {
-    const ratio = blend.volume > 0 ? (blend.volume / state.dose).toFixed(1) : '—';
-    const xDefault = 1.47;
-    const expectedTDS = blend.ey > 0 ? (blend.ey / (parseFloat(ratio) - xDefault)).toFixed(2) : '—';
+    const waterInSel = selectedIdxs.reduce((s,i) => s + state.pours[i].water, 0);
+    const rTotal     = waterInSel > 0 ? (waterInSel / state.dose) : 0;          // brew ratio
+    const xMeasured  = state.dose > 0 ? ((waterInSel - blend.volume) / state.dose) : 0; // retention this brew
+    const expectedTDS = blend.ey > 0 && (rTotal - xMeasured) > 0
+      ? (blend.ey / (rTotal - xMeasured)).toFixed(2) : '—';
     gaugesEl.innerHTML += `<div style="margin:8px 0;padding:9px 12px;border-radius:4px;background:rgba(201,148,58,.06);border:1px solid rgba(201,148,58,.2);font-family:var(--mono);font-size:10px;line-height:1.8;color:var(--muted)">
-      <span style="color:var(--gold-lt)">Hidden Golden Cup formula:</span> TDS = EY / (R − X)<br>
-      = ${blend.ey.toFixed(1)}% / (${ratio} − 1.47) = <span style="color:var(--gold-lt)">${expectedTDS}%</span>
-      <span style="font-size:9px;color:var(--dim);margin-left:4px">(X = 1.47 g/g, Happy 2025)</span>
+      <span style="color:var(--gold-lt)">Golden Cup check:</span> TDS = EY / (R − X)<br>
+      = ${blend.ey.toFixed(1)}% / (${rTotal.toFixed(1)} − ${xMeasured.toFixed(2)}) = <span style="color:var(--gold-lt)">${expectedTDS}%</span>
+      <span style="font-size:9px;color:var(--dim);margin-left:4px">R = water÷dose · X = retention measured this brew</span>
     </div>`;
   }
   // Volume stat
@@ -1233,7 +1238,7 @@ function renderTailDiagnostic() {
   } else {
     statusClass='tail-ok'; icon='✓';
     decision='Safe — Negligible Impact';
-    reason=`TDS_tail = ${tailTDS.toFixed(2)}% (< 0.3%) — Highly dilute, neither bitter nor sweet in significant quantity. Can let drawdown complete.`;
+    reason=`TDS_tail = ${tailTDS.toFixed(2)}% (< 0.4%) — Highly dilute, neither bitter nor sweet in significant quantity. Can let drawdown complete.`;
   }
 
   if (tailTDS > 0) {
