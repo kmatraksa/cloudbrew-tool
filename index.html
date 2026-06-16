@@ -257,6 +257,8 @@ body::after{
 .tools-grid .tool-card:nth-child(3){animation:fadeUp .5s .26s ease both}
 .tools-grid .tool-card:nth-child(4){animation:fadeUp .5s .34s ease both}
 .tools-grid .tool-card:nth-child(5){animation:fadeUp .5s .42s ease both}
+.tools-grid .tool-card:nth-child(6){animation:fadeUp .5s .50s ease both}
+.tools-grid .tool-card:nth-child(7){animation:fadeUp .5s .58s ease both}
 </style>
 </head>
 <body>
@@ -279,6 +281,31 @@ body::after{
 
 <div class="tools-grid">
 
+  <!-- Extraction Lab — featured flagship -->
+  <a href="extraction_lab.html" class="tool-card featured" style="--card-accent:#e8a33d">
+    <div class="card-header">
+      <div class="card-num" style="color:#e8a33d">NEW · Flagship</div>
+      <span class="card-icon">🧪</span>
+      <div class="card-title">Extraction <em>Lab</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(232,163,61,.12);color:#e8a33d">5-Tab Instrument</span>
+        <span class="card-tag" style="background:rgba(95,208,196,.1);color:#5fd0c4">Calibration Core</span>
+        <span class="card-tag" style="background:rgba(74,207,142,.1);color:var(--green)">Yield Flow</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">เครื่องมือวิเคราะห์การสกัดครบวงจร — Setup · Brew · Analysis · Phases · Learn · brewing control chart + dilution path · flavor surface (2D/3D) · โมเดล calibrate ตามทุก brew ของคุณ</p>
+      <ul class="card-features">
+        <li>Yield flow g/s + consistency check vs logs</li>
+        <li>Control chart + dilution overlay (EY คงที่)</li>
+        <li>Flavor surface 2D heatmap / 3D curve</li>
+        <li>Calibration Core: Personal X · Grind→EY · Flavor</li>
+        <li>EXACT / ESTIMATE / LEARNING tags ทุกค่า</li>
+      </ul>
+      <div class="card-cta">Open Lab <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
+
   <!-- Pour-by-Pour — featured -->
   <a href="pour_by_pour_calculator.html" class="tool-card featured" style="--card-accent:var(--gold)">
     <div class="card-header">
@@ -295,8 +322,8 @@ body::after{
       <p class="card-desc">Input TDS per pour fraction → visualize on SCA Brewing Control Chart → blend pours → tail-cut diagnostic with Batali et al. (2020) thresholds → X_actual calibration.</p>
       <ul class="card-features">
         <li>EEY threshold warning at 19% and 21%</li>
-        <li>Auto-Estimate (empirical estimator — predicts pour shape)</li>
-        <li>Golden Cup identity: TDS = EY/(R−X)</li>
+        <li>Auto-Estimate kinetic model (Liang et al. 2021)</li>
+        <li>Hidden Golden Cup formula: TDS = EY/(R−X)</li>
         <li>Dilution calculator to target TDS</li>
       </ul>
       <div class="card-cta">Open Calculator <span class="card-cta-arrow">→</span></div>
@@ -508,11 +535,11 @@ body::after{
   </div>
 
   <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
-    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Golden Cup Identity</div>
+    <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px">Hidden Formula</div>
     <div style="font-family:'Cambria Math','Times New Roman',serif;font-size:13px;color:var(--gold-lt);font-style:italic;line-height:1.7">
-      TDS = EY / (R − X)
+      TDS = EY / (R − 1.47)
     </div>
-    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">R = water÷dose · X = retention (g/g), measured per brew</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:6px">X = 1.47 g/g · Happy 2025</div>
   </div>
 
   <div style="padding:16px;background:var(--card);border:1px solid var(--border);border-radius:6px">
@@ -550,6 +577,21 @@ body::after{
       <div class="card-cta">Open Cheatsheet <span class="card-cta-arrow">→</span></div>
     </div>
   </a>
+  <a href="happy_workshop_cheatsheet.html" class="tool-card" style="--card-accent:var(--amber)">
+    <div class="card-header">
+      <div class="card-num" style="color:var(--amber)">Technical · Printable</div>
+      <span class="card-icon">📋</span>
+      <div class="card-title">Happy Workshop <em>Cheatsheet</em></div>
+      <div class="card-tag-row">
+        <span class="card-tag" style="background:rgba(251,191,36,.1);color:var(--amber)">Advanced</span>
+        <span class="card-tag" style="background:rgba(74,222,128,.1);color:var(--green)">Print / PDF</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p class="card-desc">สรุป Mr. Happy Workshop ครบใน 1 หน้า — สูตร EEY · Tail cut thresholds · Water chemistry · Pour math · Temperature · C40 clicks · Competition TOPIC</p>
+      <div class="card-cta">Open Cheatsheet <span class="card-cta-arrow">→</span></div>
+    </div>
+  </a>
 </div>
 
 <footer class="footer">
@@ -562,7 +604,7 @@ body::after{
     <span>KBO-P v2.1</span>
   </div>
   <div class="footer-copy">
-    Tools built on: Lockhart (1957) · Hendon et al. (2014) · Batali et al. (2020) · Happy Workshop (2025)
+    Tools built on: Lockhart (1957) · Hendon et al. (2014) · Batali et al. (2020) · Liang et al. (2021) · Happy Workshop (2025)
   </div>
 </footer>
 

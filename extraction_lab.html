@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Extraction Lab · Cloudbrew</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Bai+Jamjuree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0806;--panel:#13100b;--panel2:#1a160f;--raise:#221c13;
+  --line:#2a2317;--line2:#3a3120;
+  --amber:#e8a33d;--amber-dim:#7a5a20;--amber-glow:rgba(232,163,61,.18);
+  --teal:#5fd0c4;--teal-dim:#2f6962;--teal-glow:rgba(95,208,196,.15);
+  --clay:#9a7b5c;--coral:#e8674a;--violet:#b89cf0;
+  --text:#f0e9dd;--muted:#9a8e7a;--dim:#5a5142;--faint:#3a3328;
+  --mono:'IBM Plex Mono',monospace;--disp:'Space Grotesk',sans-serif;--sans:'Bai Jamjuree',sans-serif;
+  --tabh:64px;
+}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(232,163,61,.04),transparent 70%);pointer-events:none;z-index:0}
+
+/* ── Header ── */
+.topbar{position:sticky;top:0;z-index:40;background:rgba(10,8,6,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:12px}
+.brand{flex:1;min-width:0}
+.brand-name{font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:-.01em;line-height:1}
+.brand-name b{color:var(--amber);font-weight:700}
+.brand-tag{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:3px}
+.core-mini{width:38px;height:38px;flex-shrink:0;position:relative}
+.core-mini canvas{width:38px;height:38px;display:block}
+
+/* ── Main ── */
+.app{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:16px 14px calc(var(--tabh) + 28px + env(safe-area-inset-bottom,0px))}
+.tabpanel{display:none;animation:fade .3s ease}
+.tabpanel.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── Section heads ── */
+.phead{margin-bottom:16px}
+.phead-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);display:flex;align-items:center;gap:8px}
+.phead-eyebrow::before{content:'';width:16px;height:1px;background:var(--amber-dim)}
+.phead-title{font-family:var(--disp);font-weight:300;font-size:1.7rem;letter-spacing:-.02em;margin-top:4px;line-height:1}
+.phead-title b{font-weight:600;color:var(--amber)}
+.phead-sub{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.55}
+
+/* ── Cards ── */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px;margin-bottom:12px;position:relative}
+.card-label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-label .ln{flex:1;height:1px;background:var(--line)}
+
+/* ── Tag badges ── */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.tag-exact{background:rgba(95,208,196,.12);border:1px solid var(--teal-dim);color:var(--teal)}
+.tag-est{background:rgba(232,163,61,.1);border:1px solid var(--amber-dim);color:var(--amber)}
+.tag-learn{background:rgba(184,156,240,.1);border:1px solid #5a4a80;color:var(--violet)}
+
+/* ── Form fields ── */
+.fld{margin-bottom:13px}
+.fld:last-child{margin-bottom:0}
+.fld-label{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline}
+.fld-hint{color:var(--dim);text-transform:none;letter-spacing:0;font-size:9px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line2);color:var(--text);border-radius:7px;padding:11px 12px;font-family:var(--mono);font-size:15px;outline:none;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:var(--dim)}
+input:focus,select:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-glow)}
+input:focus-visible,select:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+select{font-family:var(--sans);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a8e7a' fill='none' stroke-width='1.4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=file]{font-family:var(--sans);font-size:12px;padding:9px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:var(--line2);border-radius:2px;padding:0;cursor:pointer;border:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px var(--amber-glow);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--amber);border:none;cursor:pointer}
+input[type=range]:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
+
+/* ── Pill select group ── */
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{flex:1;min-width:64px;padding:10px 6px;border-radius:7px;border:1px solid var(--line2);background:var(--bg);color:var(--muted);font-family:var(--sans);font-size:12px;text-align:center;cursor:pointer;transition:all .15s}
+.pill:active{transform:scale(.97)}
+.pill.on{border-color:var(--amber);background:var(--amber-glow);color:var(--amber)}
+.pill:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+
+/* ── Readout cells (numbers = hero) ── */
+.readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.readout-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.ro{background:var(--panel);padding:13px 12px;text-align:center;position:relative}
+.ro-val{font-family:var(--mono);font-weight:600;font-size:1.9rem;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.ro-val .u{font-size:.5em;color:var(--muted);font-weight:400;margin-left:1px}
+.ro-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.ro-sub{font-family:var(--mono);font-size:8px;color:var(--dim);margin-top:2px}
+
+/* ── Big hero readout ── */
+.hero-ro{text-align:center;padding:8px 0 4px}
+.hero-ro-val{font-family:var(--mono);font-weight:700;font-size:4.2rem;line-height:.9;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.hero-ro-val .u{font-size:.28em;color:var(--muted);font-weight:400}
+.hero-ro-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);margin-top:8px}
+
+/* ── Canvas frames ── */
+.canvas-frame{background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:4px;position:relative;overflow:hidden}
+canvas{display:block;width:100%;touch-action:none}
+.canvas-hint{font-family:var(--mono);font-size:9px;color:var(--dim);text-align:center;margin-top:7px}
+
+/* ── Note / callout ── */
+.note{padding:10px 12px;border-radius:7px;font-family:var(--mono);font-size:10px;line-height:1.6;color:var(--muted);margin-top:10px}
+.note-amber{background:rgba(232,163,61,.06);border:1px solid var(--amber-dim)}
+.note-coral{background:rgba(232,103,74,.07);border:1px solid #6a3525;color:#e8a090}
+.note-teal{background:rgba(95,208,196,.05);border:1px solid var(--teal-dim)}
+.note b{color:var(--text)}
+
+/* ── Phase blocks ── */
+.phase{border:1px solid var(--line);border-radius:9px;margin-bottom:10px;overflow:hidden}
+.phase-bar{height:3px}
+.phase-body{padding:13px 14px}
+.phase-name{font-family:var(--disp);font-weight:500;font-size:1.05rem;display:flex;align-items:center;gap:8px}
+.phase-diag{font-size:12px;color:var(--muted);line-height:1.6;margin-top:6px}
+.phase-fix{font-size:12px;line-height:1.55;margin-top:8px;padding:8px 10px;background:var(--bg);border-radius:6px;border-left:2px solid var(--amber-dim)}
+
+/* ── Recommendations ── */
+.rec{display:flex;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.rec:last-child{border-bottom:none}
+.rec-icon{font-size:16px;flex-shrink:0;width:24px;text-align:center}
+.rec-body{font-size:12.5px;line-height:1.55}
+.rec-body b{color:var(--amber)}
+
+/* ── Buttons ── */
+.btn{width:100%;padding:14px;border-radius:9px;border:none;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:transform .12s,background .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.98)}
+.btn:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.btn-primary{background:var(--amber);color:#1a1206}
+.btn-primary:active{background:var(--amber-dim)}
+.btn-ghost{background:var(--panel2);border:1px solid var(--line2);color:var(--muted)}
+.btn-ghost:active{border-color:var(--amber);color:var(--amber)}
+.btn-row{display:flex;gap:8px}
+.btn-row .btn{flex:1}
+
+/* ── Calibration Core (signature) ── */
+.core-stage{display:flex;flex-direction:column;align-items:center;padding:8px 0 4px}
+.core-canvas-wrap{width:240px;max-width:72vw;aspect-ratio:1;position:relative}
+.core-canvas-wrap canvas{width:100%;height:100%}
+.core-legend{display:grid;grid-template-columns:1fr;gap:8px;width:100%;margin-top:14px}
+.core-param{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--panel)}
+.core-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px currentColor}
+.core-pname{font-family:var(--disp);font-weight:500;font-size:13px}
+.core-pmeta{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:1px}
+.core-conf{margin-left:auto;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+
+/* ── Log list ── */
+.log-item{border:1px solid var(--line);border-radius:9px;margin-bottom:8px;overflow:hidden}
+.log-head{display:flex;align-items:center;gap:10px;padding:12px 13px;cursor:pointer}
+.log-head:hover{background:var(--panel2)}
+.log-name{flex:1;min-width:0}
+.log-title{font-family:var(--disp);font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-meta{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px}
+.log-ey{font-family:var(--mono);font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+.log-detail{padding:0 13px 13px;border-top:1px solid var(--line);display:none}
+.log-detail.open{display:block}
+.log-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--faint);font-family:var(--mono);font-size:11px}
+.log-row .k{color:var(--muted)}
+.empty{text-align:center;padding:36px 18px;font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.9}
+
+/* ── Tab bar ── */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:50;height:calc(var(--tabh) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:rgba(13,11,8,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex}
+.tab{flex:1;border:none;background:none;color:var(--dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;transition:color .15s;position:relative;padding:0}
+.tab svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6}
+.tab.on{color:var(--amber)}
+.tab.on::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:2px;background:var(--amber);border-radius:0 0 2px 2px;box-shadow:0 0 8px var(--amber-glow)}
+.tab:focus-visible{outline:2px solid var(--amber);outline-offset:-3px}
+
+.toast{position:fixed;bottom:calc(var(--tabh) + 16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--teal);color:#06100e;padding:10px 18px;border-radius:100px;font-family:var(--mono);font-size:11px;font-weight:600;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+@media(max-width:430px){
+  .grid3{grid-template-columns:1fr 1fr}
+  .hero-ro-val{font-size:3.6rem}
+  .ro-val{font-size:1.6rem}
+}
+
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="core-mini"><canvas id="coreMini" width="76" height="76"></canvas></div>
+  <div class="brand">
+    <div class="brand-name">Cloudbrew <b>Extraction Lab</b></div>
+    <div class="brand-tag">ordinary is specialty</div>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- ══ TAB 1 · SETUP ══ -->
+<section class="tabpanel active" id="tab-setup">
+  <div class="phead">
+    <div class="phead-eyebrow">01 · ก่อน Brew</div>
+    <div class="phead-title"><b>Setup</b></div>
+    <div class="phead-sub">ตั้งค่าเมล็ด · grind · อุปกรณ์ ก่อนเริ่มสกัด</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Coffee <span class="ln"></span></div>
+    <div class="fld"><div class="fld-label">Coffee name</div><input id="s_name" placeholder="เช่น Ethiopia Bildimoo Natural"></div>
+    <div class="fld"><div class="fld-label">Process</div>
+      <div class="pills" id="s_process"></div>
+    </div>
+    <div class="fld"><div class="fld-label">Roast level</div>
+      <div class="pills" id="s_roast"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Roast Estimate <span class="tag tag-est">Estimate</span><span class="ln"></span></div>
+    <div class="fld"><div class="fld-label"><span>Bean photo (optional)</span><span class="fld-hint">brightness → rough roast</span></div>
+      <input type="file" id="s_photo" accept="image/*" capture="environment"></div>
+    <div class="readout-grid"><div class="ro"><div class="ro-val" id="s_bright" style="color:var(--amber)">—</div><div class="ro-lbl">Avg Brightness</div></div><div class="ro"><div class="ro-val" id="s_roastEst" style="color:var(--amber)">—</div><div class="ro-lbl">Roast Est.</div></div></div>
+    <div class="note note-amber">ค่านี้เป็น <b>ESTIMATE</b> จากความสว่างเฉลี่ยของภาพ — ไม่ใช่ Agtron · ปรับ Roast level ด้านบนเองได้เสมอ</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Grind <span class="ln"></span></div>
+    <div class="fld"><div class="fld-label">Grinder / clicks</div><input id="s_grinder" placeholder="Comandante C40 · 28 clicks"></div>
+    <div class="grid2">
+      <div class="fld"><div class="fld-label"><span>D50</span><span class="fld-hint">µm · DiFluid</span></div><input type="number" id="s_d50" placeholder="750" inputmode="decimal"></div>
+      <div class="fld"><div class="fld-label"><span>Span</span><span class="fld-hint">optional</span></div><input type="number" id="s_span" placeholder="1.3" inputmode="decimal" step="0.01"></div>
+    </div>
+    <div class="readout-grid"><div class="ro"><div class="ro-val" id="s_kmult" style="color:var(--teal)">—</div><div class="ro-lbl">k multiplier</div><div class="ro-sub">(750/D50)^1.5</div></div><div class="ro"><div class="ro-val" id="s_kspeed" style="color:var(--teal);font-size:1.1rem">—</div><div class="ro-lbl">Extraction rate</div></div></div>
+    <div class="note note-teal">D50 จาก <b>DiFluid PSD reader</b> — ฮาร์ดแวร์วัดแม่นกว่ากล้องมือถือ จึงไม่มี camera grind analysis ในแอปนี้</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Brew Parameters <span class="ln"></span></div>
+    <div class="grid2">
+      <div class="fld"><div class="fld-label">Dose (g)</div><input type="number" id="s_dose" value="15" step="0.1" inputmode="decimal"></div>
+      <div class="fld"><div class="fld-label"><span>Water TDS</span><span class="fld-hint">ppm</span></div><input type="number" id="s_waterTDS" placeholder="40" inputmode="decimal"></div>
+    </div>
+    <div class="fld"><div class="fld-label">Dripper</div><div class="pills" id="s_dripper"></div></div>
+    <div class="fld"><div class="fld-label"><span>Ratio</span><span class="fld-hint" id="s_ratioRec">auto: —</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="range" id="s_ratio" min="13" max="20" step="0.1" value="15">
+        <div style="font-family:var(--mono);font-weight:700;font-size:1.3rem;color:var(--amber);min-width:62px;text-align:right" id="s_ratioVal">1:15.0</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:4px" id="s_applyRec">↪ ใช้ค่า auto ratio ที่แนะนำ</button>
+    <div class="note note-amber" id="s_recNote" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ══ TAB 2 · BREW ══ -->
+<section class="tabpanel" id="tab-brew">
+  <div class="phead">
+    <div class="phead-eyebrow">02 · ระหว่าง Brew</div>
+    <div class="phead-title"><b>Brew</b></div>
+    <div class="phead-sub">กรอกค่าที่วัดจริงระหว่างสกัด — ผลคำนวณอัปเดตทันที</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Measured Inputs <span class="ln"></span></div>
+    <div class="grid2">
+      <div class="fld"><div class="fld-label">Water in (g)</div><input type="number" id="b_waterIn" placeholder="250" inputmode="decimal" step="1"></div>
+      <div class="fld"><div class="fld-label">Yield out (g)</div><input type="number" id="b_yield" placeholder="208" inputmode="decimal" step="1"></div>
+    </div>
+    <div class="grid2">
+      <div class="fld"><div class="fld-label">TDS (%)</div><input type="number" id="b_tds" placeholder="1.38" inputmode="decimal" step="0.01"></div>
+      <div class="fld"><div class="fld-label">Lift-dripper time</div><input id="b_lift" placeholder="2:30" inputmode="text"></div>
+    </div>
+    <div class="fld"><div class="fld-label">Total drawdown time</div><input id="b_draw" placeholder="3:15" inputmode="text"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Tail Fraction <span class="tag tag-exact">Weighed</span><span class="ln"></span></div>
+    <div class="grid2">
+      <div class="fld"><div class="fld-label">Tail TDS (%)</div><input type="number" id="b_tailTDS" placeholder="0.65" inputmode="decimal" step="0.01"></div>
+      <div class="fld"><div class="fld-label"><span>Tail weight</span><span class="fld-hint">g · ต้องชั่ง</span></div><input type="number" id="b_tailWt" placeholder="35" inputmode="decimal" step="1"></div>
+    </div>
+    <div class="note note-amber">tail EY ต้องใช้ <b>tail mass ที่ชั่งจริง</b> — แอปไม่เดาค่าให้ ถ้าไม่ชั่งจะไม่คำนวณ tail EY</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Computed <span class="tag tag-exact">Exact</span><span class="ln"></span></div>
+    <div class="hero-ro"><div class="hero-ro-val" id="b_ey" style="color:var(--amber)">—<span class="u">% EY</span></div><div class="hero-ro-lbl">Total Extraction Yield</div></div>
+    <div class="readout-grid cols3" style="margin-top:12px">
+      <div class="ro"><div class="ro-val" id="b_ratioOut" style="font-size:1.4rem">—</div><div class="ro-lbl">Ratio out</div></div>
+      <div class="ro"><div class="ro-val" id="b_xret" style="color:var(--teal);font-size:1.4rem">—</div><div class="ro-lbl">X retained</div></div>
+      <div class="ro"><div class="ro-val" id="b_tailEY" style="color:var(--coral);font-size:1.4rem">—</div><div class="ro-lbl">Tail EY</div></div>
+    </div>
+    <div class="readout-grid cols3" style="margin-top:1px">
+      <div class="ro"><div class="ro-val" id="b_postlift" style="color:var(--clay);font-size:1.3rem">—</div><div class="ro-lbl">Post-lift drawdown</div></div>
+      <div class="ro"><div class="ro-val" id="b_yflow" style="color:var(--teal);font-size:1.3rem">—</div><div class="ro-lbl">Yield flow</div></div>
+      <div class="ro"><div class="ro-val" id="b_zone" style="font-size:1rem">—</div><div class="ro-lbl">Chart zone</div></div>
+    </div>
+    <div class="note note-teal" id="b_xnote" style="display:none"></div>
+    <div class="note note-amber" id="b_flownote" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ══ TAB 3 · ANALYSIS ══ -->
+<section class="tabpanel" id="tab-analysis">
+  <div class="phead">
+    <div class="phead-eyebrow">03 · วิเคราะห์</div>
+    <div class="phead-title"><b>Analysis</b></div>
+    <div class="phead-sub">ตำแหน่งบน brewing control chart · dilution · flavor surface</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Brewing Control Chart <span class="tag tag-exact">Exact</span><span class="ln"></span></div>
+    <div class="canvas-frame"><canvas id="chartCanvas"></canvas></div>
+    <div class="canvas-hint">จุดส้ม = brew นี้ · จุดเขียว = หลัง dilute · เส้นประ = เติม bypass (EY คงที่) · จุดจาง = logs เก่า</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Dilution to Target <span class="tag tag-exact">Exact</span><span class="ln"></span></div>
+    <div class="fld"><div class="fld-label"><span>Target TDS (%)</span><span class="fld-hint" id="a_curTDS">current: —</span></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="range" id="a_targetTDS" min="0.9" max="1.6" step="0.01" value="1.25">
+        <div style="font-family:var(--mono);font-weight:700;font-size:1.2rem;color:var(--teal);min-width:54px;text-align:right" id="a_targetVal">1.25</div>
+      </div>
+    </div>
+    <div class="readout-grid"><div class="ro"><div class="ro-val" id="a_addWater" style="color:var(--teal);font-size:1.7rem">—<span class="u">g</span></div><div class="ro-lbl">Add bypass water</div></div><div class="ro"><div class="ro-val" id="a_finalVol" style="font-size:1.7rem">—<span class="u">g</span></div><div class="ro-lbl">Final volume</div></div></div>
+    <div class="note note-teal">เติม bypass = เจือจางความเข้ม (TDS ลด) แต่ <b>EY ไม่เปลี่ยน</b> — solids สกัดออกมาแล้ว</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Flavor Surface <span class="tag tag-est" id="a_surfTag">Schematic</span><span class="ln"></span></div>
+    <div class="fld"><div class="fld-label">Attribute</div><div class="pills" id="a_attr"></div></div>
+    <div class="fld"><div class="fld-label">View</div><div class="pills" id="a_view"></div></div>
+    <div class="canvas-frame"><canvas id="surfCanvas"></canvas></div>
+    <div id="a_legend" style="display:flex;align-items:center;gap:8px;margin-top:9px;font-family:var(--mono);font-size:9px;color:var(--muted)"></div>
+    <div class="canvas-hint" id="a_surfHint">มองจากบน · สีเข้ม = attribute เด่น</div>
+    <div class="note note-teal" id="a_caption" style="margin-top:9px"></div>
+    <div class="note note-amber" id="a_surfNote">พื้นผิวเป็น <b>SCHEMATIC</b> (Guinard: sweet ล่างซ้าย, bitter บนขวา) จนกว่าจะ calibrate ด้วย CVA logs จริง</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Adjustments <span class="tag tag-est">Estimate</span><span class="ln"></span></div>
+    <div id="a_recs"></div>
+  </div>
+</section>
+
+<!-- ══ TAB 4 · PHASES ══ -->
+<section class="tabpanel" id="tab-phases">
+  <div class="phead">
+    <div class="phead-eyebrow">04 · ออกแบบช่วงสกัด</div>
+    <div class="phead-title"><b>Phases</b></div>
+    <div class="phead-sub">วินิจฉัยแต่ละช่วงจาก metrics จริง + เทคนิคที่ควรปรับ</div>
+  </div>
+  <div id="ph_blocks"></div>
+  <div class="card" style="border-color:var(--amber-dim)">
+    <div class="card-label" style="color:var(--amber)">Fix First <span class="ln" style="background:var(--amber-dim)"></span></div>
+    <div id="ph_fixfirst" style="font-size:13px;line-height:1.65"></div>
+  </div>
+</section>
+
+<!-- ══ TAB 5 · LOG & LEARN ══ -->
+<section class="tabpanel" id="tab-learn">
+  <div class="phead">
+    <div class="phead-eyebrow">05 · Log &amp; Learn</div>
+    <div class="phead-title">Calibration <b>Core</b></div>
+    <div class="phead-sub">ทุก brew ปรับค่าโมเดลให้เป็นของคุณ — parameter fitting ไม่ใช่ machine learning</div>
+  </div>
+
+  <div class="card">
+    <div class="core-stage">
+      <div class="core-canvas-wrap"><canvas id="coreCanvas" width="480" height="480"></canvas></div>
+      <div class="core-legend" id="coreLegend"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">CVA Scores <span class="fld-hint" style="text-transform:none;letter-spacing:0">optional · 0–9</span><span class="ln"></span></div>
+    <div id="cvaSliders"></div>
+  </div>
+
+  <div class="btn-row" style="margin-bottom:12px">
+    <button class="btn btn-primary" id="l_save">＋ Save Brew</button>
+  </div>
+  <div class="btn-row" style="margin-bottom:16px">
+    <button class="btn btn-ghost" id="l_export">⬆ Export JSON</button>
+    <button class="btn btn-ghost" id="l_import">⬇ Import</button>
+    <input type="file" id="l_importFile" accept="application/json" style="display:none">
+  </div>
+
+  <div class="card">
+    <div class="card-label">Logged Brews (<span id="l_count">0</span>) <span class="ln"></span><span style="font-family:var(--mono);font-size:9px;color:var(--coral);cursor:pointer" id="l_clear">clear all</span></div>
+    <div id="l_list"></div>
+  </div>
+</section>
+
+</div>
+
+<!-- ══ TAB BAR ══ -->
+<nav class="tabbar">
+  <button class="tab on" id="nav-setup" data-tab="setup"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Setup</button>
+  <button class="tab" id="nav-brew" data-tab="brew"><svg viewBox="0 0 24 24"><path d="M6 2h12M8 2v5l-3 8a4 4 0 004 5h6a4 4 0 004-5l-3-8V2"/></svg>Brew</button>
+  <button class="tab" id="nav-analysis" data-tab="analysis"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M7 15l4-5 3 3 5-7"/></svg>Analysis</button>
+  <button class="tab" id="nav-phases" data-tab="phases"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Phases</button>
+  <button class="tab" id="nav-learn" data-tab="learn"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8"/></svg>Learn</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ═══════════════ STATE & PERSISTENCE ═══════════════ */
+var LS_KEY='cloudbrew_extraction_lab_v1';
+var DEFAULT_X=1.47, K_EXP=1.5;
+var GC={eyLo:18,eyHi:22,tdsLo:1.15,tdsHi:1.35}; // Golden Cup
+var CHART={eyMin:14,eyMax:26,tdsMin:0.8,tdsMax:1.6};
+
+var setup={name:'',process:'Washed',roast:'Medium',brightness:null,roastEst:null,
+  grinder:'',d50:null,span:null,dose:15,dripper:'Orea Z1',waterTDS:null,ratio:15};
+var brew={waterIn:null,yield:null,tds:null,lift:'',draw:'',tailTDS:null,tailWt:null};
+var cva={sweet:null,acid:null,bitter:null,body:null};
+var logs=[];
+
+function lsLoad(){
+  try{var r=localStorage.getItem(LS_KEY);if(r){var d=JSON.parse(r);logs=d.logs||[];}}
+  catch(e){logs=[];}
+}
+function lsSave(){
+  try{localStorage.setItem(LS_KEY,JSON.stringify({logs:logs}));return true;}
+  catch(e){return false;}
+}
+
+/* ═══════════════ HELPERS ═══════════════ */
+function $(id){return document.getElementById(id);}
+function num(v){var n=parseFloat(v);return isNaN(n)?null:n;}
+function parseClock(t){if(!t)return null;var p=String(t).trim().split(':');if(p.length===2)return parseInt(p[0]||0,10)*60+parseFloat(p[1]||0);var n=parseFloat(t);return isNaN(n)?null:n;}
+function fmtClock(s){if(s==null||isNaN(s)||s<0)return '—';var m=Math.floor(s/60),sec=Math.round(s%60);return m+':'+String(sec).padStart(2,'0');}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+var toastT;
+function toast(msg){var t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('show');},1900);}
+
+/* ═══════════════ FORMULAS (EXACT) ═══════════════ */
+function calcEY(tds,yield_,dose){if(tds==null||yield_==null||!dose)return null;return tds*yield_/dose;}
+function calcRatio(waterIn,dose){if(waterIn==null||!dose)return null;return waterIn/dose;}
+function calcXret(waterIn,yield_,dose){if(waterIn==null||yield_==null||!dose)return null;return (waterIn-yield_)/dose;}
+function calcTailEY(tailTDS,tailWt,dose){if(tailTDS==null||tailWt==null||!dose)return null;return tailTDS*tailWt/dose;}
+function calcDilution(yield_,tdsCur,tdsTgt){if(yield_==null||tdsCur==null||!tdsTgt)return null;return yield_*(tdsCur/tdsTgt-1);}
+function kMultiplier(d50){if(!d50)return null;return Math.pow(750/d50,K_EXP);}
+
+/* effective X: learned if available else default */
+function effectiveX(){var c=calibX();return c.value!=null?c.value:DEFAULT_X;}
+
+/* ═══════════════ CALIBRATION (parameter fitting) ═══════════════ */
+function confLabel(level){return ['none','low','mid','high'][level]||'none';}
+function confColor(level){return ['#5a5142','#9a7b5c','#5fd0c4','#e8a33d'][level]||'#5a5142';}
+
+/* 1 · Personal X */
+function calibX(){
+  var xs=[];
+  for(var i=0;i<logs.length;i++){var L=logs[i];if(L.waterIn!=null&&L.yield!=null&&L.dose){xs.push((L.waterIn-L.yield)/L.dose);}}
+  if(xs.length<2)return {value:null,level:0,n:xs.length,high:false};
+  var mean=xs.reduce(function(a,b){return a+b;},0)/xs.length;
+  var variance=xs.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/xs.length;
+  var cv=mean!==0?Math.sqrt(variance)/Math.abs(mean):1;
+  var level=1;
+  if(xs.length>=8&&cv<0.12)level=3;
+  else if(xs.length>=4&&cv<0.2)level=2;
+  else level=1;
+  return {value:mean,level:level,n:xs.length,cv:cv,high:mean>2.5};
+}
+
+/* 2 · Grind → EY sensitivity (fit EY vs 1/D50, same coffee, D50 range>=60) */
+function calibGrind(){
+  var byName={};
+  for(var i=0;i<logs.length;i++){var L=logs[i];
+    if(L.name&&L.d50&&L.ey!=null){(byName[L.name]=byName[L.name]||[]).push(L);}}
+  var best=null;
+  for(var k in byName){var arr=byName[k];if(arr.length<4)continue;
+    var d50s=arr.map(function(x){return x.d50;});
+    var range=Math.max.apply(null,d50s)-Math.min.apply(null,d50s);
+    if(range<60)continue;
+    // linear fit EY = a*(1/D50)+b
+    var n=arr.length,sx=0,sy=0,sxx=0,sxy=0;
+    for(var j=0;j<n;j++){var x=1/arr[j].d50,y=arr[j].ey;sx+=x;sy+=y;sxx+=x*x;sxy+=x*y;}
+    var denom=n*sxx-sx*sx;if(denom===0)continue;
+    var a=(n*sxy-sx*sy)/denom,b=(sy-a*sx)/n;
+    // R^2
+    var ym=sy/n,ssTot=0,ssRes=0;
+    for(var m=0;m<n;m++){var xv=1/arr[m].d50,pred=a*xv+b;ssTot+=(arr[m].ey-ym)*(arr[m].ey-ym);ssRes+=(arr[m].ey-pred)*(arr[m].ey-pred);}
+    var r2=ssTot>0?1-ssRes/ssTot:0;
+    if(!best||n>best.n){best={coffee:k,slope:a,intercept:b,n:n,r2:r2,range:range};}
+  }
+  if(!best)return {value:null,level:0,n:0};
+  var level=1;
+  if(best.n>=8&&best.r2>0.7)level=3;else if(best.n>=6&&best.r2>0.5)level=2;else level=1;
+  best.value=best.slope;best.level=level;return best;
+}
+
+/* 3 · Flavor surface (blend schematic toward CVA logs via IDW) */
+function calibSurface(){
+  var pts=[];
+  for(var i=0;i<logs.length;i++){var L=logs[i];
+    if(L.ey!=null&&L.tds!=null&&L.cva&&(L.cva.sweet!=null||L.cva.acid!=null||L.cva.bitter!=null||L.cva.body!=null)){
+      pts.push(L);}}
+  var level=0;
+  if(pts.length>=8)level=3;else if(pts.length>=5)level=2;else if(pts.length>=3)level=1;else level=0;
+  return {points:pts,level:level,n:pts.length};
+}
+
+/* schematic attribute height over normalized ex(0..1 EY), tx(0..1 TDS) */
+/* curved (non-linear) so the surface shows real ridges/domes, not a flat plane */
+function schematicAttr(attr,exN,txN){
+  var v;
+  if(attr==='Sweetness'){
+    // dome peaking mid–lower-left (Guinard: sweet LL), smooth falloff
+    var dx=(exN-0.44)/0.5, dy=(txN-0.42)/0.62;
+    v=clamp(0.12+0.88*Math.exp(-(dx*dx+dy*dy)),0,1);
+  }else if(attr==='Bitterness'){
+    // convex acceleration toward upper-right
+    var d=0.62*exN+0.38*txN;
+    v=clamp(0.06+0.94*Math.pow(d,1.9),0,1);
+  }else if(attr==='Acidity'){
+    // curved decay from low-EY, slight lift at low TDS
+    v=clamp(0.1+0.9*Math.pow(1-exN,1.6)*(0.75+0.25*(1-txN)),0,1);
+  }else{
+    // Body: concave saturating rise with TDS
+    v=clamp(0.12+0.88*Math.pow(txN,0.55)*(0.85+0.15*exN),0,1);
+  }
+  return v;
+}
+/* blended height: schematic + IDW pull toward logged CVA (weight grows w/ density, cap .75) */
+function surfaceHeight(attr,exN,txN,cal){
+  var base=schematicAttr(attr,exN,txN);
+  if(!cal||cal.level===0)return base;
+  var key={Sweetness:'sweet',Acidity:'acid',Bitterness:'bitter',Body:'body'}[attr];
+  var wSum=0,vSum=0,near=0;
+  for(var i=0;i<cal.points.length;i++){var P=cal.points[i];if(!P.cva||P.cva[key]==null)continue;
+    var pex=(P.ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin),ptx=(P.tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin);
+    var dx=exN-pex,dy=txN-ptx,d2=dx*dx+dy*dy;
+    if(d2<0.04)near++;
+    var w=1/(d2+0.01);wSum+=w;vSum+=w*(P.cva[key]/9);}
+  if(wSum===0)return base;
+  var logVal=vSum/wSum;
+  var blend=clamp(0.25*cal.level*(near>0?1.3:0.7),0,0.75);
+  return base*(1-blend)+logVal*blend;
+}
+
+/* ═══════════════ TAB 1 · SETUP ═══════════════ */
+var PROCESSES=['Washed','Honey','Natural','Anaerobic'];
+var ROASTS=['Light','Light-Med','Medium','Med-Dark','Dark'];
+var DRIPPERS=['Orea Z1','V60','Kalita','Origami'];
+
+function buildPills(containerId,opts,current,onPick){
+  var c=$(containerId);c.innerHTML='';
+  opts.forEach(function(o){
+    var b=document.createElement('button');
+    b.className='pill'+(o===current?' on':'');b.textContent=o;b.type='button';
+    b.addEventListener('click',function(){onPick(o);
+      Array.prototype.forEach.call(c.children,function(ch){ch.classList.toggle('on',ch.textContent===o);});});
+    c.appendChild(b);
+  });
+}
+
+function recommendRatio(){
+  // heuristic: lighter roast + denser/washed → looser ratio; darker/natural → tighter
+  var base=15.5;
+  var rIdx=ROASTS.indexOf(setup.roast); // 0 light .. 4 dark
+  base+=(2-rIdx)*0.5; // light → looser
+  if(setup.process==='Natural'||setup.process==='Anaerobic')base-=0.5;
+  if(setup.process==='Washed')base+=0.3;
+  if(setup.d50){if(setup.d50<700)base-=0.4;else if(setup.d50>850)base+=0.4;}
+  return clamp(base,13.5,18);
+}
+
+function renderSetupComputed(){
+  var k=kMultiplier(setup.d50);
+  $('s_kmult').textContent=k!=null?k.toFixed(2)+'×':'—';
+  if(k!=null){var sp=k>1.15?'faster':k<0.85?'slower':'baseline';$('s_kspeed').textContent=sp;}
+  else $('s_kspeed').textContent='—';
+  var rec=recommendRatio();
+  $('s_ratioRec').textContent='auto: 1:'+rec.toFixed(1);
+  $('s_ratioVal').textContent='1:'+setup.ratio.toFixed(1);
+}
+
+function applyPhotoBrightness(file){
+  var img=new Image();var url=URL.createObjectURL(file);
+  img.onload=function(){
+    var cv=document.createElement('canvas');var w=cv.width=40,h=cv.height=40;
+    var cx=cv.getContext('2d');cx.drawImage(img,0,0,w,h);
+    var d=cx.getImageData(0,0,w,h).data,sum=0;
+    for(var i=0;i<d.length;i+=4){sum+=(0.299*d[i]+0.587*d[i+1]+0.114*d[i+2]);}
+    var avg=sum/(d.length/4);
+    setup.brightness=avg;
+    $('s_bright').textContent=Math.round(avg);
+    // brighter beans = lighter roast (rough)
+    var est;
+    if(avg>120)est='Light';else if(avg>95)est='Light-Med';else if(avg>72)est='Medium';else if(avg>52)est='Med-Dark';else est='Dark';
+    setup.roastEst=est;$('s_roastEst').textContent=est;
+    URL.revokeObjectURL(url);
+  };
+  img.onerror=function(){URL.revokeObjectURL(url);$('s_bright').textContent='err';};
+  img.src=url;
+}
+
+/* ═══════════════ TAB 2 · BREW ═══════════════ */
+function chartZone(ey,tds){
+  if(ey==null||tds==null)return {txt:'—',col:'var(--muted)'};
+  var eyU=ey<GC.eyLo,eyO=ey>GC.eyHi,tW=tds<GC.tdsLo,tS=tds>GC.tdsHi;
+  if(!eyU&&!eyO&&!tW&&!tS)return {txt:'Golden Cup',col:'var(--teal)'};
+  var p=[];
+  if(eyU)p.push('Under');if(eyO)p.push('Over');if(tW)p.push('Weak');if(tS)p.push('Strong');
+  var col=eyO?'var(--coral)':eyU?'var(--amber)':'var(--clay)';
+  return {txt:p.join('·'),col:col};
+}
+
+function renderBrew(){
+  var ey=calcEY(brew.tds,brew.yield,setup.dose);
+  var ratioOut=calcRatio(brew.waterIn,setup.dose);
+  var xret=calcXret(brew.waterIn,brew.yield,setup.dose);
+  var tailEY=calcTailEY(brew.tailTDS,brew.tailWt,setup.dose);
+  var lift=parseClock(brew.lift),draw=parseClock(brew.draw);
+  var postLift=(lift!=null&&draw!=null)?draw-lift:null;
+  // yield flow = liquid into cup / collection window (lift if lifted, else drawdown)
+  var collectT=(lift!=null)?lift:draw;
+  var yflow=(brew.yield!=null&&collectT!=null&&collectT>0)?brew.yield/collectT:null;
+  brew._ey=ey;brew._ratioOut=ratioOut;brew._xret=xret;brew._tailEY=tailEY;brew._yflow=yflow;
+
+  $('b_ey').innerHTML=(ey!=null?ey.toFixed(1):'—')+'<span class="u">% EY</span>';
+  $('b_ratioOut').textContent=ratioOut!=null?'1:'+ratioOut.toFixed(1):'—';
+  $('b_xret').textContent=xret!=null?xret.toFixed(2):'—';
+  $('b_tailEY').textContent=tailEY!=null?tailEY.toFixed(1)+'%':'—';
+  $('b_postlift').textContent=postLift!=null?fmtClock(postLift):'—';
+  $('b_yflow').innerHTML=yflow!=null?yflow.toFixed(2)+'<span style="font-size:.55em;color:var(--muted)"> g/s</span>':'—';
+  var z=chartZone(ey,brew.tds);
+  var zEl=$('b_zone');zEl.textContent=z.txt;zEl.style.color=z.col;
+
+  // flow consistency vs logged average (same coffee) — LEARNING
+  var fn=$('b_flownote');
+  if(yflow!=null&&setup.name){
+    var fs=[];
+    for(var i=0;i<logs.length;i++){var L=logs[i];if(L.name===setup.name&&L._yflow!=null)fs.push(L._yflow);
+      else if(L.name===setup.name&&L.yield!=null){var ct=parseClock(L.lift)!=null?parseClock(L.lift):parseClock(L.draw);if(ct!=null&&ct>0)fs.push(L.yield/ct);}}
+    if(fs.length>=2){
+      var mean=fs.reduce(function(a,b){return a+b;},0)/fs.length;
+      var dpct=(yflow-mean)/mean*100;
+      if(Math.abs(dpct)>=15){fn.style.display='block';
+        fn.innerHTML='<b>Flow '+(dpct>0?'เร็ว':'ช้า')+'กว่าปกติ '+Math.abs(dpct).toFixed(0)+'%</b> (เฉลี่ย '+mean.toFixed(2)+' g/s จาก '+fs.length+' logs เมล็ดนี้) — '+(dpct>0?'bed อาจ channel / บดหยาบไป':'bed อาจ clog / fines เยอะ / บดละเอียดไป');}
+      else{fn.style.display='block';fn.innerHTML='Flow ใกล้เคียงปกติ (เฉลี่ย '+mean.toFixed(2)+' g/s) — bed ทำตัวสม่ำเสมอ ✓';}
+    }else fn.style.display='none';
+  }else fn.style.display='none';
+
+  var xn=$('b_xnote');
+  if(xret!=null&&xret>2.5){xn.style.display='block';
+    xn.innerHTML='<b>X retained '+xret.toFixed(2)+'g/g สูง</b> — flat-bottom dripper เก็บน้ำใน dead-space เยอะ · ใช้ Manual TDS เพื่อความแม่น';}
+  else xn.style.display='none';
+}
+
+/* ═══════════════ TAB 5 · CVA ═══════════════ */
+var CVA_ATTRS=[['sweet','Sweetness','#e8a33d'],['acid','Acidity','#5fd0c4'],['bitter','Bitterness','#e8674a'],['body','Body','#b89cf0']];
+function buildCVA(){
+  var c=$('cvaSliders');c.innerHTML='';
+  CVA_ATTRS.forEach(function(a){
+    var key=a[0],label=a[1],col=a[2],val=cva[key];
+    var row=document.createElement('div');row.style.marginBottom='12px';
+    row.innerHTML='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">'+
+      '<span style="font-family:var(--mono);font-size:11px;color:'+col+'">'+label+'</span>'+
+      '<span style="font-family:var(--mono);font-weight:700;font-size:14px;color:'+col+'" id="cvaval_'+key+'">'+(val==null?'—':val.toFixed(1))+'</span></div>'+
+      '<input type="range" min="0" max="9" step="0.5" value="'+(val==null?4.5:val)+'" id="cvasl_'+key+'">';
+    c.appendChild(row);
+    var sl=$('cvasl_'+key);
+    sl.addEventListener('input',function(){cva[key]=parseFloat(sl.value);$('cvaval_'+key).textContent=cva[key].toFixed(1);});
+  });
+}
+
+/* ═══════════════ TAB 3 · CONTROL CHART CANVAS ═══════════════ */
+function setupCanvas(cv,cssH){
+  var dpr=Math.min(window.devicePixelRatio||1,2.5);
+  var w=cv.parentElement.clientWidth-8;
+  cv.style.width=w+'px';cv.style.height=cssH+'px';
+  cv.width=Math.round(w*dpr);cv.height=Math.round(cssH*dpr);
+  var cx=cv.getContext('2d');cx.setTransform(dpr,0,0,dpr,0,0);
+  return {cx:cx,w:w,h:cssH};
+}
+function exX(ey,pl,pw){return pl+((ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin))*pw;}
+function tdsY(tds,pt,ph){return pt+ph-((tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin))*ph;}
+
+function drawChart(){
+  var cv=$('chartCanvas');if(!cv)return;
+  var s=setupCanvas(cv,260),cx=s.cx;
+  var P={l:38,r:12,t:12,b:30},pw=s.w-P.l-P.r,ph=s.h-P.t-P.b;
+  cx.clearRect(0,0,s.w,s.h);
+  // sweet→bitter tint (LL green-ish → UR coral)
+  var grad=cx.createLinearGradient(P.l,P.t+ph,P.l+pw,P.t);
+  grad.addColorStop(0,'rgba(95,208,196,0.10)');
+  grad.addColorStop(0.5,'rgba(232,163,61,0.05)');
+  grad.addColorStop(1,'rgba(232,103,74,0.12)');
+  cx.fillStyle=grad;cx.fillRect(P.l,P.t,pw,ph);
+  // grid
+  cx.strokeStyle='#2a2317';cx.lineWidth=1;cx.font='9px IBM Plex Mono';
+  for(var ey=14;ey<=26;ey+=2){var x=exX(ey,P.l,pw);cx.beginPath();cx.moveTo(x,P.t);cx.lineTo(x,P.t+ph);cx.stroke();
+    cx.fillStyle='#5a5142';cx.textAlign='center';cx.fillText(ey,x,s.h-12);}
+  for(var t=0.8;t<=1.6;t+=0.2){var y=tdsY(t,P.t,ph);cx.beginPath();cx.moveTo(P.l,y);cx.lineTo(P.l+pw,y);cx.stroke();
+    cx.fillStyle='#5a5142';cx.textAlign='right';cx.fillText(t.toFixed(1),P.l-5,y+3);}
+  // axis titles
+  cx.fillStyle='#5a5142';cx.textAlign='center';cx.fillText('EY %',P.l+pw/2,s.h-1);
+  cx.save();cx.translate(9,P.t+ph/2);cx.rotate(-Math.PI/2);cx.fillText('TDS %',0,0);cx.restore();
+  // golden cup box
+  var gx1=exX(GC.eyLo,P.l,pw),gx2=exX(GC.eyHi,P.l,pw),gy1=tdsY(GC.tdsHi,P.t,ph),gy2=tdsY(GC.tdsLo,P.t,ph);
+  cx.strokeStyle='rgba(232,163,61,0.55)';cx.lineWidth=1.4;cx.setLineDash([4,3]);
+  cx.strokeRect(gx1,gy1,gx2-gx1,gy2-gy1);cx.setLineDash([]);
+  cx.fillStyle='rgba(232,163,61,0.6)';cx.font='700 8px IBM Plex Mono';cx.textAlign='center';
+  cx.fillText('GOLDEN CUP',(gx1+gx2)/2,gy1+11);
+  // past logs faint
+  for(var i=0;i<logs.length;i++){var L=logs[i];if(L.ey==null||L.tds==null)continue;
+    if(L.ey<CHART.eyMin||L.ey>CHART.eyMax||L.tds<CHART.tdsMin||L.tds>CHART.tdsMax)continue;
+    var lx=exX(L.ey,P.l,pw),ly=tdsY(L.tds,P.t,ph);
+    cx.beginPath();cx.arc(lx,ly,3,0,Math.PI*2);cx.fillStyle='rgba(154,123,92,0.4)';cx.fill();}
+  // current brew (+ dilution overlay)
+  var ey0=brew._ey,tds0=brew.tds;
+  if(ey0!=null&&ey0>=CHART.eyMin&&ey0<=CHART.eyMax&&tds0!=null){
+    var dx=exX(ey0,P.l,pw);
+    var offTop=tds0>CHART.tdsMax;
+    var oy=offTop?P.t:tdsY(tds0,P.t,ph);
+    // dilution target (EY unchanged, TDS → target)
+    var tgt=num(document.getElementById('a_targetTDS')?document.getElementById('a_targetTDS').value:null);
+    var showDil=tgt!=null&&tgt<tds0&&tgt>=CHART.tdsMin&&tgt<=CHART.tdsMax;
+    if(showDil){
+      var dilY=tdsY(tgt,P.t,ph);
+      // dilution path — vertical drop at constant EY
+      cx.beginPath();cx.setLineDash([4,3]);cx.moveTo(dx,oy);cx.lineTo(dx,dilY);
+      cx.strokeStyle='rgba(95,208,196,0.6)';cx.lineWidth=1.4;cx.stroke();cx.setLineDash([]);
+      // small downward arrow head
+      cx.beginPath();cx.moveTo(dx-4,dilY-7);cx.lineTo(dx,dilY-1);cx.lineTo(dx+4,dilY-7);
+      cx.strokeStyle='rgba(95,208,196,0.8)';cx.lineWidth=1.4;cx.stroke();
+      // diluted point (teal hollow ring = "after dilution")
+      cx.beginPath();cx.arc(dx,dilY,11,0,Math.PI*2);cx.fillStyle='rgba(95,208,196,0.15)';cx.fill();
+      cx.beginPath();cx.arc(dx,dilY,6,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+      cx.lineWidth=2.5;cx.strokeStyle='#5fd0c4';cx.stroke();
+      cx.fillStyle='#5fd0c4';cx.font='700 8px IBM Plex Mono';cx.textAlign='center';
+      cx.fillText('DILUTED '+tgt.toFixed(2)+'%',dx,dilY+20);
+    }
+    // original brew point
+    if(offTop){
+      // clamp marker at top edge + true-value label + up chevron
+      cx.beginPath();cx.moveTo(dx-5,P.t+8);cx.lineTo(dx,P.t+1);cx.lineTo(dx+5,P.t+8);
+      cx.strokeStyle='#e8a33d';cx.lineWidth=2;cx.stroke();
+      cx.beginPath();cx.arc(dx,P.t+13,4,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+      cx.lineWidth=2;cx.strokeStyle='#e8a33d';cx.stroke();
+      cx.fillStyle='#e8a33d';cx.font='700 8px IBM Plex Mono';cx.textAlign='center';
+      cx.fillText(tds0.toFixed(2)+'% ↑',dx,P.t+26);
+    }else if(tds0>=CHART.tdsMin){
+      cx.beginPath();cx.arc(dx,oy,13,0,Math.PI*2);cx.fillStyle='rgba(232,163,61,0.18)';cx.fill();
+      cx.beginPath();cx.arc(dx,oy,6,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+      cx.lineWidth=2.5;cx.strokeStyle='#e8a33d';cx.stroke();
+      cx.beginPath();cx.arc(dx,oy,2.5,0,Math.PI*2);cx.fillStyle='#e8a33d';cx.fill();
+    }
+  }
+}
+
+/* ═══════════════ TAB 3 · 3D FLAVOR SURFACE ═══════════════ */
+var surfState={attr:'Sweetness',view:'2d',az:-0.6,el:0.9,dragging:false,lx:0,ly:0};
+function project(x,y,z,az,el,scale,cxw,cyh){
+  // azimuth: rotate floor (x,y) about vertical axis
+  var ca=Math.cos(az),sa=Math.sin(az);
+  var rx=x*ca-y*sa, ry=x*sa+y*ca;
+  // elevation (oblique): back rows (ry) and height (z) both rise on screen
+  var ce=Math.cos(el),se=Math.sin(el);
+  // screen-up = ry*ce + z*se  → taller AND farther both move up
+  return {x:cxw+rx*scale, y:cyh-(ry*ce+z*se)*scale, depth:ry};
+}
+function attrColor(attr){return {Sweetness:'#e8a33d',Acidity:'#5fd0c4',Bitterness:'#e8674a',Body:'#b89cf0'}[attr];}
+var ATTR_KEY={Sweetness:'sweet',Acidity:'acid',Bitterness:'bitter',Body:'body'};
+
+/* dark base → bright attribute color by intensity t (redundant height coding) */
+function rampColor(hex,t){
+  var br=22,bg=18,bb=13; // #16120d-ish base
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  t=clamp(t,0,1);var tt=Math.pow(t,0.8);
+  return 'rgb('+Math.round(br+(r-br)*tt)+','+Math.round(bg+(g-bg)*tt)+','+Math.round(bb+(b-bb)*tt)+')';
+}
+
+function drawSurface(){
+  if(surfState.view==='3d')draw3D();else drawHeatmap();
+  renderSurfLegend();renderSurfCaption();
+}
+
+/* ── 2D HEATMAP (default · easy to read top-down) ── */
+function drawHeatmap(){
+  var cv=$('surfCanvas');if(!cv)return;
+  var s=setupCanvas(cv,250),cx=s.cx;cx.clearRect(0,0,s.w,s.h);
+  var P={l:38,r:12,t:12,b:28},pw=s.w-P.l-P.r,ph=s.h-P.t-P.b;
+  var cal=calibSurface(),col=attrColor(surfState.attr),N=28;
+  var cw=pw/N,ch=ph/N;
+  for(var i=0;i<N;i++){for(var j=0;j<N;j++){
+    var exN=(i+0.5)/N, txN=(j+0.5)/N;
+    var h=surfaceHeight(surfState.attr,exN,txN,cal);
+    var x=P.l+i*cw, y=P.t+(N-1-j)*ch; // TDS up = invert j
+    cx.fillStyle=rampColor(col,h);cx.fillRect(x,y,cw+0.7,ch+0.7);
+  }}
+  // axis ticks (same framing as control chart)
+  cx.font='9px IBM Plex Mono';cx.fillStyle='#5a5142';
+  for(var ey=14;ey<=26;ey+=4){var xx=P.l+((ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin))*pw;cx.textAlign='center';cx.fillText(ey,xx,s.h-12);}
+  for(var t=0.8;t<=1.6;t+=0.2){var yy=P.t+ph-((t-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin))*ph;cx.textAlign='right';cx.fillText(t.toFixed(1),P.l-5,yy+3);}
+  cx.textAlign='center';cx.fillText('EY %',P.l+pw/2,s.h-1);
+  cx.save();cx.translate(9,P.t+ph/2);cx.rotate(-Math.PI/2);cx.fillText('TDS %',0,0);cx.restore();
+  // golden cup box
+  function ex(e){return P.l+((e-CHART.eyMin)/(CHART.eyMax-CHART.eyMin))*pw;}
+  function ty(t){return P.t+ph-((t-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin))*ph;}
+  cx.strokeStyle='rgba(240,233,221,0.55)';cx.lineWidth=1.4;cx.setLineDash([4,3]);
+  cx.strokeRect(ex(GC.eyLo),ty(GC.tdsHi),ex(GC.eyHi)-ex(GC.eyLo),ty(GC.tdsLo)-ty(GC.tdsHi));cx.setLineDash([]);
+  cx.fillStyle='rgba(240,233,221,0.7)';cx.font='700 8px IBM Plex Mono';cx.fillText('GOLDEN CUP',(ex(GC.eyLo)+ex(GC.eyHi))/2,ty(GC.tdsHi)+11);
+  // logged CVA points
+  var key=ATTR_KEY[surfState.attr];
+  for(var L=0;L<cal.points.length;L++){var Lp=cal.points[L];if(!Lp.cva||Lp.cva[key]==null)continue;
+    if(Lp.ey<CHART.eyMin||Lp.ey>CHART.eyMax||Lp.tds<CHART.tdsMin||Lp.tds>CHART.tdsMax)continue;
+    cx.beginPath();cx.arc(ex(Lp.ey),ty(Lp.tds),3.2,0,Math.PI*2);cx.fillStyle='rgba(240,233,221,0.85)';cx.fill();}
+  // current brew marker
+  if(brew._ey!=null&&brew.tds!=null&&brew._ey>=CHART.eyMin&&brew._ey<=CHART.eyMax&&brew.tds>=CHART.tdsMin&&brew.tds<=CHART.tdsMax){
+    var dx=ex(brew._ey),dy=ty(brew.tds);
+    cx.beginPath();cx.arc(dx,dy,7,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+    cx.lineWidth=2.5;cx.strokeStyle='#f0e9dd';cx.stroke();
+    cx.beginPath();cx.arc(dx,dy,2.5,0,Math.PI*2);cx.fillStyle='#f0e9dd';cx.fill();}
+  // border
+  cx.strokeStyle='#2a2317';cx.lineWidth=1;cx.strokeRect(P.l,P.t,pw,ph);
+}
+
+/* ── intensity legend bar ── */
+function renderSurfLegend(){
+  var col=attrColor(surfState.attr);
+  var stops='';for(var k=0;k<=6;k++){stops+=rampColor(col,k/6)+(k<6?',':'');}
+  $('a_legend').innerHTML='<span>'+esc(surfState.attr)+' ต่ำ</span>'+
+    '<span style="flex:1;height:10px;border-radius:5px;border:1px solid var(--line2);background:linear-gradient(to right,'+stops+')"></span>'+
+    '<span>สูง</span>';
+}
+
+/* ── plain-language caption: where attribute peaks / dips ── */
+function zoneWord(n,lo,hi){return n<lo?'ต่ำ':n>hi?'สูง':'กลาง';}
+function renderSurfCaption(){
+  var cal=calibSurface(),attr=surfState.attr,N=12;
+  var best={v:-1,ex:0,tx:0},worst={v:2,ex:0,tx:0};
+  for(var i=0;i<N;i++){for(var j=0;j<N;j++){
+    var exN=(i+0.5)/N,txN=(j+0.5)/N,h=surfaceHeight(attr,exN,txN,cal);
+    if(h>best.v){best={v:h,ex:exN,tx:txN};}
+    if(h<worst.v){worst={v:h,ex:exN,tx:txN};}
+  }}
+  function desc(p){return 'EY '+zoneWord(p.ex,0.4,0.7)+' · TDS '+zoneWord(p.tx,0.4,0.7);}
+  var src=cal.level>0?'จาก logs ('+confLabel(cal.level)+')':'schematic';
+  $('a_caption').innerHTML='<b>'+esc(attr)+'</b> เด่นสุดที่ '+desc(best)+' · จางสุดที่ '+desc(worst)+
+    ' <span style="color:var(--dim)">('+src+')</span>';
+}
+
+/* ── 3D SURFACE (optional · drag to rotate) ── */
+function zMap(h){return h*1.5-0.3;} // height exaggeration so curve reads on phone
+function draw3D(){
+  var cv=$('surfCanvas');if(!cv)return;
+  var s=setupCanvas(cv,250),cx=s.cx;cx.clearRect(0,0,s.w,s.h);
+  var N=20,cal=calibSurface();
+  var scale=Math.min(s.w,s.h)*0.32, cxw=s.w/2, cyh=s.h*0.60;
+  var col=attrColor(surfState.attr);
+  // floor grid (orientation reference)
+  var gridQ=[],zf=zMap(0);
+  for(var gi=0;gi<=N;gi+=2){
+    var a=project((gi/N-0.5)*2,-1,zf,surfState.az,surfState.el,scale,cxw,cyh);
+    var b=project((gi/N-0.5)*2, 1,zf,surfState.az,surfState.el,scale,cxw,cyh);
+    var c=project(-1,(gi/N-0.5)*2,zf,surfState.az,surfState.el,scale,cxw,cyh);
+    var d=project( 1,(gi/N-0.5)*2,zf,surfState.az,surfState.el,scale,cxw,cyh);
+    gridQ.push([a,b],[c,d]);
+  }
+  cx.strokeStyle='rgba(154,123,92,0.18)';cx.lineWidth=0.7;
+  gridQ.forEach(function(L){cx.beginPath();cx.moveTo(L[0].x,L[0].y);cx.lineTo(L[1].x,L[1].y);cx.stroke();});
+  var quads=[];
+  for(var i=0;i<N;i++){for(var j=0;j<N;j++){
+    var verts=[[i,j],[i+1,j],[i+1,j+1],[i,j+1]];
+    var proj=[],zsum=0,dsum=0;
+    for(var v=0;v<4;v++){
+      var exN=verts[v][0]/N, txN=verts[v][1]/N;
+      var hz=surfaceHeight(surfState.attr,exN,txN,cal);
+      var X=(exN-0.5)*2, Y=(txN-0.5)*2, Z=zMap(hz);
+      var p=project(X,Y,Z,surfState.az,surfState.el,scale,cxw,cyh);
+      proj.push(p);zsum+=hz;dsum+=p.depth;}
+    quads.push({proj:proj,h:zsum/4,depth:dsum/4});
+  }}
+  quads.sort(function(a,b){return b.depth-a.depth;});
+  for(var q=0;q<quads.length;q++){var Q=quads[q],pr=Q.proj;
+    cx.beginPath();cx.moveTo(pr[0].x,pr[0].y);
+    for(var w=1;w<4;w++)cx.lineTo(pr[w].x,pr[w].y);cx.closePath();
+    cx.fillStyle=rampColor(col,Q.h);cx.fill(); // height-color = readable
+    cx.strokeStyle=hexA(col,0.32);cx.lineWidth=0.5;cx.stroke();
+  }
+  // corner labels for orientation
+  function corner(X,Y,txt,align){var p=project(X,Y,zMap(0),surfState.az,surfState.el,scale,cxw,cyh);
+    cx.fillStyle='#9a8e7a';cx.font='8px IBM Plex Mono';cx.textAlign=align;cx.fillText(txt,p.x,p.y);}
+  corner(-1,-1,'EY↓TDS↓','center');corner(1,-1,'EY↑','center');corner(-1,1,'TDS↑','center');
+  // current brew marker
+  if(brew._ey!=null&&brew.tds!=null){
+    var exN2=clamp((brew._ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin),0,1);
+    var txN2=clamp((brew.tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin),0,1);
+    var hz2=surfaceHeight(surfState.attr,exN2,txN2,cal);
+    var base=project((exN2-0.5)*2,(txN2-0.5)*2,zMap(0),surfState.az,surfState.el,scale,cxw,cyh);
+    var pp=project((exN2-0.5)*2,(txN2-0.5)*2,zMap(hz2),surfState.az,surfState.el,scale,cxw,cyh);
+    cx.beginPath();cx.moveTo(base.x,base.y);cx.lineTo(pp.x,pp.y);cx.strokeStyle=hexA('#f0e9dd',0.5);cx.lineWidth=1;cx.stroke();
+    cx.beginPath();cx.arc(pp.x,pp.y,5,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+    cx.lineWidth=2;cx.strokeStyle='#f0e9dd';cx.stroke();
+  }
+  // logged CVA points
+  var key=ATTR_KEY[surfState.attr];
+  for(var L2=0;L2<cal.points.length;L2++){var Lp=cal.points[L2];if(!Lp.cva||Lp.cva[key]==null)continue;
+    var ex3=clamp((Lp.ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin),0,1);
+    var tx3=clamp((Lp.tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin),0,1);
+    var pq=project((ex3-0.5)*2,(tx3-0.5)*2,zMap(Lp.cva[key]/9),surfState.az,surfState.el,scale,cxw,cyh);
+    cx.beginPath();cx.arc(pq.x,pq.y,3,0,Math.PI*2);cx.fillStyle='rgba(240,233,221,0.85)';cx.fill();}
+}
+function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+clamp(a,0,1)+')';}
+
+/* ═══════════════ TAB 3 · DILUTION + RECS ═══════════════ */
+function renderAnalysis(){
+  drawChart();drawSurface();
+  // dilution
+  var cur=brew.tds;
+  $('a_curTDS').textContent='current: '+(cur!=null?cur.toFixed(2)+'%':'—');
+  var tgt=num($('a_targetTDS').value);
+  $('a_targetVal').textContent=tgt.toFixed(2);
+  var add=calcDilution(brew.yield,cur,tgt);
+  if(add!=null&&add>=0){$('a_addWater').innerHTML=add.toFixed(0)+'<span class="u">g</span>';
+    $('a_finalVol').innerHTML=(brew.yield+add).toFixed(0)+'<span class="u">g</span>';}
+  else if(add!=null&&add<0){$('a_addWater').innerHTML='0<span class="u">g</span>';
+    $('a_finalVol').innerHTML='<span style="font-size:.7em;color:var(--coral)">TDS เป้าสูงกว่าปัจจุบัน</span>';}
+  else {$('a_addWater').innerHTML='—';$('a_finalVol').innerHTML='—';}
+  // surface tag
+  var cal=calibSurface();
+  $('a_surfTag').className='tag '+(cal.level>0?'tag-learn':'tag-est');
+  $('a_surfTag').textContent=cal.level>0?'Learning · '+confLabel(cal.level):'Schematic';
+  $('a_surfNote').innerHTML=cal.level>0?
+    'พื้นผิว blend จาก CVA logs จริง '+cal.n+' จุด (confidence '+confLabel(cal.level)+') ผสมกับ schematic baseline':
+    'พื้นผิวเป็น <b>SCHEMATIC</b> (Guinard: sweet ล่างซ้าย, bitter บนขวา) จนกว่าจะ calibrate ด้วย CVA logs จริง';
+  renderRecs();
+}
+
+function renderRecs(){
+  var ey=brew._ey,tds=brew.tds,xret=brew._xret,tailEY=brew._tailEY,tailTDS=brew.tailTDS;
+  var recs=[];
+  if(ey==null||tds==null){$('a_recs').innerHTML='<div class="empty">กรอกค่าใน Brew ก่อน<br>เพื่อรับคำแนะนำ</div>';return;}
+  if(ey<GC.eyLo)recs.push(['↗','สกัดน้อย (EY '+ey.toFixed(1)+'%) — <b>บดละเอียดขึ้น</b> หรือเพิ่ม contact time · น้ำร้อนขึ้นได้เล็กน้อย']);
+  else if(ey>GC.eyHi)recs.push(['↘','สกัดมาก (EY '+ey.toFixed(1)+'%) — <b>บดหยาบขึ้น</b> หรือ <b>ตัดหางเร็วขึ้น</b> · ลด agitation']);
+  else recs.push(['✓','EY '+ey.toFixed(1)+'% อยู่ใน Golden Cup zone — รักษา grind ไว้']);
+  if(tds<GC.tdsLo)recs.push(['↑','เข้มไม่พอ (TDS '+tds.toFixed(2)+'%) — <b>ratio แน่นขึ้น</b> (น้ำน้อยลง) หรือเพิ่ม dose']);
+  else if(tds>GC.tdsHi)recs.push(['↓','เข้มเกิน (TDS '+tds.toFixed(2)+'%) — <b>ratio หลวมขึ้น</b> หรือเติม bypass water']);
+  if(tailTDS!=null&&tailTDS>0.8)recs.push(['✂','tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — late extraction เยอะ <b>ตัดหางเร็วขึ้น</b> (Batali 2020)']);
+  if(xret!=null&&xret>2.5)recs.push(['⚠','X retained '+xret.toFixed(2)+' สูง — dripper เก็บน้ำเยอะ ตรวจ dead-space / ใช้ Manual TDS']);
+  var draw=parseClock(brew.draw),lift=parseClock(brew.lift);
+  if(draw!=null&&lift!=null&&(draw-lift)>45)recs.push(['⏱','Post-lift drawdown '+fmtClock(draw-lift)+' ช้า — bed อาจ clog · บดหยาบขึ้นเล็กน้อย หรือลด fines']);
+  $('a_recs').innerHTML=recs.map(function(r){return '<div class="rec"><div class="rec-icon">'+r[0]+'</div><div class="rec-body">'+r[1]+'</div></div>';}).join('');
+}
+
+/* ═══════════════ TAB 4 · PHASES ═══════════════ */
+function renderPhases(){
+  var ey=brew._ey,tds=brew.tds,tailTDS=brew.tailTDS,tailEY=brew._tailEY,xret=brew._xret;
+  var draw=parseClock(brew.draw),lift=parseClock(brew.lift);
+  var hasData=ey!=null&&tds!=null;
+  var phases=[
+    {name:'Bloom',icon:'◦',col:'#5fd0c4'},
+    {name:'Early',icon:'◑',col:'#e8a33d'},
+    {name:'Mid',icon:'●',col:'#b89cf0'},
+    {name:'Late-Tail',icon:'◗',col:'#e8674a'},
+  ];
+  // diagnoses
+  phases[0].diag=hasData?'ช่วงปล่อย CO₂ + เริ่มดึงกรด/กลิ่น · degas ดีช่วยให้ extraction สม่ำเสมอ':'—';
+  phases[0].fix=setup.process==='Natural'||setup.process==='Anaerobic'?'Natural/Anaerobic CO₂ เยอะ — bloom นานขึ้น (45s) น้ำ 2–3× dose':'Bloom 30–45s น้ำ 2× dose';
+
+  if(hasData){
+    phases[1].diag=ey<GC.eyLo?'EY รวมต่ำ ('+ey.toFixed(1)+'%) — early extraction อาจไม่พอ pour แรกอ่อนไป':'early extraction ปกติ';
+    phases[1].fix=ey<GC.eyLo?'เพิ่มน้ำ pour แรก / กวนเบาๆ ให้ wetting ทั่ว':'รักษา pour แรกให้ even saturation';
+    phases[2].diag=(tds>GC.tdsHi)?'TDS สูง ('+tds.toFixed(2)+'%) — main extraction เข้มข้น':(tds<GC.tdsLo?'TDS ต่ำ — main pour อาจ bypass มาก':'main extraction สมดุล');
+    phases[2].fix=tds>GC.tdsHi?'ratio หลวมขึ้น หรือลด pour กลาง':'pour กลางให้ flow สม่ำเสมอ คุม turbulence';
+    var tailMsg;
+    if(tailTDS!=null){tailMsg=tailTDS>0.8?'tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — late extraction สูง เสี่ยงขม/ฝาด':(tailTDS>0.4?'tail TDS '+tailTDS.toFixed(2)+'% กลางๆ — ตัดถ้าแข่ง':'tail TDS '+tailTDS.toFixed(2)+'% < 0.4% ปลอดภัย');}
+    else tailMsg='ยังไม่วัด tail TDS';
+    phases[3].diag=tailMsg+(tailEY!=null?' · tail EY '+tailEY.toFixed(1)+'%':'');
+    phases[3].fix=(tailTDS!=null&&tailTDS>0.8)?'ยก dripper เร็วขึ้น (ตัดหาง) ก่อน late compounds ลงแก้ว':'คุมจุดยก dripper จาก tail TDS ไม่ใช่เวลา';
+  }else{
+    phases[1].diag=phases[2].diag=phases[3].diag='กรอกค่าใน Brew เพื่อวินิจฉัย';
+    phases[1].fix=phases[2].fix=phases[3].fix='—';
+  }
+  $('ph_blocks').innerHTML=phases.map(function(p){
+    return '<div class="phase"><div class="phase-bar" style="background:'+p.col+'"></div><div class="phase-body">'+
+      '<div class="phase-name"><span style="color:'+p.col+'">'+p.icon+'</span> '+p.name+'</div>'+
+      '<div class="phase-diag">'+p.diag+'</div>'+
+      '<div class="phase-fix">→ '+p.fix+'</div></div></div>';
+  }).join('');
+  // fix first
+  var ff;
+  if(!hasData)ff='กรอกค่าใน <b>Brew</b> ก่อน แล้วระบบจะบอกว่าควรแก้อะไรก่อน';
+  else if(tailTDS!=null&&tailTDS>0.8)ff='<b>ตัดหางก่อน</b> — tail TDS '+tailTDS.toFixed(2)+'% สูงสุดที่ทำให้ขม กระทบ cup มากที่สุด';
+  else if(ey>GC.eyHi)ff='<b>ลด extraction ก่อน</b> — บดหยาบขึ้น EY '+ey.toFixed(1)+'% เกิน zone';
+  else if(ey<GC.eyLo)ff='<b>เพิ่ม extraction ก่อน</b> — บดละเอียดขึ้น EY '+ey.toFixed(1)+'% ต่ำกว่า zone';
+  else if(tds<GC.tdsLo)ff='<b>เพิ่มความเข้มก่อน</b> — ratio แน่นขึ้น';
+  else if(tds>GC.tdsHi)ff='<b>ลดความเข้มก่อน</b> — ratio หลวมขึ้น';
+  else ff='✓ ทุก metric อยู่ใน zone — โฟกัสที่ consistency และ sensory refinement';
+  $('ph_fixfirst').innerHTML=ff;
+}
+
+/* ═══════════════ TAB 5 · CALIBRATION CORE (signature) ═══════════════ */
+var coreAnim={t:0,raf:null,targets:[0,0,0],cur:[0,0,0]};
+function reduceMotion(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
+
+function drawCore(canvasId,sizeHint){
+  var cv=$(canvasId);if(!cv)return;
+  var cx=cv.getContext('2d');var W=cv.width,H=cv.height,cxw=W/2,cyh=H/2;
+  cx.clearRect(0,0,W,H);
+  var x=calibX(),g=calibGrind(),sf=calibSurface();
+  var levels=[x.level,g.level,sf.level];
+  coreAnim.targets=levels.map(function(l){return l/3;});
+  var cols=['#e8a33d','#5fd0c4','#b89cf0'];
+  var maxR=Math.min(W,H)*0.44;
+  var ringW=maxR*0.16, gap=maxR*0.07;
+  for(var i=0;i<3;i++){
+    var r=maxR-i*(ringW+gap);
+    var frac=coreAnim.cur[i];
+    // track
+    cx.beginPath();cx.arc(cxw,cyh,r,0,Math.PI*2);cx.lineWidth=ringW;cx.strokeStyle='rgba(255,255,255,0.04)';cx.stroke();
+    // fill arc
+    if(frac>0){
+      cx.beginPath();cx.arc(cxw,cyh,r,-Math.PI/2,-Math.PI/2+Math.PI*2*frac);
+      cx.lineWidth=ringW;cx.lineCap='round';cx.strokeStyle=cols[i];
+      cx.shadowBlur=12;cx.shadowColor=cols[i];cx.stroke();cx.shadowBlur=0;
+    }
+  }
+  // center
+  var allHigh=levels[0]>=2&&levels[1]>=1&&levels[2]>=1;
+  var avg=(coreAnim.cur[0]+coreAnim.cur[1]+coreAnim.cur[2])/3;
+  cx.beginPath();cx.arc(cxw,cyh,maxR*0.3,0,Math.PI*2);
+  cx.fillStyle='rgba(232,163,61,'+(0.05+avg*0.18)+')';cx.fill();
+  cx.fillStyle='#f0e9dd';cx.textAlign='center';cx.textBaseline='middle';
+  cx.font='700 '+Math.round(maxR*0.26)+'px IBM Plex Mono';
+  cx.fillText(Math.round(avg*100)+'%',cxw,cyh-maxR*0.04);
+  cx.font='600 '+Math.round(maxR*0.085)+'px IBM Plex Mono';cx.fillStyle='#9a8e7a';
+  cx.fillText('CALIBRATED',cxw,cyh+maxR*0.16);
+}
+
+function animateCore(){
+  if(coreAnim.raf)cancelAnimationFrame(coreAnim.raf);
+  if(reduceMotion()){coreAnim.cur=coreAnim.targets.slice();drawCore('coreCanvas');drawCore('coreMini');return;}
+  function step(){
+    var done=true;
+    for(var i=0;i<3;i++){var d=coreAnim.targets[i]-coreAnim.cur[i];if(Math.abs(d)>0.002){coreAnim.cur[i]+=d*0.12;done=false;}else coreAnim.cur[i]=coreAnim.targets[i];}
+    drawCore('coreCanvas');drawCore('coreMini');
+    if(!done)coreAnim.raf=requestAnimationFrame(step);
+  }
+  step();
+}
+
+function renderCore(){
+  var x=calibX(),g=calibGrind(),sf=calibSurface();
+  // set targets then animate
+  coreAnim.targets=[x.level/3,g.level/3,sf.level/3];
+  animateCore();
+  var params=[
+    {col:'#e8a33d',name:'Personal X',meta:x.value!=null?'mean '+x.value.toFixed(2)+'g/g · n='+x.n+(x.high?' · ⚠ high':''):'n='+x.n+' · ต้องการ ≥2 logs',level:x.level},
+    {col:'#5fd0c4',name:'Grind → EY',meta:g.value!=null?'slope fit · '+g.coffee+' · n='+g.n+' · R²='+(g.r2||0).toFixed(2):'ต้องการ ≥4 logs เมล็ดเดียวกัน · D50 range ≥60µm',level:g.level},
+    {col:'#b89cf0',name:'Flavor Surface',meta:sf.n>0?'CVA points '+sf.n+' · IDW blend':'ต้องการ ≥3 CVA logs',level:sf.level},
+  ];
+  $('coreLegend').innerHTML=params.map(function(p){
+    return '<div class="core-param"><span class="core-dot" style="color:'+p.col+';background:'+p.col+'"></span>'+
+      '<div><div class="core-pname">'+p.name+'</div><div class="core-pmeta">'+p.meta+'</div></div>'+
+      '<span class="core-conf" style="color:'+confColor(p.level)+';background:'+hexA(confColor(p.level),0.12)+'">'+confLabel(p.level)+'</span></div>';
+  }).join('');
+}
+
+/* ═══════════════ TAB 5 · LOG ═══════════════ */
+function saveBrew(){
+  var ey=calcEY(brew.tds,brew.yield,setup.dose);
+  if(ey==null&&!setup.name){toast('กรอกข้อมูล brew ก่อน');return;}
+  var entry={
+    ts:Date.now(),name:setup.name,process:setup.process,roast:setup.roast,
+    grinder:setup.grinder,d50:setup.d50,span:setup.span,dose:setup.dose,
+    dripper:setup.dripper,waterTDS:setup.waterTDS,ratioSet:setup.ratio,
+    waterIn:brew.waterIn,yield:brew.yield,tds:brew.tds,lift:brew.lift,draw:brew.draw,
+    tailTDS:brew.tailTDS,tailWt:brew.tailWt,
+    ey:ey,ratioOut:brew._ratioOut,xret:brew._xret,tailEY:brew._tailEY,_yflow:brew._yflow,
+    cva:{sweet:cva.sweet,acid:cva.acid,bitter:cva.bitter,body:cva.body},
+  };
+  logs.unshift(entry);
+  var ok=lsSave();
+  renderLog();renderCore();drawChart();
+  toast(ok?'บันทึกแล้ว ✓':'บันทึก (memory · storage บล็อก — export กันลืม)');
+}
+
+function renderLog(){
+  $('l_count').textContent=logs.length;
+  if(!logs.length){$('l_list').innerHTML='<div class="empty">ยังไม่มี log<br>กรอก Setup + Brew แล้วกด Save</div>';return;}
+  $('l_list').innerHTML=logs.map(function(L,idx){
+    var d=new Date(L.ts);
+    var ds=d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    var eyCol=L.ey==null?'#9a8e7a':L.ey<GC.eyLo?'#e8a33d':L.ey<=GC.eyHi?'#5fd0c4':'#e8674a';
+    var rows='';
+    function row(k,v){return v==null||v===''?'':'<div class="log-row"><span class="k">'+k+'</span><span>'+esc(v)+'</span></div>';}
+    rows+=row('Process',L.process);rows+=row('Roast',L.roast);rows+=row('Grinder',L.grinder);
+    rows+=row('D50',L.d50!=null?L.d50+'µm':'');rows+=row('Dose',L.dose+'g');
+    rows+=row('Dripper',L.dripper);rows+=row('Water in',L.waterIn!=null?L.waterIn+'g':'');
+    rows+=row('Yield',L.yield!=null?L.yield+'g':'');rows+=row('TDS',L.tds!=null?L.tds+'%':'');
+    rows+=row('Ratio out',L.ratioOut!=null?'1:'+L.ratioOut.toFixed(1):'');
+    rows+=row('Yield flow',L._yflow!=null?L._yflow.toFixed(2)+' g/s':'');
+    rows+=row('X retained',L.xret!=null?L.xret.toFixed(2):'');
+    rows+=row('Tail TDS',L.tailTDS!=null?L.tailTDS+'%':'');rows+=row('Tail EY',L.tailEY!=null?L.tailEY.toFixed(1)+'%':'');
+    var cvaStr=L.cva&&(L.cva.sweet!=null||L.cva.acid!=null||L.cva.bitter!=null||L.cva.body!=null)?
+      ['S'+(L.cva.sweet!=null?L.cva.sweet:'–'),'A'+(L.cva.acid!=null?L.cva.acid:'–'),'B'+(L.cva.bitter!=null?L.cva.bitter:'–'),'Bd'+(L.cva.body!=null?L.cva.body:'–')].join(' '):'';
+    rows+=row('CVA',cvaStr);
+    return '<div class="log-item"><div class="log-head" data-idx="'+idx+'">'+
+      '<div class="log-name"><div class="log-title">'+(esc(L.name)||'Untitled')+'</div><div class="log-meta">'+ds+(L.tds!=null?' · TDS '+L.tds+'%':'')+'</div></div>'+
+      '<div class="log-ey" style="color:'+eyCol+'">'+(L.ey!=null?L.ey.toFixed(1):'—')+'<span style="font-size:.6em;color:var(--muted)">%</span></div></div>'+
+      '<div class="log-detail">'+rows+
+      '<button class="btn btn-ghost" style="margin-top:10px;font-size:9px;padding:9px" data-del="'+idx+'">Delete</button></div></div>';
+  }).join('');
+  // wire toggles + delete
+  Array.prototype.forEach.call($('l_list').querySelectorAll('.log-head'),function(h){
+    h.addEventListener('click',function(){h.nextElementSibling.classList.toggle('open');});});
+  Array.prototype.forEach.call($('l_list').querySelectorAll('[data-del]'),function(b){
+    b.addEventListener('click',function(e){e.stopPropagation();var i=parseInt(b.getAttribute('data-del'),10);logs.splice(i,1);lsSave();renderLog();renderCore();drawChart();toast('ลบแล้ว');});});
+}
+
+function exportJSON(){
+  var blob=new Blob([JSON.stringify({app:'cloudbrew-extraction-lab',v:1,logs:logs},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='cloudbrew_lab_'+Date.now()+'.json';a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},100);toast('Export แล้ว');
+}
+function importJSON(file){
+  var rd=new FileReader();
+  rd.onload=function(){try{var d=JSON.parse(rd.result);var arr=d.logs||d;if(Array.isArray(arr)){logs=arr.concat(logs);lsSave();renderLog();renderCore();drawChart();toast('Import '+arr.length+' logs');}else toast('ไฟล์ไม่ถูกต้อง');}catch(e){toast('อ่านไฟล์ไม่ได้');}};
+  rd.readAsText(file);
+}
+
+/* ═══════════════ TAB NAV ═══════════════ */
+var TABS=['setup','brew','analysis','phases','learn'];
+function setTab(name){
+  TABS.forEach(function(t){
+    $('tab-'+t).classList.toggle('active',t===name);
+    $('nav-'+t).classList.toggle('on',t===name);
+  });
+  if(name==='analysis'){requestAnimationFrame(renderAnalysis);}
+  if(name==='phases')renderPhases();
+  if(name==='learn'){renderCore();renderLog();}
+  if(name==='brew')renderBrew();
+  if(name==='setup')renderSetupComputed();
+  window.scrollTo(0,0);
+}
+
+/* ═══════════════ WIRING ═══════════════ */
+function bindInput(id,obj,key,parse){
+  var el=$(id);if(!el)return;
+  el.addEventListener('input',function(){obj[key]=parse?parse(el.value):el.value;onChange();});
+}
+function onChange(){
+  // recompute live across tabs that are visible
+  renderBrew();renderSetupComputed();
+  if($('tab-analysis').classList.contains('active'))renderAnalysis();
+  if($('tab-phases').classList.contains('active'))renderPhases();
+}
+
+function init(){
+  lsLoad();
+  // pills
+  buildPills('s_process',PROCESSES,setup.process,function(v){setup.process=v;onChange();});
+  buildPills('s_roast',ROASTS,setup.roast,function(v){setup.roast=v;onChange();});
+  buildPills('s_dripper',DRIPPERS,setup.dripper,function(v){setup.dripper=v;});
+  buildPills('a_attr',['Sweetness','Acidity','Bitterness','Body'],surfState.attr,function(v){surfState.attr=v;drawSurface();});
+  buildPills('a_view',['2D Map','3D'],surfState.view==='2d'?'2D Map':'3D',function(v){
+    surfState.view=(v==='3D')?'3d':'2d';
+    $('a_surfHint').textContent=surfState.view==='3d'?'ลากเพื่อหมุน · สี+ความสูง = ความเข้ม':'มองจากบน · สีเข้ม = attribute เด่น';
+    drawSurface();});
+  buildCVA();
+  // setup inputs
+  bindInput('s_name',setup,'name');
+  bindInput('s_grinder',setup,'grinder');
+  bindInput('s_d50',setup,'d50',num);
+  bindInput('s_span',setup,'span',num);
+  bindInput('s_dose',setup,'dose',function(v){return num(v)||15;});
+  bindInput('s_waterTDS',setup,'waterTDS',num);
+  $('s_ratio').addEventListener('input',function(){setup.ratio=parseFloat($('s_ratio').value);$('s_ratioVal').textContent='1:'+setup.ratio.toFixed(1);});
+  $('s_applyRec').addEventListener('click',function(){var r=recommendRatio();setup.ratio=Math.round(r*10)/10;$('s_ratio').value=setup.ratio;$('s_ratioVal').textContent='1:'+setup.ratio.toFixed(1);
+    var note=$('s_recNote');note.style.display='block';note.innerHTML='ใช้ค่า <b>1:'+setup.ratio.toFixed(1)+'</b> จาก roast='+setup.roast+' · process='+setup.process+(setup.d50?' · D50='+setup.d50+'µm':'')+' <span style="color:var(--dim)">(heuristic)</span>';toast('ใช้ auto ratio');});
+  $('s_photo').addEventListener('change',function(){if(this.files&&this.files[0])applyPhotoBrightness(this.files[0]);});
+  // brew inputs
+  bindInput('b_waterIn',brew,'waterIn',num);
+  bindInput('b_yield',brew,'yield',num);
+  bindInput('b_tds',brew,'tds',num);
+  bindInput('b_lift',brew,'lift');
+  bindInput('b_draw',brew,'draw');
+  bindInput('b_tailTDS',brew,'tailTDS',num);
+  bindInput('b_tailWt',brew,'tailWt',num);
+  // analysis
+  $('a_targetTDS').addEventListener('input',renderAnalysis);
+  // learn buttons
+  $('l_save').addEventListener('click',saveBrew);
+  $('l_export').addEventListener('click',exportJSON);
+  $('l_import').addEventListener('click',function(){$('l_importFile').click();});
+  $('l_importFile').addEventListener('change',function(){if(this.files&&this.files[0])importJSON(this.files[0]);this.value='';});
+  $('l_clear').addEventListener('click',function(){if(logs.length&&confirm('ลบ log ทั้งหมด? กู้คืนไม่ได้')){logs=[];lsSave();renderLog();renderCore();drawChart();toast('ลบทั้งหมด');}});
+  // tab nav
+  TABS.forEach(function(t){$('nav-'+t).addEventListener('click',function(){setTab(t);});});
+  // surface drag rotate
+  var sc=$('surfCanvas');
+  function down(e){surfState.dragging=true;var p=e.touches?e.touches[0]:e;surfState.lx=p.clientX;surfState.ly=p.clientY;}
+  function move(e){if(!surfState.dragging)return;e.preventDefault();var p=e.touches?e.touches[0]:e;
+    surfState.az+=(p.clientX-surfState.lx)*0.012;surfState.el=clamp(surfState.el-(p.clientY-surfState.ly)*0.008,0.25,1.45);
+    surfState.lx=p.clientX;surfState.ly=p.clientY;drawSurface();}
+  function up(){surfState.dragging=false;}
+  sc.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+  sc.addEventListener('touchstart',down,{passive:false});sc.addEventListener('touchmove',move,{passive:false});sc.addEventListener('touchend',up);
+  // resize redraw
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if($('tab-analysis').classList.contains('active'))renderAnalysis();renderCore();},200);});
+  // initial render
+  renderSetupComputed();renderBrew();renderCore();renderLog();
+}
+document.addEventListener('DOMContentLoaded',init);
+
+
+</script>
+</body>
+</html>
