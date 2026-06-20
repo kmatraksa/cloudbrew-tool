@@ -237,7 +237,12 @@ canvas{display:block;width:100%;touch-action:none}
       <div class="fld"><div class="fld-label">Dose (g)</div><input type="number" id="s_dose" value="15" step="0.1" inputmode="decimal"></div>
       <div class="fld"><div class="fld-label"><span>Water TDS</span><span class="fld-hint">ppm</span></div><input type="number" id="s_waterTDS" placeholder="40" inputmode="decimal"></div>
     </div>
-    <div class="fld"><div class="fld-label">Dripper</div><div class="pills" id="s_dripper"></div></div>
+    <div class="fld"><div class="fld-label">Dripper</div><div class="pills" id="s_dripper"></div>
+      <div class="note note-teal" id="s_dripperInfo" style="display:none;margin-top:9px"></div>
+    </div>
+    <div class="fld"><div class="fld-label"><span>Material</span><span class="fld-hint">heat transfer</span></div><div class="pills" id="s_material"></div>
+      <div class="note note-amber" id="s_materialInfo" style="display:none;margin-top:9px"></div>
+    </div>
     <div class="fld"><div class="fld-label"><span>Ratio</span><span class="fld-hint" id="s_ratioRec">auto: —</span></div>
       <div style="display:flex;align-items:center;gap:12px">
         <input type="range" id="s_ratio" min="13" max="20" step="0.1" value="15">
@@ -410,7 +415,7 @@ var GC={eyLo:18,eyHi:22,tdsLo:1.15,tdsHi:1.35}; // Golden Cup
 var CHART={eyMin:14,eyMax:26,tdsMin:0.8,tdsMax:1.6};
 
 var setup={name:'',process:'Washed',roast:'Medium',brightness:null,roastEst:null,
-  grinder:'',d50:null,span:null,dose:15,dripper:'Orea Z1',waterTDS:null,ratio:15};
+  grinder:'',d50:null,span:null,dose:15,dripper:'Orea Z1',material:'Plastic',waterTDS:null,ratio:15};
 var brew={waterIn:null,yield:null,tds:null,lift:'',draw:'',tailTDS:null,tailWt:null};
 var cva={sweet:null,acid:null,bitter:null,body:null};
 var logs=[];
@@ -544,7 +549,46 @@ function surfaceHeight(attr,exN,txN,cal){
 /* ═══════════════ TAB 1 · SETUP ═══════════════ */
 var PROCESSES=['Washed','Honey','Natural','Anaerobic'];
 var ROASTS=['Light','Light-Med','Medium','Med-Dark','Dark'];
-var DRIPPERS=['Orea Z1','V60','Kalita','Origami'];
+var DRIPPERS=['Orea Z1','Orea V4','April','Solo','V60','Origami','Kalita Wave','Hario Switch','Chemex','December','Flower','Tricolate','Other'];
+/* geometry · typical X retention (approx, varies by filter/technique) · flow character */
+var DRIPPER_INFO={
+  'Orea Z1':{geo:'Flat',x:'~2.5–3.5',flow:'เร็ว · retention สูง',note:'flat-bottom · dead-space เก็บน้ำเยอะ → X สูง'},
+  'Orea V4':{geo:'Flat',x:'~2.0–2.8',flow:'เร็วมาก',note:'flat fast — Wölfl WBrC 2024'},
+  'April':{geo:'Flat',x:'~2.0–2.8',flow:'กลาง-เร็ว',note:'flat-bottom competition'},
+  'Solo':{geo:'Flat',x:'~2.0–2.8',flow:'กลาง',note:'Tran/Peng WBrC 2025 · ใช้คู่ Melodrip'},
+  'V60':{geo:'Conical',x:'~1.5–2.0',flow:'เร็ว · technique-driven',note:'conical · spiral ribs · ไวต่อ pour'},
+  'Origami':{geo:'Hybrid',x:'~1.6–2.2',flow:'ขึ้นกับ filter',note:'ribs · ใช้ cone หรือ flat filter ได้'},
+  'Kalita Wave':{geo:'Flat',x:'~1.8–2.4',flow:'สม่ำเสมอ · forgiving',note:'3-hole flat · wave filter'},
+  'Hario Switch':{geo:'Immersion',x:'~1.8–2.5',flow:'immersion + drip',note:'valve hybrid — คุม contact time ได้'},
+  'Chemex':{geo:'Conical',x:'~2.0–2.6',flow:'ช้า · filter หนา',note:'bonded paper หนา → clarity สูง'},
+  'December':{geo:'Conical',x:'~1.5–2.0',flow:'ปรับได้',note:'adjustable flow base'},
+  'Flower':{geo:'Conical',x:'~1.5–2.0',flow:'เร็ว',note:'cone · raised ribs ระบายดี'},
+  'Tricolate':{geo:'Flat',x:'~2.2–3.0',flow:'percolation · no bypass',note:'bypass-free → EY สูง · flow ช้า'},
+  'Other':{geo:'—',x:'—',flow:'—',note:'กรอกชื่อใน grinder/notes ถ้าต้องการ'}
+};
+function renderDripperInfo(){
+  var d=DRIPPER_INFO[setup.dripper],el=$('s_dripperInfo');
+  if(!d||setup.dripper==='Other'){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML='<b>'+esc(setup.dripper)+'</b> · '+d.geo+' · retention X '+d.x+' · '+d.flow+'<br><span style="color:var(--dim)">'+d.note+'</span>';
+}
+
+/* material thermal behavior (research-backed) — affects heat transfer, NOT a direct EY input */
+var MATERIALS=['Plastic','Glass','Ceramic','Metal','Double-wall'];
+var MATERIAL_INFO={
+  'Plastic':{mass:'ต่ำสุด',preheat:'น้อย',behavior:'ขโมยความร้อนจาก brew น้อยสุด · temp นิ่งสุด ปล่อยให้ kettle temp คุมรส',cond:'นำความร้อนต่ำ'},
+  'Glass':{mass:'กลาง',preheat:'ควร',behavior:'สมดุล · conductivity คล้าย ceramic แต่เบากว่า เก็บความร้อนพอควร',cond:'นำความร้อนกลาง'},
+  'Ceramic':{mass:'สูงสุด',preheat:'จำเป็นมาก',behavior:'ดูดความร้อนได้ถึง 3× ของ plastic — ถ้าไม่ preheat จะดึง temp ตอนต้น กระทบ early extraction',cond:'เก็บความร้อนดีหลัง preheat'},
+  'Metal':{mass:'ต่ำ · นำสูง',preheat:'ควร',behavior:'นำความร้อนเร็ว เน้น early extraction (acidity/flavor) · brew เย็นเร็วกว่า',cond:'นำความร้อนสูงสุด'},
+  'Double-wall':{mass:'แยกชั้น',preheat:'น้อย',behavior:'vacuum/double wall = insulate temp ดีสุด · brew อุ่นนานสม่ำเสมอ → sweeter/juicier (เช่น Stagg X)',cond:'insulate สูงสุด'}
+};
+function renderMaterialInfo(){
+  var m=MATERIAL_INFO[setup.material],el=$('s_materialInfo');
+  if(!m){el.style.display='none';return;}
+  el.style.display='block';
+  var ph=m.preheat==='จำเป็นมาก'?'<b style="color:var(--coral)">Preheat: '+m.preheat+'</b>':'Preheat: '+m.preheat;
+  el.innerHTML='Thermal mass '+m.mass+' · '+ph+'<br><span style="color:var(--dim)">'+m.behavior+'</span>';
+}
 
 function buildPills(containerId,opts,current,onPick){
   var c=$(containerId);c.innerHTML='';
@@ -1069,7 +1113,7 @@ function saveBrew(){
   var entry={
     ts:Date.now(),name:setup.name,process:setup.process,roast:setup.roast,
     grinder:setup.grinder,d50:setup.d50,span:setup.span,dose:setup.dose,
-    dripper:setup.dripper,waterTDS:setup.waterTDS,ratioSet:setup.ratio,
+    dripper:setup.dripper,material:setup.material,waterTDS:setup.waterTDS,ratioSet:setup.ratio,
     waterIn:brew.waterIn,yield:brew.yield,tds:brew.tds,lift:brew.lift,draw:brew.draw,
     tailTDS:brew.tailTDS,tailWt:brew.tailWt,
     ey:ey,ratioOut:brew._ratioOut,xret:brew._xret,tailEY:brew._tailEY,_yflow:brew._yflow,
@@ -1092,7 +1136,7 @@ function renderLog(){
     function row(k,v){return v==null||v===''?'':'<div class="log-row"><span class="k">'+k+'</span><span>'+esc(v)+'</span></div>';}
     rows+=row('Process',L.process);rows+=row('Roast',L.roast);rows+=row('Grinder',L.grinder);
     rows+=row('D50',L.d50!=null?L.d50+'µm':'');rows+=row('Dose',L.dose+'g');
-    rows+=row('Dripper',L.dripper);rows+=row('Water in',L.waterIn!=null?L.waterIn+'g':'');
+    rows+=row('Dripper',L.dripper);rows+=row('Material',L.material);rows+=row('Water in',L.waterIn!=null?L.waterIn+'g':'');
     rows+=row('Yield',L.yield!=null?L.yield+'g':'');rows+=row('TDS',L.tds!=null?L.tds+'%':'');
     rows+=row('Ratio out',L.ratioOut!=null?'1:'+L.ratioOut.toFixed(1):'');
     rows+=row('Yield flow',L._yflow!=null?L._yflow.toFixed(2)+' g/s':'');
@@ -1157,7 +1201,8 @@ function init(){
   // pills
   buildPills('s_process',PROCESSES,setup.process,function(v){setup.process=v;onChange();});
   buildPills('s_roast',ROASTS,setup.roast,function(v){setup.roast=v;onChange();});
-  buildPills('s_dripper',DRIPPERS,setup.dripper,function(v){setup.dripper=v;});
+  buildPills('s_dripper',DRIPPERS,setup.dripper,function(v){setup.dripper=v;renderDripperInfo();});
+  buildPills('s_material',MATERIALS,setup.material,function(v){setup.material=v;renderMaterialInfo();});
   buildPills('a_attr',['Sweetness','Acidity','Bitterness','Body'],surfState.attr,function(v){surfState.attr=v;drawSurface();});
   buildPills('a_view',['2D Map','3D'],surfState.view==='2d'?'2D Map':'3D',function(v){
     surfState.view=(v==='3D')?'3d':'2d';
@@ -1205,7 +1250,7 @@ function init(){
   // resize redraw
   var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if($('tab-analysis').classList.contains('active'))renderAnalysis();renderCore();},200);});
   // initial render
-  renderSetupComputed();renderBrew();renderCore();renderLog();
+  renderSetupComputed();renderBrew();renderCore();renderLog();renderDripperInfo();renderMaterialInfo();
 }
 document.addEventListener('DOMContentLoaded',init);
 
