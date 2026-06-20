@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -196,14 +196,14 @@ canvas{display:block;width:100%;touch-action:none}
 <!-- ══ TAB 1 · SETUP ══ -->
 <section class="tabpanel active" id="tab-setup">
   <div class="phead">
-    <div class="phead-eyebrow">01 · ก่อน Brew</div>
+    <div class="phead-eyebrow">01 · Before Brew</div>
     <div class="phead-title"><b>Setup</b></div>
-    <div class="phead-sub">ตั้งค่าเมล็ด · grind · อุปกรณ์ ก่อนเริ่มสกัด</div>
+    <div class="phead-sub">set coffee · grind · equipment before brewing</div>
   </div>
 
   <div class="card">
     <div class="card-label">Coffee <span class="ln"></span></div>
-    <div class="fld"><div class="fld-label">Coffee name</div><input id="s_name" placeholder="เช่น Ethiopia Bildimoo Natural"></div>
+    <div class="fld"><div class="fld-label">Coffee name</div><input id="s_name" placeholder="e.g. Ethiopia Bildimoo Natural"></div>
     <div class="fld"><div class="fld-label">Process</div>
       <div class="pills" id="s_process"></div>
     </div>
@@ -217,7 +217,7 @@ canvas{display:block;width:100%;touch-action:none}
     <div class="fld"><div class="fld-label"><span>Bean photo (optional)</span><span class="fld-hint">brightness → rough roast</span></div>
       <input type="file" id="s_photo" accept="image/*" capture="environment"></div>
     <div class="readout-grid"><div class="ro"><div class="ro-val" id="s_bright" style="color:var(--amber)">—</div><div class="ro-lbl">Avg Brightness</div></div><div class="ro"><div class="ro-val" id="s_roastEst" style="color:var(--amber)">—</div><div class="ro-lbl">Roast Est.</div></div></div>
-    <div class="note note-amber">ค่านี้เป็น <b>ESTIMATE</b> จากความสว่างเฉลี่ยของภาพ — ไม่ใช่ Agtron · ปรับ Roast level ด้านบนเองได้เสมอ</div>
+    <div class="note note-amber">this value is <b>ESTIMATE</b> from average image brightness — not Agtron · always overridable via Roast level above</div>
   </div>
 
   <div class="card">
@@ -228,7 +228,7 @@ canvas{display:block;width:100%;touch-action:none}
       <div class="fld"><div class="fld-label"><span>Span</span><span class="fld-hint">optional</span></div><input type="number" id="s_span" placeholder="1.3" inputmode="decimal" step="0.01"></div>
     </div>
     <div class="readout-grid"><div class="ro"><div class="ro-val" id="s_kmult" style="color:var(--teal)">—</div><div class="ro-lbl">k multiplier</div><div class="ro-sub">(750/D50)^1.5</div></div><div class="ro"><div class="ro-val" id="s_kspeed" style="color:var(--teal);font-size:1.1rem">—</div><div class="ro-lbl">Extraction rate</div></div></div>
-    <div class="note note-teal">D50 จาก <b>DiFluid PSD reader</b> — ฮาร์ดแวร์วัดแม่นกว่ากล้องมือถือ จึงไม่มี camera grind analysis ในแอปนี้</div>
+    <div class="note note-teal">D50 from <b>DiFluid PSD reader</b> — hardware measures better than a phone camera, so no camera grind analysis here</div>
   </div>
 
   <div class="card">
@@ -249,7 +249,7 @@ canvas{display:block;width:100%;touch-action:none}
         <div style="font-family:var(--mono);font-weight:700;font-size:1.3rem;color:var(--amber);min-width:62px;text-align:right" id="s_ratioVal">1:15.0</div>
       </div>
     </div>
-    <button class="btn btn-ghost" style="margin-top:4px" id="s_applyRec">↪ ใช้ค่า auto ratio ที่แนะนำ</button>
+    <button class="btn btn-ghost" style="margin-top:4px" id="s_applyRec">↪ use recommended auto ratio</button>
     <div class="note note-amber" id="s_recNote" style="display:none"></div>
   </div>
 </section>
@@ -257,9 +257,9 @@ canvas{display:block;width:100%;touch-action:none}
 <!-- ══ TAB 2 · BREW ══ -->
 <section class="tabpanel" id="tab-brew">
   <div class="phead">
-    <div class="phead-eyebrow">02 · ระหว่าง Brew</div>
+    <div class="phead-eyebrow">02 · During Brew</div>
     <div class="phead-title"><b>Brew</b></div>
-    <div class="phead-sub">กรอกค่าที่วัดจริงระหว่างสกัด — ผลคำนวณอัปเดตทันที</div>
+    <div class="phead-sub">enter measured values during the brew — results update live</div>
   </div>
 
   <div class="card">
@@ -279,9 +279,25 @@ canvas{display:block;width:100%;touch-action:none}
     <div class="card-label">Tail Fraction <span class="tag tag-exact">Weighed</span><span class="ln"></span></div>
     <div class="grid2">
       <div class="fld"><div class="fld-label">Tail TDS (%)</div><input type="number" id="b_tailTDS" placeholder="0.65" inputmode="decimal" step="0.01"></div>
-      <div class="fld"><div class="fld-label"><span>Tail weight</span><span class="fld-hint">g · ต้องชั่ง</span></div><input type="number" id="b_tailWt" placeholder="35" inputmode="decimal" step="1"></div>
+      <div class="fld"><div class="fld-label"><span>Tail weight</span><span class="fld-hint">g · must weigh</span></div><input type="number" id="b_tailWt" placeholder="35" inputmode="decimal" step="1"></div>
     </div>
-    <div class="note note-amber">tail EY ต้องใช้ <b>tail mass ที่ชั่งจริง</b> — แอปไม่เดาค่าให้ ถ้าไม่ชั่งจะไม่คำนวณ tail EY</div>
+    <div class="note note-amber">tail EY requires <b>actually-weighed tail mass</b> — the app won't guess; without weighing, tail EY isn't computed</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Belka PORTAL · EC <span class="tag tag-est">Diagnostic</span><span class="ln"></span></div>
+    <div class="grid3">
+      <div class="fld"><div class="fld-label"><span>EC peak</span><span class="fld-hint">µS/cm</span></div><input type="number" id="b_ecPeak" placeholder="1100" inputmode="decimal" step="1"></div>
+      <div class="fld"><div class="fld-label"><span>EC tail</span><span class="fld-hint">end</span></div><input type="number" id="b_ecTail" placeholder="320" inputmode="decimal" step="1"></div>
+      <div class="fld"><div class="fld-label"><span>Time→peak</span><span class="fld-hint">mm:ss</span></div><input id="b_ecTpeak" placeholder="0:45" inputmode="text"></div>
+    </div>
+    <div class="readout-grid cols3">
+      <div class="ro"><div class="ro-val" id="b_ecRatio" style="color:var(--violet);font-size:1.2rem">—</div><div class="ro-lbl">EC→TDS factor</div><div class="ro-sub">calibrated</div></div>
+      <div class="ro"><div class="ro-val" id="b_ecTdsEst" style="color:var(--violet);font-size:1.2rem">—</div><div class="ro-lbl">TDS from EC</div></div>
+      <div class="ro"><div class="ro-val" id="b_ecDecay" style="color:var(--coral);font-size:1.2rem">—</div><div class="ro-lbl">Tail/peak</div></div>
+    </div>
+    <div class="note note-amber" id="b_ecNote">EC <b>not TDS</b> — saccharides/melanoidins don't ionize so aren't counted + temperature-sensitive · use as <b>diagnostic curve</b> (consistency + bimodal tail), not a refractometer replacement</div>
+    <div class="note note-teal" id="b_ecLearn" style="display:none"></div>
   </div>
 
   <div class="card">
@@ -305,15 +321,15 @@ canvas{display:block;width:100%;touch-action:none}
 <!-- ══ TAB 3 · ANALYSIS ══ -->
 <section class="tabpanel" id="tab-analysis">
   <div class="phead">
-    <div class="phead-eyebrow">03 · วิเคราะห์</div>
+    <div class="phead-eyebrow">03 · Analysis</div>
     <div class="phead-title"><b>Analysis</b></div>
-    <div class="phead-sub">ตำแหน่งบน brewing control chart · dilution · flavor surface</div>
+    <div class="phead-sub">position on brewing control chart · dilution · flavor surface</div>
   </div>
 
   <div class="card">
     <div class="card-label">Brewing Control Chart <span class="tag tag-exact">Exact</span><span class="ln"></span></div>
     <div class="canvas-frame"><canvas id="chartCanvas"></canvas></div>
-    <div class="canvas-hint">จุดส้ม = brew นี้ · จุดเขียว = หลัง dilute · เส้นประ = เติม bypass (EY คงที่) · จุดจาง = logs เก่า</div>
+    <div class="canvas-hint">orange dot = this brew · green dot = after dilute · dashed line = add bypass (EY constant) · faint dots = old logs</div>
   </div>
 
   <div class="card">
@@ -325,7 +341,7 @@ canvas{display:block;width:100%;touch-action:none}
       </div>
     </div>
     <div class="readout-grid"><div class="ro"><div class="ro-val" id="a_addWater" style="color:var(--teal);font-size:1.7rem">—<span class="u">g</span></div><div class="ro-lbl">Add bypass water</div></div><div class="ro"><div class="ro-val" id="a_finalVol" style="font-size:1.7rem">—<span class="u">g</span></div><div class="ro-lbl">Final volume</div></div></div>
-    <div class="note note-teal">เติม bypass = เจือจางความเข้ม (TDS ลด) แต่ <b>EY ไม่เปลี่ยน</b> — solids สกัดออกมาแล้ว</div>
+    <div class="note note-teal">add bypass = dilutes strength (TDS down) but <b>EY unchanged</b> — solids already extracted</div>
   </div>
 
   <div class="card">
@@ -334,9 +350,9 @@ canvas{display:block;width:100%;touch-action:none}
     <div class="fld"><div class="fld-label">View</div><div class="pills" id="a_view"></div></div>
     <div class="canvas-frame"><canvas id="surfCanvas"></canvas></div>
     <div id="a_legend" style="display:flex;align-items:center;gap:8px;margin-top:9px;font-family:var(--mono);font-size:9px;color:var(--muted)"></div>
-    <div class="canvas-hint" id="a_surfHint">มองจากบน · สีเข้ม = attribute เด่น</div>
+    <div class="canvas-hint" id="a_surfHint">top-down · darker = attribute strongest</div>
     <div class="note note-teal" id="a_caption" style="margin-top:9px"></div>
-    <div class="note note-amber" id="a_surfNote">พื้นผิวเป็น <b>SCHEMATIC</b> (Guinard: sweet ล่างซ้าย, bitter บนขวา) จนกว่าจะ calibrate ด้วย CVA logs จริง</div>
+    <div class="note note-amber" id="a_surfNote">surface is <b>SCHEMATIC</b> (Guinard: sweet lower-left, bitter upper-right) until calibrated with real CVA logs</div>
   </div>
 
   <div class="card">
@@ -348,9 +364,9 @@ canvas{display:block;width:100%;touch-action:none}
 <!-- ══ TAB 4 · PHASES ══ -->
 <section class="tabpanel" id="tab-phases">
   <div class="phead">
-    <div class="phead-eyebrow">04 · ออกแบบช่วงสกัด</div>
+    <div class="phead-eyebrow">04 · Phase Design</div>
     <div class="phead-title"><b>Phases</b></div>
-    <div class="phead-sub">วินิจฉัยแต่ละช่วงจาก metrics จริง + เทคนิคที่ควรปรับ</div>
+    <div class="phead-sub">diagnose each phase from real metrics + technique to adjust</div>
   </div>
   <div id="ph_blocks"></div>
   <div class="card" style="border-color:var(--amber-dim)">
@@ -364,7 +380,7 @@ canvas{display:block;width:100%;touch-action:none}
   <div class="phead">
     <div class="phead-eyebrow">05 · Log &amp; Learn</div>
     <div class="phead-title">Calibration <b>Core</b></div>
-    <div class="phead-sub">ทุก brew ปรับค่าโมเดลให้เป็นของคุณ — parameter fitting ไม่ใช่ machine learning</div>
+    <div class="phead-sub">every brew tunes the model to you — parameter fitting, not machine learning</div>
   </div>
 
   <div class="card">
@@ -416,7 +432,7 @@ var CHART={eyMin:14,eyMax:26,tdsMin:0.8,tdsMax:1.6};
 
 var setup={name:'',process:'Washed',roast:'Medium',brightness:null,roastEst:null,
   grinder:'',d50:null,span:null,dose:15,dripper:'Orea Z1',material:'Plastic',waterTDS:null,ratio:15};
-var brew={waterIn:null,yield:null,tds:null,lift:'',draw:'',tailTDS:null,tailWt:null};
+var brew={waterIn:null,yield:null,tds:null,lift:'',draw:'',tailTDS:null,tailWt:null,ecPeak:null,ecTail:null,ecTpeak:''};
 var cva={sweet:null,acid:null,bitter:null,body:null};
 var logs=[];
 
@@ -552,19 +568,19 @@ var ROASTS=['Light','Light-Med','Medium','Med-Dark','Dark'];
 var DRIPPERS=['Orea Z1','Orea V4','April','Solo','V60','Origami','Kalita Wave','Hario Switch','Chemex','December','Flower','Tricolate','Other'];
 /* geometry · typical X retention (approx, varies by filter/technique) · flow character */
 var DRIPPER_INFO={
-  'Orea Z1':{geo:'Flat',x:'~2.5–3.5',flow:'เร็ว · retention สูง',note:'flat-bottom · dead-space เก็บน้ำเยอะ → X สูง'},
-  'Orea V4':{geo:'Flat',x:'~2.0–2.8',flow:'เร็วมาก',note:'flat fast — Wölfl WBrC 2024'},
-  'April':{geo:'Flat',x:'~2.0–2.8',flow:'กลาง-เร็ว',note:'flat-bottom competition'},
-  'Solo':{geo:'Flat',x:'~2.0–2.8',flow:'กลาง',note:'Tran/Peng WBrC 2025 · ใช้คู่ Melodrip'},
-  'V60':{geo:'Conical',x:'~1.5–2.0',flow:'เร็ว · technique-driven',note:'conical · spiral ribs · ไวต่อ pour'},
-  'Origami':{geo:'Hybrid',x:'~1.6–2.2',flow:'ขึ้นกับ filter',note:'ribs · ใช้ cone หรือ flat filter ได้'},
-  'Kalita Wave':{geo:'Flat',x:'~1.8–2.4',flow:'สม่ำเสมอ · forgiving',note:'3-hole flat · wave filter'},
-  'Hario Switch':{geo:'Immersion',x:'~1.8–2.5',flow:'immersion + drip',note:'valve hybrid — คุม contact time ได้'},
-  'Chemex':{geo:'Conical',x:'~2.0–2.6',flow:'ช้า · filter หนา',note:'bonded paper หนา → clarity สูง'},
-  'December':{geo:'Conical',x:'~1.5–2.0',flow:'ปรับได้',note:'adjustable flow base'},
-  'Flower':{geo:'Conical',x:'~1.5–2.0',flow:'เร็ว',note:'cone · raised ribs ระบายดี'},
-  'Tricolate':{geo:'Flat',x:'~2.2–3.0',flow:'percolation · no bypass',note:'bypass-free → EY สูง · flow ช้า'},
-  'Other':{geo:'—',x:'—',flow:'—',note:'กรอกชื่อใน grinder/notes ถ้าต้องการ'}
+  'Orea Z1':{geo:'Flat',x:'~2.5–3.5',flow:'fast · high retention',note:'flat-bottom · dead-space holds water → high X'},
+  'Orea V4':{geo:'Flat',x:'~2.0–2.8',flow:'very fast',note:'flat fast — Wölfl WBrC 2024'},
+  'April':{geo:'Flat',x:'~2.0–2.8',flow:'medium-fast',note:'flat-bottom competition'},
+  'Solo':{geo:'Flat',x:'~2.0–2.8',flow:'medium',note:'Tran/Peng WBrC 2025 · paired with Melodrip'},
+  'V60':{geo:'Conical',x:'~1.5–2.0',flow:'fast · technique-driven',note:'conical · spiral ribs · pour-sensitive'},
+  'Origami':{geo:'Hybrid',x:'~1.6–2.2',flow:'filter-dependent',note:'ribs · works with cone or flat filter'},
+  'Kalita Wave':{geo:'Flat',x:'~1.8–2.4',flow:'even · forgiving',note:'3-hole flat · wave filter'},
+  'Hario Switch':{geo:'Immersion',x:'~1.8–2.5',flow:'immersion + drip',note:'valve hybrid — controls contact time'},
+  'Chemex':{geo:'Conical',x:'~2.0–2.6',flow:'slow · thick filter',note:'thick bonded paper → high clarity'},
+  'December':{geo:'Conical',x:'~1.5–2.0',flow:'adjustable',note:'adjustable flow base'},
+  'Flower':{geo:'Conical',x:'~1.5–2.0',flow:'fast',note:'cone · raised ribs drain well'},
+  'Tricolate':{geo:'Flat',x:'~2.2–3.0',flow:'percolation · no bypass',note:'bypass-free → high EY · slow flow'},
+  'Other':{geo:'—',x:'—',flow:'—',note:'enter name in grinder/notes if needed'}
 };
 function renderDripperInfo(){
   var d=DRIPPER_INFO[setup.dripper],el=$('s_dripperInfo');
@@ -576,17 +592,17 @@ function renderDripperInfo(){
 /* material thermal behavior (research-backed) — affects heat transfer, NOT a direct EY input */
 var MATERIALS=['Plastic','Glass','Ceramic','Metal','Double-wall'];
 var MATERIAL_INFO={
-  'Plastic':{mass:'ต่ำสุด',preheat:'น้อย',behavior:'ขโมยความร้อนจาก brew น้อยสุด · temp นิ่งสุด ปล่อยให้ kettle temp คุมรส',cond:'นำความร้อนต่ำ'},
-  'Glass':{mass:'กลาง',preheat:'ควร',behavior:'สมดุล · conductivity คล้าย ceramic แต่เบากว่า เก็บความร้อนพอควร',cond:'นำความร้อนกลาง'},
-  'Ceramic':{mass:'สูงสุด',preheat:'จำเป็นมาก',behavior:'ดูดความร้อนได้ถึง 3× ของ plastic — ถ้าไม่ preheat จะดึง temp ตอนต้น กระทบ early extraction',cond:'เก็บความร้อนดีหลัง preheat'},
-  'Metal':{mass:'ต่ำ · นำสูง',preheat:'ควร',behavior:'นำความร้อนเร็ว เน้น early extraction (acidity/flavor) · brew เย็นเร็วกว่า',cond:'นำความร้อนสูงสุด'},
-  'Double-wall':{mass:'แยกชั้น',preheat:'น้อย',behavior:'vacuum/double wall = insulate temp ดีสุด · brew อุ่นนานสม่ำเสมอ → sweeter/juicier (เช่น Stagg X)',cond:'insulate สูงสุด'}
+  'Plastic':{mass:'lowest',preheat:'low',behavior:'steals least heat from brew · most stable temp, lets kettle temp drive flavor',cond:'low conductivity'},
+  'Glass':{mass:'medium',preheat:'recommended',behavior:'balanced · conductivity like ceramic but lighter, holds heat moderately',cond:'medium conductivity'},
+  'Ceramic':{mass:'highest',preheat:'essential',behavior:'absorbs up to 3× the heat of plastic — without preheating it pulls temp early, hurting early extraction',cond:'holds heat well after preheat'},
+  'Metal':{mass:'low · conducts high',preheat:'recommended',behavior:'conducts heat fast, favors early extraction (acidity/flavor) · brew cools faster',cond:'highest conductivity'},
+  'Double-wall':{mass:'layered',preheat:'low',behavior:'vacuum/double wall = insulates temp best · brew stays warm and even → sweeter/juicier (e.g. Stagg X)',cond:'max insulation'}
 };
 function renderMaterialInfo(){
   var m=MATERIAL_INFO[setup.material],el=$('s_materialInfo');
   if(!m){el.style.display='none';return;}
   el.style.display='block';
-  var ph=m.preheat==='จำเป็นมาก'?'<b style="color:var(--coral)">Preheat: '+m.preheat+'</b>':'Preheat: '+m.preheat;
+  var ph=m.preheat==='essential'?'<b style="color:var(--coral)">Preheat: '+m.preheat+'</b>':'Preheat: '+m.preheat;
   el.innerHTML='Thermal mass '+m.mass+' · '+ph+'<br><span style="color:var(--dim)">'+m.behavior+'</span>';
 }
 
@@ -643,6 +659,40 @@ function applyPhotoBrightness(file){
 }
 
 /* ═══════════════ TAB 2 · BREW ═══════════════ */
+/* EC↔TDS calibration — fit factor from logs that have BOTH ec peak + measured TDS (per-user, NOT universal) */
+function calibEC(){
+  var fs=[];
+  for(var i=0;i<logs.length;i++){var L=logs[i];
+    if(L.ecPeak!=null&&L.ecPeak>0&&L.tds!=null&&L.tds>0)fs.push(L.tds/L.ecPeak);}
+  if(fs.length<2)return {factor:null,n:fs.length,level:0};
+  var mean=fs.reduce(function(a,b){return a+b;},0)/fs.length;
+  var variance=fs.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/fs.length;
+  var cv=mean!==0?Math.sqrt(variance)/Math.abs(mean):1;
+  var level=fs.length>=8&&cv<0.1?3:fs.length>=4&&cv<0.2?2:1;
+  return {factor:mean,n:fs.length,level:level,cv:cv};
+}
+function renderEC(){
+  var c=calibEC();
+  brew._ecCal=c;
+  $('b_ecRatio').textContent=c.factor!=null?c.factor.toFixed(5):'—';
+  // TDS estimate from EC peak (rough — peak EC ~ peak concentration, not cup avg)
+  var tdsEst=(c.factor!=null&&brew.ecPeak!=null)?brew.ecPeak*c.factor:null;
+  $('b_ecTdsEst').textContent=tdsEst!=null?'~'+tdsEst.toFixed(2)+'%':'—';
+  // tail/peak decay — bimodal / late-extraction indicator
+  var decay=(brew.ecPeak!=null&&brew.ecPeak>0&&brew.ecTail!=null)?brew.ecTail/brew.ecPeak:null;
+  $('b_ecDecay').textContent=decay!=null?(decay*100).toFixed(0)+'%':'—';
+  var ln=$('b_ecLearn');
+  if(c.factor!=null){ln.style.display='block';
+    var conf=confLabel(c.level);
+    var msg='<b>EC→TDS factor calibrated</b> ('+conf+', n='+c.n+') — TDS ≈ EC × '+c.factor.toFixed(5);
+    if(decay!=null&&decay>0.45)msg+='<br><span style="color:var(--coral)">Tail/peak '+(decay*100).toFixed(0)+'% high — EC lingers late in brew = late extraction (boulders/fines), bimodal risk</span>';
+    else if(decay!=null)msg+='<br>Tail/peak '+(decay*100).toFixed(0)+'% — clean cutoff ✓';
+    ln.innerHTML=msg;}
+  else if(brew.ecPeak!=null){ln.style.display='block';
+    ln.innerHTML='log a brew with both <b>EC peak + measured TDS</b> ≥2 times → it fits your own EC↔TDS factor (now n='+c.n+')';}
+  else ln.style.display='none';
+}
+
 function chartZone(ey,tds){
   if(ey==null||tds==null)return {txt:'—',col:'var(--muted)'};
   var eyU=ey<GC.eyLo,eyO=ey>GC.eyHi,tW=tds<GC.tdsLo,tS=tds>GC.tdsHi;
@@ -664,6 +714,7 @@ function renderBrew(){
   var collectT=(lift!=null)?lift:draw;
   var yflow=(brew.yield!=null&&collectT!=null&&collectT>0)?brew.yield/collectT:null;
   brew._ey=ey;brew._ratioOut=ratioOut;brew._xret=xret;brew._tailEY=tailEY;brew._yflow=yflow;
+  renderEC();
 
   $('b_ey').innerHTML=(ey!=null?ey.toFixed(1):'—')+'<span class="u">% EY</span>';
   $('b_ratioOut').textContent=ratioOut!=null?'1:'+ratioOut.toFixed(1):'—';
@@ -684,14 +735,14 @@ function renderBrew(){
       var mean=fs.reduce(function(a,b){return a+b;},0)/fs.length;
       var dpct=(yflow-mean)/mean*100;
       if(Math.abs(dpct)>=15){fn.style.display='block';
-        fn.innerHTML='<b>Flow '+(dpct>0?'เร็ว':'ช้า')+'กว่าปกติ '+Math.abs(dpct).toFixed(0)+'%</b> (เฉลี่ย '+mean.toFixed(2)+' g/s จาก '+fs.length+' logs เมล็ดนี้) — '+(dpct>0?'bed อาจ channel / บดหยาบไป':'bed อาจ clog / fines เยอะ / บดละเอียดไป');}
-      else{fn.style.display='block';fn.innerHTML='Flow ใกล้เคียงปกติ (เฉลี่ย '+mean.toFixed(2)+' g/s) — bed ทำตัวสม่ำเสมอ ✓';}
+        fn.innerHTML='<b>Flow '+(dpct>0?'fast':'slow')+'than normal '+Math.abs(dpct).toFixed(0)+'%</b> (avg '+mean.toFixed(2)+' g/s from '+fs.length+' logs of this coffee) — '+(dpct>0?'bed may channel / too coarse':'bed may clog / too many fines / too fine');}
+      else{fn.style.display='block';fn.innerHTML='Flow near normal (avg '+mean.toFixed(2)+' g/s) — bed behaving consistently ✓';}
     }else fn.style.display='none';
   }else fn.style.display='none';
 
   var xn=$('b_xnote');
   if(xret!=null&&xret>2.5){xn.style.display='block';
-    xn.innerHTML='<b>X retained '+xret.toFixed(2)+'g/g สูง</b> — flat-bottom dripper เก็บน้ำใน dead-space เยอะ · ใช้ Manual TDS เพื่อความแม่น';}
+    xn.innerHTML='<b>X retained '+xret.toFixed(2)+'g/g high</b> — flat-bottom dripper holds water in dead-space · use Manual TDS for accuracy';}
   else xn.style.display='none';
 }
 
@@ -857,6 +908,16 @@ function drawHeatmap(){
   // current brew marker
   if(brew._ey!=null&&brew.tds!=null&&brew._ey>=CHART.eyMin&&brew._ey<=CHART.eyMax&&brew.tds>=CHART.tdsMin&&brew.tds<=CHART.tdsMax){
     var dx=ex(brew._ey),dy=ty(brew.tds);
+    // diluted marker — same EY, target TDS (dilution lowers TDS, EY unchanged)
+    var tgt=num(document.getElementById('a_targetTDS')?document.getElementById('a_targetTDS').value:null);
+    if(tgt!=null&&tgt<brew.tds&&tgt>=CHART.tdsMin&&tgt<=CHART.tdsMax){
+      var ddy=ty(tgt);
+      cx.beginPath();cx.setLineDash([4,3]);cx.moveTo(dx,dy);cx.lineTo(dx,ddy);
+      cx.strokeStyle='rgba(95,208,196,0.7)';cx.lineWidth=1.4;cx.stroke();cx.setLineDash([]);
+      cx.beginPath();cx.arc(dx,ddy,7,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+      cx.lineWidth=2.5;cx.strokeStyle='#5fd0c4';cx.stroke();
+      cx.fillStyle='#5fd0c4';cx.font='700 7px IBM Plex Mono';cx.fillText('DILUTED',dx,ddy+17);
+    }
     cx.beginPath();cx.arc(dx,dy,7,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
     cx.lineWidth=2.5;cx.strokeStyle='#f0e9dd';cx.stroke();
     cx.beginPath();cx.arc(dx,dy,2.5,0,Math.PI*2);cx.fillStyle='#f0e9dd';cx.fill();}
@@ -868,13 +929,13 @@ function drawHeatmap(){
 function renderSurfLegend(){
   var col=attrColor(surfState.attr);
   var stops='';for(var k=0;k<=6;k++){stops+=rampColor(col,k/6)+(k<6?',':'');}
-  $('a_legend').innerHTML='<span>'+esc(surfState.attr)+' ต่ำ</span>'+
+  $('a_legend').innerHTML='<span>'+esc(surfState.attr)+' low</span>'+
     '<span style="flex:1;height:10px;border-radius:5px;border:1px solid var(--line2);background:linear-gradient(to right,'+stops+')"></span>'+
-    '<span>สูง</span>';
+    '<span>high</span>';
 }
 
 /* ── plain-language caption: where attribute peaks / dips ── */
-function zoneWord(n,lo,hi){return n<lo?'ต่ำ':n>hi?'สูง':'กลาง';}
+function zoneWord(n,lo,hi){return n<lo?'low':n>hi?'high':'medium';}
 function renderSurfCaption(){
   var cal=calibSurface(),attr=surfState.attr,N=12;
   var best={v:-1,ex:0,tx:0},worst={v:2,ex:0,tx:0};
@@ -884,9 +945,24 @@ function renderSurfCaption(){
     if(h<worst.v){worst={v:h,ex:exN,tx:txN};}
   }}
   function desc(p){return 'EY '+zoneWord(p.ex,0.4,0.7)+' · TDS '+zoneWord(p.tx,0.4,0.7);}
-  var src=cal.level>0?'จาก logs ('+confLabel(cal.level)+')':'schematic';
-  $('a_caption').innerHTML='<b>'+esc(attr)+'</b> เด่นสุดที่ '+desc(best)+' · จางสุดที่ '+desc(worst)+
+  var src=cal.level>0?'from logs ('+confLabel(cal.level)+')':'schematic';
+  var capHtml='<b>'+esc(attr)+'</b> strongest at '+desc(best)+' · weakest at '+desc(worst)+
     ' <span style="color:var(--dim)">('+src+')</span>';
+  // dilution shift readout — how this attribute changes if diluted to target
+  var tgt=num(document.getElementById('a_targetTDS')?document.getElementById('a_targetTDS').value:null);
+  if(brew._ey!=null&&brew.tds!=null&&tgt!=null&&tgt<brew.tds&&tgt>=CHART.tdsMin&&tgt<=CHART.tdsMax){
+    var exN=clamp((brew._ey-CHART.eyMin)/(CHART.eyMax-CHART.eyMin),0,1);
+    var t0=clamp((brew.tds-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin),0,1);
+    var t1=clamp((tgt-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin),0,1);
+    var h0=surfaceHeight(attr,exN,t0,cal),h1=surfaceHeight(attr,exN,t1,cal);
+    var dpct=(h1-h0)*100;
+    if(Math.abs(dpct)>=3){
+      capHtml+='<br><span style="color:var(--teal)">dilute to '+tgt.toFixed(2)+'% → '+esc(attr)+' '+(dpct<0?'down':'up')+' ~'+Math.abs(dpct).toFixed(0)+'% (EY constant, TDS down)</span>';
+    }else{
+      capHtml+='<br><span style="color:var(--teal)">dilute to '+tgt.toFixed(2)+'% → '+esc(attr)+' barely changes</span>';
+    }
+  }
+  $('a_caption').innerHTML=capHtml;
 }
 
 /* ── 3D SURFACE (optional · drag to rotate) ── */
@@ -938,6 +1014,20 @@ function draw3D(){
     var hz2=surfaceHeight(surfState.attr,exN2,txN2,cal);
     var base=project((exN2-0.5)*2,(txN2-0.5)*2,zMap(0),surfState.az,surfState.el,scale,cxw,cyh);
     var pp=project((exN2-0.5)*2,(txN2-0.5)*2,zMap(hz2),surfState.az,surfState.el,scale,cxw,cyh);
+    // diluted marker — same EY, target TDS → lands at different attribute height
+    var tgt3=num(document.getElementById('a_targetTDS')?document.getElementById('a_targetTDS').value:null);
+    if(tgt3!=null&&tgt3<brew.tds&&tgt3>=CHART.tdsMin&&tgt3<=CHART.tdsMax){
+      var dtxN=clamp((tgt3-CHART.tdsMin)/(CHART.tdsMax-CHART.tdsMin),0,1);
+      var dhz=surfaceHeight(surfState.attr,exN2,dtxN,cal);
+      var dbase=project((exN2-0.5)*2,(dtxN-0.5)*2,zMap(0),surfState.az,surfState.el,scale,cxw,cyh);
+      var dpp=project((exN2-0.5)*2,(dtxN-0.5)*2,zMap(dhz),surfState.az,surfState.el,scale,cxw,cyh);
+      // surface-to-surface shift line (shows how attribute changes with dilution)
+      cx.beginPath();cx.setLineDash([3,3]);cx.moveTo(pp.x,pp.y);cx.lineTo(dpp.x,dpp.y);
+      cx.strokeStyle='rgba(95,208,196,0.7)';cx.lineWidth=1.3;cx.stroke();cx.setLineDash([]);
+      cx.beginPath();cx.moveTo(dbase.x,dbase.y);cx.lineTo(dpp.x,dpp.y);cx.strokeStyle=hexA('#5fd0c4',0.4);cx.lineWidth=1;cx.stroke();
+      cx.beginPath();cx.arc(dpp.x,dpp.y,5,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
+      cx.lineWidth=2;cx.strokeStyle='#5fd0c4';cx.stroke();
+    }
     cx.beginPath();cx.moveTo(base.x,base.y);cx.lineTo(pp.x,pp.y);cx.strokeStyle=hexA('#f0e9dd',0.5);cx.lineWidth=1;cx.stroke();
     cx.beginPath();cx.arc(pp.x,pp.y,5,0,Math.PI*2);cx.fillStyle='#0a0806';cx.fill();
     cx.lineWidth=2;cx.strokeStyle='#f0e9dd';cx.stroke();
@@ -964,31 +1054,31 @@ function renderAnalysis(){
   if(add!=null&&add>=0){$('a_addWater').innerHTML=add.toFixed(0)+'<span class="u">g</span>';
     $('a_finalVol').innerHTML=(brew.yield+add).toFixed(0)+'<span class="u">g</span>';}
   else if(add!=null&&add<0){$('a_addWater').innerHTML='0<span class="u">g</span>';
-    $('a_finalVol').innerHTML='<span style="font-size:.7em;color:var(--coral)">TDS เป้าสูงกว่าปัจจุบัน</span>';}
+    $('a_finalVol').innerHTML='<span style="font-size:.7em;color:var(--coral)">target TDS above current</span>';}
   else {$('a_addWater').innerHTML='—';$('a_finalVol').innerHTML='—';}
   // surface tag
   var cal=calibSurface();
   $('a_surfTag').className='tag '+(cal.level>0?'tag-learn':'tag-est');
   $('a_surfTag').textContent=cal.level>0?'Learning · '+confLabel(cal.level):'Schematic';
   $('a_surfNote').innerHTML=cal.level>0?
-    'พื้นผิว blend จาก CVA logs จริง '+cal.n+' จุด (confidence '+confLabel(cal.level)+') ผสมกับ schematic baseline':
-    'พื้นผิวเป็น <b>SCHEMATIC</b> (Guinard: sweet ล่างซ้าย, bitter บนขวา) จนกว่าจะ calibrate ด้วย CVA logs จริง';
+    'surface blended from real CVA logs '+cal.n+' points (confidence '+confLabel(cal.level)+') blended with schematic baseline':
+    'surface is <b>SCHEMATIC</b> (Guinard: sweet lower-left, bitter upper-right) until calibrated with real CVA logs';
   renderRecs();
 }
 
 function renderRecs(){
   var ey=brew._ey,tds=brew.tds,xret=brew._xret,tailEY=brew._tailEY,tailTDS=brew.tailTDS;
   var recs=[];
-  if(ey==null||tds==null){$('a_recs').innerHTML='<div class="empty">กรอกค่าใน Brew ก่อน<br>เพื่อรับคำแนะนำ</div>';return;}
-  if(ey<GC.eyLo)recs.push(['↗','สกัดน้อย (EY '+ey.toFixed(1)+'%) — <b>บดละเอียดขึ้น</b> หรือเพิ่ม contact time · น้ำร้อนขึ้นได้เล็กน้อย']);
-  else if(ey>GC.eyHi)recs.push(['↘','สกัดมาก (EY '+ey.toFixed(1)+'%) — <b>บดหยาบขึ้น</b> หรือ <b>ตัดหางเร็วขึ้น</b> · ลด agitation']);
-  else recs.push(['✓','EY '+ey.toFixed(1)+'% อยู่ใน Golden Cup zone — รักษา grind ไว้']);
-  if(tds<GC.tdsLo)recs.push(['↑','เข้มไม่พอ (TDS '+tds.toFixed(2)+'%) — <b>ratio แน่นขึ้น</b> (น้ำน้อยลง) หรือเพิ่ม dose']);
-  else if(tds>GC.tdsHi)recs.push(['↓','เข้มเกิน (TDS '+tds.toFixed(2)+'%) — <b>ratio หลวมขึ้น</b> หรือเติม bypass water']);
-  if(tailTDS!=null&&tailTDS>0.8)recs.push(['✂','tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — late extraction เยอะ <b>ตัดหางเร็วขึ้น</b> (Batali 2020)']);
-  if(xret!=null&&xret>2.5)recs.push(['⚠','X retained '+xret.toFixed(2)+' สูง — dripper เก็บน้ำเยอะ ตรวจ dead-space / ใช้ Manual TDS']);
+  if(ey==null||tds==null){$('a_recs').innerHTML='<div class="empty">enter values in Brew first<br>to get recommendations</div>';return;}
+  if(ey<GC.eyLo)recs.push(['↗','under-extracted (EY '+ey.toFixed(1)+'%) — <b>grind finer</b> or increase contact time · slightly hotter water ok']);
+  else if(ey>GC.eyHi)recs.push(['↘','over-extracted (EY '+ey.toFixed(1)+'%) — <b>grind coarser</b> or <b>cut tail earlier</b> · reduce agitation']);
+  else recs.push(['✓','EY '+ey.toFixed(1)+'% in Golden Cup zone — keep the grind']);
+  if(tds<GC.tdsLo)recs.push(['↑','too weak (TDS '+tds.toFixed(2)+'%) — <b>tighter ratio</b> (less water) or increase dose']);
+  else if(tds>GC.tdsHi)recs.push(['↓','too strong (TDS '+tds.toFixed(2)+'%) — <b>looser ratio</b> or add bypass water']);
+  if(tailTDS!=null&&tailTDS>0.8)recs.push(['✂','tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — high late extraction <b>cut tail earlier</b> (Batali 2020)']);
+  if(xret!=null&&xret>2.5)recs.push(['⚠','X retained '+xret.toFixed(2)+' high — dripper holds lots of water, check dead-space / use Manual TDS']);
   var draw=parseClock(brew.draw),lift=parseClock(brew.lift);
-  if(draw!=null&&lift!=null&&(draw-lift)>45)recs.push(['⏱','Post-lift drawdown '+fmtClock(draw-lift)+' ช้า — bed อาจ clog · บดหยาบขึ้นเล็กน้อย หรือลด fines']);
+  if(draw!=null&&lift!=null&&(draw-lift)>45)recs.push(['⏱','Post-lift drawdown '+fmtClock(draw-lift)+' slow — bed may be clogging · grind slightly coarser or reduce fines']);
   $('a_recs').innerHTML=recs.map(function(r){return '<div class="rec"><div class="rec-icon">'+r[0]+'</div><div class="rec-body">'+r[1]+'</div></div>';}).join('');
 }
 
@@ -1004,21 +1094,21 @@ function renderPhases(){
     {name:'Late-Tail',icon:'◗',col:'#e8674a'},
   ];
   // diagnoses
-  phases[0].diag=hasData?'ช่วงปล่อย CO₂ + เริ่มดึงกรด/กลิ่น · degas ดีช่วยให้ extraction สม่ำเสมอ':'—';
-  phases[0].fix=setup.process==='Natural'||setup.process==='Anaerobic'?'Natural/Anaerobic CO₂ เยอะ — bloom นานขึ้น (45s) น้ำ 2–3× dose':'Bloom 30–45s น้ำ 2× dose';
+  phases[0].diag=hasData?'CO₂ release + start pulling acids/aroma · good degassing evens out extraction':'—';
+  phases[0].fix=setup.process==='Natural'||setup.process==='Anaerobic'?'Natural/Anaerobic high CO₂ — longer bloom (45s), water 2–3× dose':'Bloom 30–45s, water 2× dose';
 
   if(hasData){
-    phases[1].diag=ey<GC.eyLo?'EY รวมต่ำ ('+ey.toFixed(1)+'%) — early extraction อาจไม่พอ pour แรกอ่อนไป':'early extraction ปกติ';
-    phases[1].fix=ey<GC.eyLo?'เพิ่มน้ำ pour แรก / กวนเบาๆ ให้ wetting ทั่ว':'รักษา pour แรกให้ even saturation';
-    phases[2].diag=(tds>GC.tdsHi)?'TDS สูง ('+tds.toFixed(2)+'%) — main extraction เข้มข้น':(tds<GC.tdsLo?'TDS ต่ำ — main pour อาจ bypass มาก':'main extraction สมดุล');
-    phases[2].fix=tds>GC.tdsHi?'ratio หลวมขึ้น หรือลด pour กลาง':'pour กลางให้ flow สม่ำเสมอ คุม turbulence';
+    phases[1].diag=ey<GC.eyLo?'low total EY ('+ey.toFixed(1)+'%) — early extraction may be insufficient, first pour too weak':'early extraction normal';
+    phases[1].fix=ey<GC.eyLo?'add water on first pour / gently stir for even wetting':'keep first pour at even saturation';
+    phases[2].diag=(tds>GC.tdsHi)?'high TDS ('+tds.toFixed(2)+'%) — concentrated main extraction':(tds<GC.tdsLo?'low TDS — main pour may bypass a lot':'main extraction balanced');
+    phases[2].fix=tds>GC.tdsHi?'looser ratio or reduce mid pour':'keep mid pours steady, control turbulence';
     var tailMsg;
-    if(tailTDS!=null){tailMsg=tailTDS>0.8?'tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — late extraction สูง เสี่ยงขม/ฝาด':(tailTDS>0.4?'tail TDS '+tailTDS.toFixed(2)+'% กลางๆ — ตัดถ้าแข่ง':'tail TDS '+tailTDS.toFixed(2)+'% < 0.4% ปลอดภัย');}
-    else tailMsg='ยังไม่วัด tail TDS';
+    if(tailTDS!=null){tailMsg=tailTDS>0.8?'tail TDS '+tailTDS.toFixed(2)+'% > 0.8% — high late extraction, bitter/astringent risk':(tailTDS>0.4?'tail TDS '+tailTDS.toFixed(2)+'% medium — cut if competing':'tail TDS '+tailTDS.toFixed(2)+'% < 0.4% safe');}
+    else tailMsg='tail TDS not measured';
     phases[3].diag=tailMsg+(tailEY!=null?' · tail EY '+tailEY.toFixed(1)+'%':'');
-    phases[3].fix=(tailTDS!=null&&tailTDS>0.8)?'ยก dripper เร็วขึ้น (ตัดหาง) ก่อน late compounds ลงแก้ว':'คุมจุดยก dripper จาก tail TDS ไม่ใช่เวลา';
+    phases[3].fix=(tailTDS!=null&&tailTDS>0.8)?'lift dripper earlier (cut tail) before late compounds reach the cup':'time the lift by tail TDS, not the clock';
   }else{
-    phases[1].diag=phases[2].diag=phases[3].diag='กรอกค่าใน Brew เพื่อวินิจฉัย';
+    phases[1].diag=phases[2].diag=phases[3].diag='enter values in Brew to diagnose';
     phases[1].fix=phases[2].fix=phases[3].fix='—';
   }
   $('ph_blocks').innerHTML=phases.map(function(p){
@@ -1029,13 +1119,13 @@ function renderPhases(){
   }).join('');
   // fix first
   var ff;
-  if(!hasData)ff='กรอกค่าใน <b>Brew</b> ก่อน แล้วระบบจะบอกว่าควรแก้อะไรก่อน';
-  else if(tailTDS!=null&&tailTDS>0.8)ff='<b>ตัดหางก่อน</b> — tail TDS '+tailTDS.toFixed(2)+'% สูงสุดที่ทำให้ขม กระทบ cup มากที่สุด';
-  else if(ey>GC.eyHi)ff='<b>ลด extraction ก่อน</b> — บดหยาบขึ้น EY '+ey.toFixed(1)+'% เกิน zone';
-  else if(ey<GC.eyLo)ff='<b>เพิ่ม extraction ก่อน</b> — บดละเอียดขึ้น EY '+ey.toFixed(1)+'% ต่ำกว่า zone';
-  else if(tds<GC.tdsLo)ff='<b>เพิ่มความเข้มก่อน</b> — ratio แน่นขึ้น';
-  else if(tds>GC.tdsHi)ff='<b>ลดความเข้มก่อน</b> — ratio หลวมขึ้น';
-  else ff='✓ ทุก metric อยู่ใน zone — โฟกัสที่ consistency และ sensory refinement';
+  if(!hasData)ff='enter values in <b>Brew</b> first, then it tells you what to fix first';
+  else if(tailTDS!=null&&tailTDS>0.8)ff='<b>cut tail first</b> — tail TDS '+tailTDS.toFixed(2)+'% — biggest bitterness driver, impacts the cup most';
+  else if(ey>GC.eyHi)ff='<b>lower extraction first</b> — grind coarser, EY '+ey.toFixed(1)+'% over zone';
+  else if(ey<GC.eyLo)ff='<b>raise extraction first</b> — grind finer, EY '+ey.toFixed(1)+'% below zone';
+  else if(tds<GC.tdsLo)ff='<b>raise strength first</b> — tighter ratio';
+  else if(tds>GC.tdsHi)ff='<b>lower strength first</b> — looser ratio';
+  else ff='✓ all metrics in zone — focus on consistency and sensory refinement';
   $('ph_fixfirst').innerHTML=ff;
 }
 
@@ -1095,9 +1185,9 @@ function renderCore(){
   coreAnim.targets=[x.level/3,g.level/3,sf.level/3];
   animateCore();
   var params=[
-    {col:'#e8a33d',name:'Personal X',meta:x.value!=null?'mean '+x.value.toFixed(2)+'g/g · n='+x.n+(x.high?' · ⚠ high':''):'n='+x.n+' · ต้องการ ≥2 logs',level:x.level},
-    {col:'#5fd0c4',name:'Grind → EY',meta:g.value!=null?'slope fit · '+g.coffee+' · n='+g.n+' · R²='+(g.r2||0).toFixed(2):'ต้องการ ≥4 logs เมล็ดเดียวกัน · D50 range ≥60µm',level:g.level},
-    {col:'#b89cf0',name:'Flavor Surface',meta:sf.n>0?'CVA points '+sf.n+' · IDW blend':'ต้องการ ≥3 CVA logs',level:sf.level},
+    {col:'#e8a33d',name:'Personal X',meta:x.value!=null?'mean '+x.value.toFixed(2)+'g/g · n='+x.n+(x.high?' · ⚠ high':''):'n='+x.n+' · needs ≥2 logs',level:x.level},
+    {col:'#5fd0c4',name:'Grind → EY',meta:g.value!=null?'slope fit · '+g.coffee+' · n='+g.n+' · R²='+(g.r2||0).toFixed(2):'needs ≥4 logs of same coffee · D50 range ≥60µm',level:g.level},
+    {col:'#b89cf0',name:'Flavor Surface',meta:sf.n>0?'CVA points '+sf.n+' · IDW blend':'needs ≥3 CVA logs',level:sf.level},
   ];
   $('coreLegend').innerHTML=params.map(function(p){
     return '<div class="core-param"><span class="core-dot" style="color:'+p.col+';background:'+p.col+'"></span>'+
@@ -1109,25 +1199,25 @@ function renderCore(){
 /* ═══════════════ TAB 5 · LOG ═══════════════ */
 function saveBrew(){
   var ey=calcEY(brew.tds,brew.yield,setup.dose);
-  if(ey==null&&!setup.name){toast('กรอกข้อมูล brew ก่อน');return;}
+  if(ey==null&&!setup.name){toast('enter brew data first');return;}
   var entry={
     ts:Date.now(),name:setup.name,process:setup.process,roast:setup.roast,
     grinder:setup.grinder,d50:setup.d50,span:setup.span,dose:setup.dose,
     dripper:setup.dripper,material:setup.material,waterTDS:setup.waterTDS,ratioSet:setup.ratio,
     waterIn:brew.waterIn,yield:brew.yield,tds:brew.tds,lift:brew.lift,draw:brew.draw,
-    tailTDS:brew.tailTDS,tailWt:brew.tailWt,
+    tailTDS:brew.tailTDS,tailWt:brew.tailWt,ecPeak:brew.ecPeak,ecTail:brew.ecTail,ecTpeak:brew.ecTpeak,
     ey:ey,ratioOut:brew._ratioOut,xret:brew._xret,tailEY:brew._tailEY,_yflow:brew._yflow,
     cva:{sweet:cva.sweet,acid:cva.acid,bitter:cva.bitter,body:cva.body},
   };
   logs.unshift(entry);
   var ok=lsSave();
   renderLog();renderCore();drawChart();
-  toast(ok?'บันทึกแล้ว ✓':'บันทึก (memory · storage บล็อก — export กันลืม)');
+  toast(ok?'saved ✓':'saved (memory · storage blocked — export to be safe)');
 }
 
 function renderLog(){
   $('l_count').textContent=logs.length;
-  if(!logs.length){$('l_list').innerHTML='<div class="empty">ยังไม่มี log<br>กรอก Setup + Brew แล้วกด Save</div>';return;}
+  if(!logs.length){$('l_list').innerHTML='<div class="empty">no logs yet<br>fill Setup + Brew then tap Save</div>';return;}
   $('l_list').innerHTML=logs.map(function(L,idx){
     var d=new Date(L.ts);
     var ds=d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
@@ -1142,6 +1232,7 @@ function renderLog(){
     rows+=row('Yield flow',L._yflow!=null?L._yflow.toFixed(2)+' g/s':'');
     rows+=row('X retained',L.xret!=null?L.xret.toFixed(2):'');
     rows+=row('Tail TDS',L.tailTDS!=null?L.tailTDS+'%':'');rows+=row('Tail EY',L.tailEY!=null?L.tailEY.toFixed(1)+'%':'');
+    rows+=row('EC peak',L.ecPeak!=null?L.ecPeak+' µS/cm':'');rows+=row('EC tail',L.ecTail!=null?L.ecTail+' µS/cm':'');
     var cvaStr=L.cva&&(L.cva.sweet!=null||L.cva.acid!=null||L.cva.bitter!=null||L.cva.body!=null)?
       ['S'+(L.cva.sweet!=null?L.cva.sweet:'–'),'A'+(L.cva.acid!=null?L.cva.acid:'–'),'B'+(L.cva.bitter!=null?L.cva.bitter:'–'),'Bd'+(L.cva.body!=null?L.cva.body:'–')].join(' '):'';
     rows+=row('CVA',cvaStr);
@@ -1155,17 +1246,17 @@ function renderLog(){
   Array.prototype.forEach.call($('l_list').querySelectorAll('.log-head'),function(h){
     h.addEventListener('click',function(){h.nextElementSibling.classList.toggle('open');});});
   Array.prototype.forEach.call($('l_list').querySelectorAll('[data-del]'),function(b){
-    b.addEventListener('click',function(e){e.stopPropagation();var i=parseInt(b.getAttribute('data-del'),10);logs.splice(i,1);lsSave();renderLog();renderCore();drawChart();toast('ลบแล้ว');});});
+    b.addEventListener('click',function(e){e.stopPropagation();var i=parseInt(b.getAttribute('data-del'),10);logs.splice(i,1);lsSave();renderLog();renderCore();drawChart();toast('deleted');});});
 }
 
 function exportJSON(){
   var blob=new Blob([JSON.stringify({app:'cloudbrew-extraction-lab',v:1,logs:logs},null,2)],{type:'application/json'});
   var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='cloudbrew_lab_'+Date.now()+'.json';a.click();
-  setTimeout(function(){URL.revokeObjectURL(url);},100);toast('Export แล้ว');
+  setTimeout(function(){URL.revokeObjectURL(url);},100);toast('Exported');
 }
 function importJSON(file){
   var rd=new FileReader();
-  rd.onload=function(){try{var d=JSON.parse(rd.result);var arr=d.logs||d;if(Array.isArray(arr)){logs=arr.concat(logs);lsSave();renderLog();renderCore();drawChart();toast('Import '+arr.length+' logs');}else toast('ไฟล์ไม่ถูกต้อง');}catch(e){toast('อ่านไฟล์ไม่ได้');}};
+  rd.onload=function(){try{var d=JSON.parse(rd.result);var arr=d.logs||d;if(Array.isArray(arr)){logs=arr.concat(logs);lsSave();renderLog();renderCore();drawChart();toast('Import '+arr.length+' logs');}else toast('invalid file');}catch(e){toast('cannot read file');}};
   rd.readAsText(file);
 }
 
@@ -1206,7 +1297,7 @@ function init(){
   buildPills('a_attr',['Sweetness','Acidity','Bitterness','Body'],surfState.attr,function(v){surfState.attr=v;drawSurface();});
   buildPills('a_view',['2D Map','3D'],surfState.view==='2d'?'2D Map':'3D',function(v){
     surfState.view=(v==='3D')?'3d':'2d';
-    $('a_surfHint').textContent=surfState.view==='3d'?'ลากเพื่อหมุน · สี+ความสูง = ความเข้ม':'มองจากบน · สีเข้ม = attribute เด่น';
+    $('a_surfHint').textContent=surfState.view==='3d'?'drag to rotate · color+height = intensity':'top-down · darker = attribute strongest';
     drawSurface();});
   buildCVA();
   // setup inputs
@@ -1218,7 +1309,7 @@ function init(){
   bindInput('s_waterTDS',setup,'waterTDS',num);
   $('s_ratio').addEventListener('input',function(){setup.ratio=parseFloat($('s_ratio').value);$('s_ratioVal').textContent='1:'+setup.ratio.toFixed(1);});
   $('s_applyRec').addEventListener('click',function(){var r=recommendRatio();setup.ratio=Math.round(r*10)/10;$('s_ratio').value=setup.ratio;$('s_ratioVal').textContent='1:'+setup.ratio.toFixed(1);
-    var note=$('s_recNote');note.style.display='block';note.innerHTML='ใช้ค่า <b>1:'+setup.ratio.toFixed(1)+'</b> จาก roast='+setup.roast+' · process='+setup.process+(setup.d50?' · D50='+setup.d50+'µm':'')+' <span style="color:var(--dim)">(heuristic)</span>';toast('ใช้ auto ratio');});
+    var note=$('s_recNote');note.style.display='block';note.innerHTML='use <b>1:'+setup.ratio.toFixed(1)+'</b> from roast='+setup.roast+' · process='+setup.process+(setup.d50?' · D50='+setup.d50+'µm':'')+' <span style="color:var(--dim)">(heuristic)</span>';toast('using auto ratio');});
   $('s_photo').addEventListener('change',function(){if(this.files&&this.files[0])applyPhotoBrightness(this.files[0]);});
   // brew inputs
   bindInput('b_waterIn',brew,'waterIn',num);
@@ -1228,6 +1319,9 @@ function init(){
   bindInput('b_draw',brew,'draw');
   bindInput('b_tailTDS',brew,'tailTDS',num);
   bindInput('b_tailWt',brew,'tailWt',num);
+  bindInput('b_ecPeak',brew,'ecPeak',num);
+  bindInput('b_ecTail',brew,'ecTail',num);
+  bindInput('b_ecTpeak',brew,'ecTpeak');
   // analysis
   $('a_targetTDS').addEventListener('input',renderAnalysis);
   // learn buttons
@@ -1235,7 +1329,7 @@ function init(){
   $('l_export').addEventListener('click',exportJSON);
   $('l_import').addEventListener('click',function(){$('l_importFile').click();});
   $('l_importFile').addEventListener('change',function(){if(this.files&&this.files[0])importJSON(this.files[0]);this.value='';});
-  $('l_clear').addEventListener('click',function(){if(logs.length&&confirm('ลบ log ทั้งหมด? กู้คืนไม่ได้')){logs=[];lsSave();renderLog();renderCore();drawChart();toast('ลบทั้งหมด');}});
+  $('l_clear').addEventListener('click',function(){if(logs.length&&confirm('delete all logs? cannot undo')){logs=[];lsSave();renderLog();renderCore();drawChart();toast('cleared all');}});
   // tab nav
   TABS.forEach(function(t){$('nav-'+t).addEventListener('click',function(){setTab(t);});});
   // surface drag rotate
